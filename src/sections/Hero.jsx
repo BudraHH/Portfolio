@@ -2,7 +2,10 @@ import { motion } from "framer-motion";
 import profileImage from "../assets/dp.jpeg";
 import { useState, useRef, useEffect } from "react";
 import Typed from "typed.js";
+import {useLocation} from "react-router-dom";
 export default function Hero({choice}) {
+
+
 
     const leftSectionRef = useRef(null);
     const heroSectionRef = useRef(null);
@@ -72,25 +75,25 @@ export default function Hero({choice}) {
         return (
         <div
             ref={heroSectionRef}
-            className="h-[100vh] w-full flex flex-col md:flex-row items-center justify-center px-6 md:px-20 lg:px-32 overflow-x-hidden">
+            className="h-[100vh] w-full flex flex-row items-center justify-center px-6 md:px-14 lg:px-20 xl:px-32 overflow-x-hidden">
 
             {/* Left Section - Development Focused Introduction */}
             <div
                 ref={leftSectionRef}
-                className="h-full max-h-[80%] w-full md:w-1/2 text-center md:text-left   overflow-auto scrollbar-hide scroll-smooth"
+                className="z-10  h-full max-h-[80%] w-full text-left   overflow-auto scrollbar-hide scroll-smooth"
             >
-                <div className="h-full  flex flex-col justify-center items-start ">
-                    <p className={`mb-2 opacity-75`}><pre className={``}>{choice === 'development' ? (
+                <div className="h-full md:h-full  flex flex-col justify-center items-start ">
+                    <div className={`text-sm md:text-lg mb-2 opacity-75`}><pre className={``}>{choice === 'development' ? (
                        "console.log("
                     ) : (
-                        `if "name" == "main":\n\tprint(`
-                    )}</pre></p>
+                        `if __name__ == "__main__":\n\tprint("`
+                    )}</pre></div>
                     <div className={`flex flex-col justify-center items-start`}>
                         <motion.h1
                             initial={{opacity:0, x: -50}}
                             animate={{opacity: 1, x: 0}}
                             transition={{duration: 0.2,delay: 0.2}}
-                            className={`text-white text-[25px] ml-[2px] mb-2 uppercase`}
+                            className={`text-white md:text-[25px] ml-[2px] mb-2 uppercase`}
                         >
                             Hi{" "}
                             <motion.span
@@ -112,15 +115,15 @@ export default function Hero({choice}) {
 
                         </motion.h1>
                         {choice === 'development' && (
-                            <p className={`mb-2 opacity-75`}>
+                            <div className={`text-sm md:text-lg mb-2 opacity-75`}>
                               <pre>
                                 {`);\n\npublic static void main(String[] args) {\n\tSystem.out.printf("`}
                                         </pre>
-                            </p>
+                            </div>
                         )}
 
                         {/* Name Section */}
-                        <div className={`text-[150px] leading-none flex flex-col ${choice === 'development' ? "font-sans" : "font-sans"} text-white`}>
+                        <div className={`text-5xl md:text-8xl xl:text-[150px] leading-none flex flex-col items-start ${choice === 'development' ? "font-sans" : "font-sans"} text-white`}>
                             <motion.h1
 
                                 className="font-normal text-shadow-lg">
@@ -133,24 +136,24 @@ export default function Hero({choice}) {
                             </motion.h1>
                         </div>
                     </div>
-                    <p className={`opacity-75`}>
+                    <div className={`text-sm md:text-lg opacity-75`}>
                         <pre>
-                            {choice === 'development' ? `\n\t");\n}` : `\n\t)`}
+                            {choice === 'development' ? `\n\t");\n}` : `\n\t")`}
                         </pre>
-                    </p>
+                    </div>
 
                 </div>
 
                 {/* About Section */}
-                <div className="relative flex flex-col justify-center items-center  ">
-                    <div className={` w-[100%] h-[10%] p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
-                        <motion.h1 className={`absolute  font-semibold text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
+                <div className="relative  flex flex-col justify-center items-center  ">
+                    <div className={` w-[100%] h-[10%] xl:p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
+                        <motion.h1 className={`absolute  font-semibold text-6xl md:text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
                             About
                         </motion.h1>
-                        <motion.p className={`relative top-4 font-black text-[40px]`}>
+                        <motion.p className={`relative top-4 font-black text-[25px] md:text-[40px]`}>
                             About{" "}
-                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} text-[40px] hover:drop-shadow-[0_0_1px_cyan]`}>
-                                me
+                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"}  hover:drop-shadow-[0_0_1px_cyan]`}>
+                                Me
                             </motion.span>
                             <motion.span>
                                 !
@@ -159,11 +162,11 @@ export default function Hero({choice}) {
                     </div>
 
                     {/* Description */}
-                    <div className={`w-[100%] h-full px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
+                    <div className={`w-[100%] h-full xl:px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
 
-                        <div className="px-5  w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                        <div className="md:px-5  w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
                             {choice === 'development' ? (
-                                <motion.pre className={`w-full h-full overflow-x-auto text-cyan-500 p-6 rounded-lg text-sm font-mono text-wrap break-words`}>
+                                <motion.pre className={`w-full h-full max-w-[100%] overflow-x-auto text-cyan-500 p-6 rounded-lg text-sm font-mono text-left md:text-wrap break-words`}>
                                     {`
 `}<span className="text-cyan-400">class</span> <span className="text-white">Developer</span> {"{"} <br/>
                                     &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">String</span> devName = <span className="text-cyan-300">"Hari Hara Budra"</span>;<br/>
@@ -182,7 +185,7 @@ export default function Hero({choice}) {
 
                                 </motion.pre>
                             ) : (
-                                <motion.pre className={`w-full h-full overflow-x-auto text-red-500-400 p-6 rounded-lg text-sm font-mono text-wrap break-words`}>
+                                <motion.pre className={`w-full h-full max-w-[100%] overflow-x-auto text-white p-6 rounded-lg text-sm font-mono text-left md:text-wrap break-words`}>
                                     {`
 `}<span className="text-yellow-400">class</span> <span className="text-white">AIEngineer</span>:<br/>
                                     &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">def</span> <span className="text-white">__init__</span>(self):<br/>
@@ -216,13 +219,13 @@ export default function Hero({choice}) {
                 </div>
 
                 <div className="relative flex flex-col justify-center items-center  ">
-                    <div className={` w-[100%] h-[10%] p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
-                        <motion.h1 className={`absolute  font-semibold text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
+                    <div className={` w-[100%] h-[10%] xl:p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
+                        <motion.h1 className={`absolute  font-semibold text-6xl md:text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
                             Quick
                         </motion.h1>
-                        <motion.p className={`relative top-4 font-black text-[40px]`}>
+                        <motion.p className={`relative top-4 font-black text-[25px] md:text-[40px]`}>
                             Quick{" "}
-                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} text-[40px] hover:drop-shadow-[0_0_1px_cyan]`}>
+                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} hover:drop-shadow-[0_0_1px_cyan]`}>
                                 Info
                             </motion.span>
                             <motion.span>
@@ -231,33 +234,60 @@ export default function Hero({choice}) {
                         </motion.p>
                     </div>
 
-                    <div className={`w-[100%] h-full px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
+                    <div className={`w-[100%] h-full xl:px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
                         <div className={`w-full space-y-5`}>
-                            <div className="p-5 w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre> <span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> PHONE NUMBER: <a href={"tel:+917397509844"}
+                            <div className="p-5 w-full  max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> PHONE NUMBER: <a href={"tel:+917397509844"}
                                                                                                          target="_blank"
                                                                                                          rel="noreferrer"
                                                                                                          className={`hover:underline`} >+91 7397 509 844</a> </pre>
                             </div>
-                            <div className="p-5 w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre> <span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> E-MAIL: <a href={"mailto:hariharabudra@gmail.com"}
+                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> E-MAIL: <a href={"mailto:hariharabudra@gmail.com"}
                                                                                                    target="_blank"
                                                                                                    rel="noreferrer" className={`hover:underline`}>hariharabudra@gmail.com</a> </pre>
                             </div>
-                            <div className="p-5 w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre> <span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span>  GITHUB: <a href={"https://github.com/BudraHH"}
+                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> GITHUB: <a href={"https://github.com/BudraHH"}
                                                                                                     target="_blank"
                                                                                                     rel="noreferrer"
                                 className={`hover:underline`}>https://github.com/BudraHH</a></pre>
                             </div>
-                            <div className="p-5 w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre> <span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span>  LINKEDIN: <a href={"https://www.linkedin.com/in/hari-hara-budra/"}
+                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> LINKEDIN: <a href={"https://www.linkedin.com/in/hari-hara-budra/"}
                                                                                                       target="_blank"
                                                                                                       rel="noreferrer" className={`hover:underline`}>https://www.linkedin.com/in/hari-hara-budra/</a></pre>
                             </div>
-                            <div className="p-5 w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre> <span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> LOCATION: Coimbatore, Tamil Nadu </pre>
+                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> LOCATION: Coimbatore, Tamil Nadu </pre>
                             </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div className="relative flex flex-col justify-center items-center  ">
+                    <div className={` w-[100%] h-[10%] xl:p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
+                        <motion.h1 className={`absolute  font-semibold text-6xl md:text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
+                            Role & Place
+                        </motion.h1>
+                        <motion.p className={`relative top-4 font-black text-[25px] md:text-[40px]`}>
+                            Current Role & {" "}
+                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} hover:drop-shadow-[0_0_1px_cyan]`}>
+                                Workplace
+                            </motion.span>
+                            <motion.span>
+                                !
+                            </motion.span>
+                        </motion.p>
+                    </div>
+
+                    <div className={`w-[100%] h-full xl:px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
+                        <div className="p-5 w-full  max-w-[100%] overflow-x-auto  text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
+                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>@budrahh:~$</span> echo $CURRENT_ROLE </pre>
+                                <pre>Software Development Project Trainee</pre>
+                            <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>@budrahh:~$</span> echo $CURRENT_WORKPLACE </pre>
+                            <pre>Zoho Corporation</pre>
                         </div>
 
                     </div>
@@ -272,7 +302,7 @@ export default function Hero({choice}) {
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="w-full md:w-1/2 flex justify-center"
+                className="absolute z-0 -right-32 lg:relative md:-right-52 lg:right-0 h-[70%] lg:h-full w-full  lg:aspect-square flex justify-center"
             >
                 <img
                     src={profileImage}
