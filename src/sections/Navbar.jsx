@@ -20,7 +20,7 @@ export default function Navbar() {
         <nav className="fixed top-0 z-20 w-full h-20  text-white px-6 md:px-12 lg:px-20 flex items-center justify-between  ">
             {/* Name (Left) */}
             <div className="text-xl md:text-2xl font-bold text-white cursor-pointer">
-                <Link to="/">Hari Hara Budra</Link>
+                <Link to="/">Budra HH</Link>
             </div>
 
             {/* Navigation Links (Center) */}

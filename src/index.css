@@ -14,3 +14,53 @@ body {
   color: white;
   background-color: #000;
 }
+
+.scroll-smooth {
+  scroll-behavior: auto;
+}
+
+
+/* Hide scrollbar for Chrome, Safari, and Edge */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+
+@keyframes typing {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Styling for the typing effect */
+.typing-effect {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: typing 3s steps(30) 1s forwards; /* Adjust the duration and steps */
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 10px;
+  background-color: white;
+  animation: blink 0.7s step-end infinite;
+  margin-left: 5px;
+}

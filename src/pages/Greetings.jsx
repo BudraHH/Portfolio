@@ -1,15 +1,20 @@
 import { motion } from "framer-motion";
 import SpotlightCard from "../components/SpotlightCard";
 import ClickSpark from "../components/ClickSpark.jsx";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useChoice } from "../context/ChoiceContext";
 
 export default function Greetings() {
+    const { setChoice } = useChoice();
+
     const expertiseAreas = [
-        { area: 'Development', color: "rgba(38,211,238,0.8)", link: "/development" },
-        { area: 'Data Science', color: "rgba(250,204,21,0.8)", link: "/data-science" },
+        { area: 'Development', color: "rgba(38,211,238,0.8)", link: "/development", choice: "development" },
+        { area: 'Data Science', color: "rgba(250,204,21,0.8)", link: "/data-science", choice: "datascience" },
     ];
 
-
+    const handleChoiceClick = (area) => {
+        setChoice(area);
+    };
 
     return (
         <div className="w-full h-screen flex flex-col justify-center items-center p-10 md:p-20 overflow-hidden bg-black" aria-label="Landing-Page">
@@ -61,7 +66,10 @@ export default function Greetings() {
                                 initial={{opacity:0, y:50}}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.5 * index + 1.5, ease: "easeOut" }}
-                                className={`z-20 cursor-pointer w-full h-full`}>
+                                className={`z-20 cursor-pointer w-full h-full`}
+                                key={index}
+                                onClick={() => handleChoiceClick(item.choice)}
+                            >
                                 <Link to={item.link} key={index}><SpotlightCard  className={`h-full flex justify-center items-center font-semibold text-sm md:text-xl lg:text-2xl bg-white/5 border border-white/5 `} spotlightColor={item.color}>
                                     {item.area}
                                 </SpotlightCard>

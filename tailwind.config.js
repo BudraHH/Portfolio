@@ -5,7 +5,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-
+        devBaseColor: "rgba(38,211,238,0.8)",
+        dataBaseColor: "rgba(250,204,21,0.8)",
       },
       keyframes: {
         scrollCode: {
