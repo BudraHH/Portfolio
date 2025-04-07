@@ -2,19 +2,16 @@ import { motion } from "framer-motion";
 import SpotlightCard from "../components/SpotlightCard";
 import ClickSpark from "../components/ClickSpark.jsx";
 import { Link } from "react-router-dom";
-import { useChoice } from "../context/ChoiceContext";
 
 export default function Greetings() {
-    const { setChoice } = useChoice();
+
 
     const expertiseAreas = [
-        { area: 'Development', color: "rgba(38,211,238,0.8)", link: "/development", choice: "development" },
-        { area: 'Data Science', color: "rgba(250,204,21,0.8)", link: "/data-science", choice: "datascience" },
+        { area: 'Development', color: "rgba(38,211,238,0.8)", link: "/development"},
+        { area: 'Data Science', color: "rgba(250,204,21,0.8)", link: "/data-science" },
     ];
 
-    const handleChoiceClick = (area) => {
-        setChoice(area);
-    };
+
 
     return (
         <div className="w-full h-screen flex flex-col justify-center items-center p-10 md:p-20 overflow-hidden bg-black" aria-label="Landing-Page">
@@ -25,7 +22,7 @@ export default function Greetings() {
                 transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
                 className="relative z-20 w-full md:h-full p-10 md:p-14 lg:p-16 flex flex-col justify-center items-center bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl text-center"
             >
-            {/*    /!* Main Heading *!/*/}
+
                 <motion.h2
                     initial={{opacity:0, y:50}}
                     animate={{ opacity: 1, y: 0 }}
@@ -68,7 +65,6 @@ export default function Greetings() {
                                 transition={{ duration: 0.5, delay: 0.5 * index + 1.5, ease: "easeOut" }}
                                 className={`z-20 cursor-pointer w-full h-full`}
                                 key={index}
-                                onClick={() => handleChoiceClick(item.choice)}
                             >
                                 <Link to={item.link} key={index}><SpotlightCard  className={`h-full flex justify-center items-center font-semibold text-sm md:text-xl lg:text-2xl bg-white/5 border border-white/5 `} spotlightColor={item.color}>
                                     {item.area}

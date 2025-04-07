@@ -2,13 +2,18 @@ import { motion } from "framer-motion";
 import profileImage from "../assets/dp.jpeg";
 import { useState, useRef, useEffect } from "react";
 import Typed from "typed.js";
-import {useLocation} from "react-router-dom";
+import AboutMe from "./AboutMe.jsx";
+import QuickInfo from "./QuickInfo.jsx";
+import {FaTerminal} from "react-icons/fa";
+import RoleAndPlace from "./RoleAndPlace.jsx";
 export default function Hero({choice}) {
 
-
-
-    const leftSectionRef = useRef(null);
     const heroSectionRef = useRef(null);
+    const leftSectionRef = useRef(null);
+
+    const aboutSectionRef = useRef(null);
+    const quickInfoSectionRef = useRef(null);
+    const roleAndPlaceSectionRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = (event) => {
@@ -84,7 +89,7 @@ export default function Hero({choice}) {
             >
                 <div className="h-full md:h-full  flex flex-col justify-center items-start ">
                     <div className={`text-sm md:text-lg mb-2 opacity-75`}><pre className={``}>{choice === 'development' ? (
-                       "console.log("
+                       `console.log("`
                     ) : (
                         `if __name__ == "__main__":\n\tprint("`
                     )}</pre></div>
@@ -117,7 +122,7 @@ export default function Hero({choice}) {
                         {choice === 'development' && (
                             <div className={`text-sm md:text-lg mb-2 opacity-75`}>
                               <pre>
-                                {`);\n\npublic static void main(String[] args) {\n\tSystem.out.printf("`}
+                                {`");\n\npublic static void main(String[] args) {\n\tSystem.out.printf("`}
                                         </pre>
                             </div>
                         )}
@@ -144,156 +149,12 @@ export default function Hero({choice}) {
 
                 </div>
 
-                {/* About Section */}
-                <div className="relative  flex flex-col justify-center items-center  ">
-                    <div className={` w-[100%] h-[10%] xl:p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
-                        <motion.h1 className={`absolute  font-semibold text-6xl md:text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
-                            About
-                        </motion.h1>
-                        <motion.p className={`relative top-4 font-black text-[25px] md:text-[40px]`}>
-                            About{" "}
-                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"}  hover:drop-shadow-[0_0_1px_cyan]`}>
-                                Me
-                            </motion.span>
-                            <motion.span>
-                                !
-                            </motion.span>
-                        </motion.p>
-                    </div>
 
-                    {/* Description */}
-                    <div className={`w-[100%] h-full xl:px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
-
-                        <div className="md:px-5  w-full bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                            {choice === 'development' ? (
-                                <motion.pre className={`w-full h-full max-w-[100%] overflow-x-auto text-cyan-500 p-6 rounded-lg text-sm font-mono text-left md:text-wrap break-words`}>
-                                    {`
-`}<span className="text-cyan-400">class</span> <span className="text-white">Developer</span> {"{"} <br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">String</span> devName = <span className="text-cyan-300">"Hari Hara Budra"</span>;<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">String</span> domain = <span className="text-cyan-300">"Development"</span>;<br/><br/>
-
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">void</span> build() {"{"} <br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Crafting seamless experiences, one function at a time."</span>);<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Specialized in scalable backends, optimized databases, and smooth front-end interactions."</span>);<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;{"}"}<br/><br/>
-
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">void</span> innovate() {"{"} <br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Writing efficient algorithms and architecting full-stack applications."</span>);<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Bringing ideas to life through clean, maintainable, and high-performance code."</span>);<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;{"}"}<br/>
-                                    {"}"}
-
-                                </motion.pre>
-                            ) : (
-                                <motion.pre className={`w-full h-full max-w-[100%] overflow-x-auto text-white p-6 rounded-lg text-sm font-mono text-left md:text-wrap break-words`}>
-                                    {`
-`}<span className="text-yellow-400">class</span> <span className="text-white">AIEngineer</span>:<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">def</span> <span className="text-white">__init__</span>(self):<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.name = <span className="text-green-300">"Hari Hara Budra"</span><br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.degree = <span className="text-green-300">"BTech in AI & Data Science"</span><br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.specialties = [<span className="text-yellow-400">"Data Science"</span>, <span className="text-yellow-300">"Machine Learning"</span>, <span className="text-yellow-300">"Deep Learning"</span>, <span className="text-yellow-300">"AI Systems"</span>]<br/><br/>
-
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">def</span> <span className="text-white">analyze_data</span>(self, dataset):<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-green-400">"""Transforming raw data into meaningful insights."""</span><br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">print</span>(<span className="text-yellow-300">f"Analyzing {"{"}dataset{"}"} using advanced ML techniques..."</span>)<br/><br/>
-
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">def</span> <span className="text-white">build_model</span>(self, architecture):<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-green-400">"""Designing AI models for real-world applications."""</span><br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">print</span>(<span className="text-yellow-300">f"Building a {"{"}architecture{"}"} model for intelligent decision-making."</span>)<br/><br/>
-
-                                    &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">def</span> <span className="text-white">innovate</span>(self):<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-green-400">"""Pushing the boundaries of AI & DS."""</span><br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">print</span>(<span className="text-yellow-300">"Exploring AI-driven solutions for the future."</span>)<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-yellow-400">print</span>(<span className="text-yellow-300">"Advancing state-of-the-art in ML and DL research."</span>)<br/><br/>
-
-                                    <span className="text-yellow-400">if</span> <span className="text-red-600">__name__</span> == <span className="text-green-400">"__main__"</span>:<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;engineer = <span className="text-white">AIEngineer</span>()<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;engineer.analyze_data(<span className="text-green-300">"large-scale datasets"</span>)<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;engineer.build_model(<span className="text-green-300">"Deep Neural Network"</span>)<br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;engineer.innovate()<br/>
-                                </motion.pre>
-
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-                <div className="relative flex flex-col justify-center items-center  ">
-                    <div className={` w-[100%] h-[10%] xl:p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
-                        <motion.h1 className={`absolute  font-semibold text-6xl md:text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
-                            Quick
-                        </motion.h1>
-                        <motion.p className={`relative top-4 font-black text-[25px] md:text-[40px]`}>
-                            Quick{" "}
-                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} hover:drop-shadow-[0_0_1px_cyan]`}>
-                                Info
-                            </motion.span>
-                            <motion.span>
-                                !
-                            </motion.span>
-                        </motion.p>
-                    </div>
-
-                    <div className={`w-[100%] h-full xl:px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
-                        <div className={`w-full space-y-5`}>
-                            <div className="p-5 w-full  max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> PHONE NUMBER: <a href={"tel:+917397509844"}
-                                                                                                         target="_blank"
-                                                                                                         rel="noreferrer"
-                                                                                                         className={`hover:underline`} >+91 7397 509 844</a> </pre>
-                            </div>
-                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> E-MAIL: <a href={"mailto:hariharabudra@gmail.com"}
-                                                                                                   target="_blank"
-                                                                                                   rel="noreferrer" className={`hover:underline`}>hariharabudra@gmail.com</a> </pre>
-                            </div>
-                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> GITHUB: <a href={"https://github.com/BudraHH"}
-                                                                                                    target="_blank"
-                                                                                                    rel="noreferrer"
-                                className={`hover:underline`}>https://github.com/BudraHH</a></pre>
-                            </div>
-                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> LINKEDIN: <a href={"https://www.linkedin.com/in/hari-hara-budra/"}
-                                                                                                      target="_blank"
-                                                                                                      rel="noreferrer" className={`hover:underline`}>https://www.linkedin.com/in/hari-hara-budra/</a></pre>
-                            </div>
-                            <div className="p-5 w-full max-w-[100%] overflow-x-auto scrollbar-hide text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>&gt;&gt;&gt;</span> LOCATION: Coimbatore, Tamil Nadu </pre>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div className="relative flex flex-col justify-center items-center  ">
-                    <div className={` w-[100%] h-[10%] xl:p-10 mt-10 mb-5 flex flex-col justify-center items-start`}>
-                        <motion.h1 className={`absolute  font-semibold text-6xl md:text-8xl ${choice === 'development' ? "text-gray-800 opacity-[100%]" : "text-yellow-800 opacity-[30%] "} `}>
-                            Role & Place
-                        </motion.h1>
-                        <motion.p className={`relative top-4 font-black text-[25px] md:text-[40px]`}>
-                            Current Role & {" "}
-                            <motion.span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} hover:drop-shadow-[0_0_1px_cyan]`}>
-                                Workplace
-                            </motion.span>
-                            <motion.span>
-                                !
-                            </motion.span>
-                        </motion.p>
-                    </div>
-
-                    <div className={`w-[100%] h-full xl:px-10 my-5 flex flex-col justify-center items-center space-y-10`}>
-                        <div className="p-5 w-full  max-w-[100%] overflow-x-auto  text-sm md:text-lg bg-white/5 backdrop-blur-3xl border border-white/10 rounded-xl">
-                                <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>@budrahh:~$</span> echo $CURRENT_ROLE </pre>
-                                <pre>Software Development Project Trainee</pre>
-                            <pre><span className={`${choice === 'development' ? "text-devBaseColor" : "text-dataBaseColor"} font-bold`}>@budrahh:~$</span> echo $CURRENT_WORKPLACE </pre>
-                            <pre>Zoho Corporation</pre>
-                        </div>
-
-                    </div>
-                </div>
+                <AboutMe choice={choice} ref={aboutSectionRef}/>
 
 
+                <QuickInfo choice={choice} ref={quickInfoSectionRef}/>
+<RoleAndPlace choice={choice} ref={roleAndPlaceSectionRef}/>
 
             </div>
 
@@ -310,6 +171,7 @@ export default function Hero({choice}) {
 
                 />
             </motion.div>
+
         </div>
     );
 }

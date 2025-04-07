@@ -3,7 +3,6 @@ import Greetings from "./pages/Greetings.jsx";
 import Development from "./pages/Development.jsx";
 import DataScience from "./pages/DataScience.jsx";
 import Navbar from "./sections/Navbar.jsx";
-import { ChoiceProvider } from "./context/ChoiceContext";
 
 function Layout() {
     const location = useLocation();
@@ -25,9 +24,9 @@ function Layout() {
 export default function App() {
     return (
         <BrowserRouter>
-            <ChoiceProvider>
+
                 <Layout />
-            </ChoiceProvider>
+
         </BrowserRouter>
     );
 }
