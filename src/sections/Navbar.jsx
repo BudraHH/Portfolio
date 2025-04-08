@@ -10,7 +10,7 @@ export default function Navbar() {
 
     // Navigation links array
     const navLinks = [
-        { name: "About", path: "/about" },
+        { name: "About", ref: "/about" },
         { name: "Education", path: "/education" },
         { name: "Skills", path: "/skills" },
         { name: "Works", path: "/works" }

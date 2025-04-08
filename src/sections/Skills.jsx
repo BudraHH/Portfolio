@@ -4,41 +4,29 @@ import { useEffect, useRef } from "react";
 import {
     FaCode, FaReact, FaHtml5, FaCss3Alt, FaNodeJs, FaDatabase, FaMobileAlt,
     FaTools, FaPython, FaJava, FaFlask, FaGitAlt, FaGithub, FaNpm, FaDocker,
-    FaChartBar, FaBrain, FaServer, FaRocket, FaBook, FaTerminal, FaNetworkWired, FaLaptopCode
+    FaServer, FaRocket, FaBook, FaTerminal, FaNetworkWired, FaLaptopCode
 } from 'react-icons/fa';
 import {
     SiTailwindcss, SiDjango, SiExpress, SiPostgresql, SiMongodb, SiFlutter,
-    SiPandas, SiNumpy, SiScikitlearn, SiTensorflow, SiKeras, SiMlflow,
-    SiHuggingface, SiJupyter, SiTypescript, SiRedis, SiKubernetes, SiGooglecloud
+    SiTypescript, SiRedis, SiKubernetes, SiGooglecloud
 } from 'react-icons/si';
 import { TbApi } from 'react-icons/tb';
 
-// --- Base Color Classes & Configuration ---
-const devBaseColorClass = 'text-cyan-400';
-const dataBaseColorClass = 'text-yellow-400';
+// --- Development Theme Configuration ---
+const accentColorClass = 'text-cyan-400'; // Primary accent
+const themeGradient = 'from-cyan-500 via-purple-500 to-pink-500'; // Gradient for highlights/borders
+const glowFrom = 'from-cyan-600/20'; // Background glow start
+const glowTo = 'to-purple-600/10';  // Background glow end
+const pillHoverBg = 'hover:bg-cyan-900/60'; // Pill background on hover
+const pillHoverBorder = 'hover:border-cyan-400/80'; // Pill border on hover
+const categoryBorderColor = 'border-cyan-500/30'; // Border for category titles
 
-// Gradient classes for borders/glows
-const devGradient = 'from-cyan-500 via-purple-500 to-pink-500';
-const dataGradient = 'from-yellow-400 via-orange-500 to-red-500';
-
-// Background Glows
-const devGlowFrom = 'from-cyan-600/20'; // Slightly stronger glow
-const dataGlowFrom = 'from-yellow-600/20';
-const devGlowTo = 'to-purple-600/10';
-const dataGlowTo = 'to-orange-600/10';
-
-// Pill hover styles
-const devPillHoverBg = 'hover:bg-cyan-900/60';
-const dataPillHoverBg = 'hover:bg-yellow-900/60';
-const devPillHoverBorder = 'hover:border-cyan-400/80';
-const dataPillHoverBorder = 'hover:border-yellow-400/80';
-
-// --- Icon Mappings (Ensure consistency) ---
-const iconSize = "text-lg";
+// --- Icon Mappings (Keep relevant icons) ---
+const iconSize = "text-lg"; // Standard size for skill icons
 const skillIcons = {
     Python: <FaPython className={`text-blue-400 ${iconSize}`} />,
     JavaScript: <FaCode className={`text-yellow-500 ${iconSize}`} />,
-    TypeScript: <SiTypescript className={`text-blue-500 ${iconSize}`} />,
+    // TypeScript: <SiTypescript className={`text-blue-500 ${iconSize}`} />, // Optional: Keep if used
     Java: <FaJava className={`text-red-500 ${iconSize}`} />,
     "React.js": <FaReact className={`text-cyan-400 ${iconSize}`} />,
     HTML: <FaHtml5 className={`text-orange-500 ${iconSize}`} />,
@@ -48,83 +36,54 @@ const skillIcons = {
     "Express.js": <SiExpress className={`text-gray-400 ${iconSize}`} />,
     Django: <SiDjango className={`text-green-700 ${iconSize}`} />,
     Flask: <FaFlask className={`text-gray-300 ${iconSize}`} />,
-    Flutter: <SiFlutter className={`text-cyan-400 ${iconSize}`} />,
+    Flutter: <SiFlutter className={`text-cyan-400 ${iconSize}`} />, // Keep if mobile dev is listed
     PostgreSQL: <SiPostgresql className={`text-blue-600 ${iconSize}`} />,
     MongoDB: <SiMongodb className={`text-green-600 ${iconSize}`} />,
-    Redis: <SiRedis className={`text-red-600 ${iconSize}`} />,
+    // Redis: <SiRedis className={`text-red-600 ${iconSize}`} />, // Optional
     Git: <FaGitAlt className={`text-orange-600 ${iconSize}`} />,
     GitHub: <FaGithub className={`text-gray-300 ${iconSize}`} />,
-    Docker: <FaDocker className={`text-blue-500 ${iconSize}`} />,
-    Kubernetes: <SiKubernetes className={`text-blue-700 ${iconSize}`} />,
-    Postman: <TbApi className={`text-orange-500 ${iconSize}`} />,
+    // Docker: <FaDocker className={`text-blue-500 ${iconSize}`} />, // Optional
+    // Kubernetes: <SiKubernetes className={`text-blue-700 ${iconSize}`} />, // Optional
+    Postman: <TbApi className={`text-orange-500 ${iconSize}`} />, // API testing tool
     Npm: <FaNpm className={`text-red-600 ${iconSize}`} />,
-    "Google Cloud": <SiGooglecloud className={`text-blue-500 ${iconSize}`} />,
-    Pandas: <SiPandas className={`text-purple-500 ${iconSize}`} />,
-    NumPy: <SiNumpy className={`text-blue-400 ${iconSize}`} />,
-    "Scikit-learn": <FaBrain className={`text-orange-500 ${iconSize}`} />,
-    TensorFlow: <SiTensorflow className={`text-orange-600 ${iconSize}`} />,
-    Keras: <SiKeras className={`text-red-600 ${iconSize}`} />,
-    Matplotlib: <FaChartBar className={`text-blue-500 ${iconSize}`} />,
-    Seaborn: <FaChartBar className={`text-purple-400 ${iconSize}`} />,
-    MLflow: <SiMlflow className={`text-blue-500 ${iconSize}`} />,
-    "Hugging Face": <SiHuggingface className={`text-yellow-400 ${iconSize}`} />,
-    "Jupyter Notebook": <SiJupyter className={`text-orange-500 ${iconSize}`} />,
-    Fallback: <FaCode className={`text-gray-500 ${iconSize}`} />
+    // "Google Cloud": <SiGooglecloud className={`text-blue-500 ${iconSize}`} />, // Optional
+    Fallback: <FaCode className={`text-gray-500 ${iconSize}`} /> // Fallback icon
 };
 
+// Category icons using the development theme colors where appropriate
 const categoryIconSize = "text-xl";
 const categoryIcons = {
-    "Programming Languages": <FaCode className={`text-yellow-400 ${categoryIconSize}`} />,
+    "Core Languages": <FaCode className={`${accentColorClass} ${categoryIconSize}`} />, // Use accent for core
     "Frontend": <FaLaptopCode className={`text-cyan-400 ${categoryIconSize}`} />,
     "Backend": <FaServer className={`text-green-500 ${categoryIconSize}`} />,
-    "Mobile": <FaMobileAlt className={`text-cyan-400 ${categoryIconSize}`} />,
+    "Mobile": <FaMobileAlt className={`text-cyan-400 ${categoryIconSize}`} />, // Keep if Flutter listed
     "Databases": <FaDatabase className={`text-blue-600 ${categoryIconSize}`} />,
-    "Tools & DevOps": <FaTools className={`text-orange-500 ${categoryIconSize}`} />,
-    "Cloud": <FaNetworkWired className={`text-blue-500 ${categoryIconSize}`} />,
-    "Core DS": <FaBrain className={`text-orange-500 ${categoryIconSize}`} />,
-    "Visualization": <FaChartBar className={`text-purple-400 ${categoryIconSize}`} />,
-    "Deployment & MLOps": <FaRocket className={`text-blue-500 ${categoryIconSize}`} />,
-    "Notebooks": <FaBook className={`text-orange-500 ${categoryIconSize}`} />,
+    "Tools & Workflow": <FaTools className={`text-orange-500 ${categoryIconSize}`} />, // Renamed category
+    // "Cloud & DevOps": <FaNetworkWired className={`text-blue-500 ${categoryIconSize}`} />, // Optional category
     Fallback: <FaCode className={`text-gray-500 ${categoryIconSize}`} />
 };
 
+// --- Development Skills Data ---
+// Focused purely on development skills, emphasizing the core languages.
+const developmentSkills = {
+    // Renamed first category to highlight core languages
+    "Core Languages": ["Java", "JavaScript", "Python"],
+    "Frontend": ["React.js", "HTML", "CSS", "Tailwind CSS"],
+    "Backend": ["Node.js", "Express.js", "Django", "Flask"], // Includes Python frameworks
+    "Mobile": ["Flutter"], // Include this category if Flutter is relevant
+    "Databases": ["PostgreSQL", "MongoDB"],
+    // Renamed for broader scope
+    "Tools & Workflow": ["Git", "GitHub", "Postman", "Npm"],
+    // "Cloud & DevOps": ["Docker", "Google Cloud"] // Optional category
+};
+
+
 // --- Component ---
-export default function Skills({ choice = 'development' }) {
+export default function DevelopmentSkills() { // Removed 'choice' prop
     const shouldReduceMotion = useReducedMotion();
     const containerRef = useRef(null);
-    const isInView = useInView(containerRef, { amount: 0.25 }); // Render and animate only once when in view
-
-    // --- Skills Data ---
-    const skillsData = {
-        development: {
-            "Programming Languages": ["Python", "JavaScript", "Java"],
-            "Frontend": ["React.js", "HTML", "CSS", "Tailwind CSS"],
-            "Backend": ["Node.js", "Express.js", "Django", "Flask"],
-            "Mobile": ["Flutter"],
-            "Databases": ["PostgreSQL", "MongoDB", ],
-            "Tools & DevOps": ["Git", "GitHub",  "Postman", "Npm"],
-
-        },
-        dataScience: {
-            "Programming Languages": ["Python", "JavaScript", "Java"],
-            "Core DS": ["Pandas", "NumPy", "Scikit-learn", "TensorFlow", "Keras"],
-            "Visualization": ["Matplotlib", "Seaborn"],
-            "Deployment & MLOps": ["Flask","Django", "Postman"],
-            "Notebooks": ["Jupyter Notebook"],
-            "Databases": ["PostgreSQL", "MongoDB"],
-            "Tools & DevOps": ["Git", "GitHub"],
-        }
-    };
-
-    const isDevelopment = choice.toLowerCase() === "development";
-    const skills = isDevelopment ? skillsData.development : skillsData.dataScience;
-    const accentColorClass = isDevelopment ? devBaseColorClass : dataBaseColorClass;
-    const themeGradient = isDevelopment ? devGradient : dataGradient;
-    const glowFrom = isDevelopment ? devGlowFrom : dataGlowFrom;
-    const glowTo = isDevelopment ? devGlowTo : dataGlowTo;
-    const pillHoverBg = isDevelopment ? devPillHoverBg : dataPillHoverBg;
-    const pillHoverBorder = isDevelopment ? devPillHoverBorder : dataPillHoverBorder;
-
+    // Animate only once when it comes into view
+    const isInView = useInView(containerRef, { once: true, amount: 0.2 });
 
     // --- Typed.js ---
     const typedMyRef = useRef(null);
@@ -133,153 +92,174 @@ export default function Skills({ choice = 'development' }) {
         let typedMyInstance;
         let typedToollkitInstance;
 
-        if (isInView && typedMyRef.current) {
+        // Only run Typed.js when the component is in view
+        if (isInView && typedMyRef.current && typedToolkitRef.current) {
+            // Ensure text content is cleared before initializing
             typedMyRef.current.textContent = '';
-            if (typedToolkitRef.current) typedToolkitRef.current.textContent = '';
+            typedToolkitRef.current.textContent = '';
 
             typedMyInstance = new Typed(typedMyRef.current, {
-                strings: ["My"], typeSpeed: 100, startDelay: 500, showCursor: true, cursorChar: '|', loop: false,
+                strings: ["Development"], // Changed first word
+                typeSpeed: 80,
+                startDelay: 400,
+                showCursor: true,
+                cursorChar: '_', // Underscore cursor for dev feel
+                loop: false,
                 onComplete: (self) => {
                     setTimeout(() => { if (self.cursor) self.cursor.style.opacity = '0'; }, 50);
-                    if (typedToolkitRef.current) {
-                        typedToollkitInstance = new Typed(typedToolkitRef.current, {
-                            strings: ["Toolkit"], typeSpeed: 100, startDelay: 100, showCursor: true, cursorChar: '|', loop: false,
-                            onComplete: (self2) => { setTimeout(() => { if (self2.cursor) self2.cursor.style.opacity = '50'; }, 1500); },
-                        });
-                    }
+                    // Chain the second Typed instance
+                    typedToollkitInstance = new Typed(typedToolkitRef.current, {
+                        strings: ["Toolkit"],
+                        typeSpeed: 80,
+                        startDelay: 100,
+                        showCursor: true,
+                        cursorChar: '_',
+                        loop: false,
+                        onComplete: (self2) => {
+                            // Keep cursor blinking at the end
+                            setTimeout(() => { if (self2.cursor) self2.cursor.style.animation = 'blink 1s infinite'; }, 500);
+                        },
+                    });
                 },
             });
         }
 
+        // Cleanup function to destroy Typed instances on unmount or when isInView becomes false
         return () => {
             if (typedMyInstance) typedMyInstance.destroy();
             if (typedToollkitInstance) typedToollkitInstance.destroy();
         };
-    }, [isInView, choice]);
+        // Rerun effect if isInView changes (specifically to true)
+    }, [isInView]);
 
     // --- Framer Motion Variants ---
     const containerVariants = {
         hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.5 } }
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.08, delayChildren: 0.6 } // Slightly adjusted timing
+        }
     };
 
     const cardVariants = {
-        hidden: { opacity: 0, y: 50, scale: 0.95 },
-        visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 80, damping: 15, duration: 0.6 } }
+        hidden: { opacity: 0, y: 40, scale: 0.9, rotateX: -10 }, // Added subtle rotation
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            transition: { type: "spring", stiffness: 70, damping: 12, duration: 0.5 }
+        }
     };
 
+    // Variants for staggering content within the card
     const cardContentVariants = {
         hidden: {},
-        visible: { transition: { staggerChildren: 0.1 } }
+        visible: { transition: { staggerChildren: 0.07 } }
     }
     const cardTitleVariants = {
-        hidden: { opacity: 0, x: -20 },
-        visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+        hidden: { opacity: 0, x: -15 },
+        visible: { opacity: 1, x: 0, transition: { duration: 0.35, ease: 'easeOut' } }
     }
-    const pillContainerVariants = {
+    const pillContainerVariants = { // For staggering pills
         hidden: {},
-        visible: { transition: { staggerChildren: 0.06 } }
+        visible: { transition: { staggerChildren: 0.05 } }
     }
     const pillVariants = {
-        hidden: { opacity: 0, scale: 0.8, y: 10 },
-        visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } }
+        hidden: { opacity: 0, scale: 0.7, y: 15 },
+        visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } }
     }
 
-    const iconHoverVariant = {
-        y: [0, -2, 0],
-        scale: [1, 1.15, 1],
+    // Hover animation for skill icons (only if motion is not reduced)
+    const iconHoverVariant = shouldReduceMotion ? {} : {
+        y: [0, -2.5, 0], // Slightly more pronounced lift
+        scale: [1, 1.2, 1], // Slightly larger scale
         transition: { duration: 0.3, ease: "backInOut" }
-    }
+    };
 
     return (
-        <div ref={containerRef} className="relative  w-full text-white px-4 sm:px-8 md:px-12 lg:px-20 xl:px-28 py-20 md:py-24 font-mono overflow-hidden bg-gray-950 isolate" style={{ perspective: '1200px' }}>
-            <div className="absolute inset-0 z-[-1] opacity-[0.02] bg-[url('/noise.png')] bg-repeat pointer-events-none mix-blend-overlay"></div>
-            <div className="absolute inset-0 z-[-2] opacity-[0.07]">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(107, 114, 128, 0.5)" strokeWidth="0.5"/></pattern><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><rect width="50" height="50" fill="url(#smallGrid)"/><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(107, 114, 128, 0.7)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#grid)" /></svg>
-            </div>
-            <div className="absolute inset-0 z-[-2] bg-gradient-to-bl from-gray-950 via-black to-black opacity-95"></div>
+        // Main container with reference for useInView
+        <div ref={containerRef} className="relative w-full text-white px-4 sm:px-8 md:px-12 lg:px-20 xl:px-28 pt-20 md:pt-24 font-sans overflow-hidden   isolate" style={{ perspective: '1000px' }}> {/* Darker dev background, sans-serif font */}
 
-            <div className="relative z-10 flex flex-col items-left w-full  mx-auto ">
+            {/* Background Effects */}
+            <div className={`absolute inset-0 z-[-1] bg-gradient-radial from-transparent via-transparent to-black opacity-80`}></div>
+            <div className={`absolute top-0 left-0 w-1/2 h-1/2 z-[-2] bg-gradient-radial ${glowFrom} ${glowTo} blur-[100px] opacity-50 pointer-events-none`}></div>
+            <div className={`absolute bottom-0 right-0 w-1/2 h-1/2 z-[-2] bg-gradient-radial from-purple-700/15 to-pink-700/5 blur-[120px] opacity-60 pointer-events-none`}></div>
+            {/* Subtle Grid */}
+            <div className="absolute inset-0 z-[-1] opacity-[0.03] bg-[url('/grid.svg')] bg-repeat pointer-events-none mix-blend-soft-light"></div>
+
+            {/* Content Area */}
+            <div className="relative z-10 flex flex-col items-start w-full  mx-auto"> {/* Align left, max width */}
+
+                {/* Animated Section Header */}
                 <motion.h2
-                    initial={{ opacity: 0, y: -30 }}
-                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
-                    transition={{ delay: 0.3, duration: 0.8, type: "spring", stiffness: 100 }}
-                    className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-mono text-left tracking-tight text-gray-100 h-20 flex flex-row justify-start -gap-20"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={isInView ? { opacity: 1, y: 0 } : {}}
+                    transition={{ delay: 0.2, duration: 0.6, type: "spring", stiffness: 90 }}
+                    // Modern heading style, using accent color
+                    className="text-3xl sm:text-4xl md:text-5xl font-bold text-left tracking-tight text-gray-100 mb-6 md:mb-10 h-16 flex items-center gap-3" // Increased bottom margin
                 >
                     <span ref={typedMyRef} className="text-gray-200"></span>
-                    <span ref={typedToolkitRef} className={`${accentColorClass}`}></span>
+                    <span ref={typedToolkitRef} className={`${accentColorClass}`}></span> {/* Use accent color */}
                 </motion.h2>
 
-                <div className={`flex flex-row space-x-5`}>
-                    <motion.div
-                        initial={{opacity: 0, x: -100}}
-                        animate={isInView ? {opacity: 1, x:0} : {opacity:0, x: -100}}
-                        transition={{delay: 0.3, duration: 0.5}}
-                        className={`w-1 ${isInView ? (isDevelopment ? "bg-cyan-400" : "bg-yellow-400") : "bg-transparent"}`}></motion.div>
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate={isInView ? "visible" : "hidden"}
-                        transition={{delay: 0.5, duration: 0.5}}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 w-full"
-                    >
-                        {Object.entries(skills).map(([category, items]) => (
-                            <motion.div // The Card
-                                key={category}
-                                variants={cardVariants}
-
-                                className="group relative flex flex-col h-full rounded-xl shadow-xl bg-gray-900/20 backdrop-blur-xl border border-white/10 overflow-hidden  " // Added overflow-hidden, transform-style-3d
+                {/* Skills Grid */}
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    // Trigger animation when the component is in view
+                    animate={isInView ? "visible" : "hidden"}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full" // Responsive grid
+                >
+                    {/* Map over the developmentSkills data */}
+                    {Object.entries(developmentSkills).map(([category, items]) => (
+                        <motion.div // Individual Skill Card
+                            key={category}
+                            variants={cardVariants} // Apply card animation variants
+                            className="group relative flex flex-col h-full rounded-lg shadow-lg bg-[#111827]/60 backdrop-blur-md border border-white/10 overflow-hidden transition-shadow duration-300  " // Dev-themed card styles
+                        >
+                            {/* Inner container for padding and content staggering */}
+                            <motion.div
+                                className="relative z-10 flex flex-col h-full p-5 md:p-6"
+                                variants={cardContentVariants} // Stagger title and pills
                             >
-
-                                {/* Inner content container with padding */}
+                                {/* Category Title Area */}
                                 <motion.div
-                                    className="relative z-10 flex flex-col h-full p-5 md:p-6 bg-gray-900/5 rounded-lg" // Slightly smaller radius than parent
-                                    variants={cardContentVariants}
-                                    initial="hidden"
-                                    animate="visible" // Animate content after card appears
+                                    variants={cardTitleVariants} // Animate title
+                                    className={`flex items-center gap-3 mb-5 text-lg font-semibold text-gray-100 border-b-2 ${categoryBorderColor} pb-3`} // Style category title
                                 >
-                                    {/* Category Title */}
-                                    <motion.div
-                                        variants={cardTitleVariants}
-                                        className="flex items-center gap-3 mb-5 text-lg font-semibold text-gray-100 border-b border-gray-700/60 pb-3"
-                                    >
-                                        {categoryIcons[category] || categoryIcons.Fallback}
-                                        <span className="tracking-wide">
-                                        {category}
-                                    </span>
-                                    </motion.div>
+                                    {categoryIcons[category] || categoryIcons.Fallback}
+                                    <span className="tracking-wide">{category}</span>
+                                </motion.div>
 
-                                    {/* Skills List */}
-                                    <motion.div
-                                        variants={pillContainerVariants} // Stagger pills within this container
-                                        className="flex flex-wrap gap-2.5 " // Adjusted gap
-                                    >
-                                        {items.map((skill) => (
-                                            <motion.div // This is the pill
-                                                key={skill}
-                                                variants={pillVariants}
-
-                                                className={`relative inline-flex items-center gap-2 px-3.5 py-1.5 h-10 rounded-lg cursor-crosshair
-                                                        bg-gradient-to-br from-gray-800/80 to-gray-900/70 border border-gray-600/80
-                                                        text-gray-300 text-xs md:text-sm shadow-md transition-all duration-200
-                                                        ${pillHoverBg} ${pillHoverBorder} hover:text-white hover:shadow-lg`} // Refined styling
-                                            >
-                                                {/* Wrap icon in motion.span for animation */}
-                                                <motion.span variants={shouldReduceMotion ? {} : iconHoverVariant}>
-                                                    {skillIcons[skill] || skillIcons.Fallback}
-                                                </motion.span>
-                                                <span className="whitespace-nowrap">{skill}</span>
-                                            </motion.div>
-                                        ))}
-                                    </motion.div>
+                                {/* Skill Pills Area */}
+                                <motion.div
+                                    variants={pillContainerVariants} // Stagger pills
+                                    className="flex flex-wrap gap-2.5 mt-auto pt-2" // Pills wrap, aligned towards bottom if space allows
+                                >
+                                    {items.map((skill) => (
+                                        <motion.div // Individual Skill Pill
+                                            key={skill}
+                                            variants={pillVariants} // Animate each pill
+                                            className={`relative inline-flex items-center gap-2 px-3 py-1.5 rounded-md cursor-default
+                                                    bg-gray-800/70 border border-gray-600/50
+                                                    text-gray-300 text-xs md:text-sm shadow-sm transition-all duration-200
+                                                    ${pillHoverBg} ${pillHoverBorder} hover:text-white hover:shadow-md hover:scale-[1.03]`} // Pill styling and hover effects
+                                        >
+                                            {/* Icon with hover animation */}
+                                            <motion.span whileHover={iconHoverVariant}>
+                                                {skillIcons[skill] || skillIcons.Fallback}
+                                            </motion.span>
+                                            {/* Skill name */}
+                                            <span className="whitespace-nowrap">{skill}</span>
+                                        </motion.div>
+                                    ))}
                                 </motion.div>
                             </motion.div>
-                        ))}
-                    </motion.div>
-
-                </div>
+                        </motion.div>
+                    ))}
+                </motion.div>
             </div>
-
         </div>
     );
 }

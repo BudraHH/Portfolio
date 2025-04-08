@@ -1,6 +1,6 @@
 import Hero from "../sections/Hero.jsx";
 import ClickSpark from "../components/ClickSpark.jsx";
-import Summary from "../sections/Summary.jsx";
+import Summary from "../sections/Journey.jsx";
 
 import Skills from "../sections/Skills.jsx";
 import {useLocation} from "react-router-dom";
