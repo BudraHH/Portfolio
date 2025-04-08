@@ -1,8 +1,8 @@
-import Hero from "../sections/Hero.jsx";
+import Hero from "../sections/dev/Hero.jsx";
 import ClickSpark from "../components/ClickSpark.jsx";
-import Summary from "../sections/Journey.jsx";
+import Summary from "../sections/dev/Summary.jsx";
 
-import Skills from "../sections/Skills.jsx";
+import Skills from "../sections/dev/Skills.jsx";
 import {useLocation} from "react-router-dom";
 
 

@@ -7,7 +7,7 @@ export default function Greetings() {
 
 
     const expertiseAreas = [
-        { area: 'Development', color: "rgba(38,211,238,0.8)", link: "/development"},
+        { area: 'Development', color: "rgba(38,211,238,0.8)", link: "/development/"},
         { area: 'Data Science', color: "rgba(250,204,21,0.8)", link: "/data-science" },
     ];
 

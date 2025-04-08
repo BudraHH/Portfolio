@@ -1,50 +1,39 @@
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import React from 'react';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+// --- Layouts / Pages ---
+import DevelopmentLayout from "./pages/DevelopmentLayout.jsx";
+
+// --- Route Elements ---
 import Greetings from "./pages/Greetings.jsx";
-import Development from "./pages/Development.jsx";
+import DevelopmentIndexPage from "./pages/development/DevelopmentIndexPage.jsx";
+import AboutPage from "./pages/development/AboutPage.jsx";
+import ProjectsPage from "./pages/development/DevProjects.jsx";
 import DataScience from "./pages/DataScience.jsx";
-import Navbar from "./sections/Navbar.jsx";
 
-function Layout() {
-    const location = useLocation();
-
-    return (
-        <div className="w-screen h-screen overflow-x-hidden">
-            {/* Show Navbar on all pages except Greetings */}
-            {location.pathname !== "/" && <Navbar />}
-
-            <Routes>
-                <Route path="/" element={<Greetings />} />
-                <Route path="/development" element={<Development />} />
-                <Route path="/data-science" element={<DataScience />} />
-            </Routes>
-        </div>
-    );
-}
-
+// --- Main App Component ---
 export default function App() {
     return (
         <BrowserRouter>
+            <div className={`overflow-x-hidden`}>
+                <Routes>
+                    <Route path="/" element={<Greetings />} />
 
-                <Layout />
+                    <Route path="/development" element={<DevelopmentLayout />}>
+                        <Route index element={<DevelopmentIndexPage />} />
+                        <Route path="about" element={<AboutPage />} />
+                        <Route path="projects" element={<ProjectsPage />} />
+                    </Route>
 
+                    <Route path="/data-science" element={<DataScience />} />
+
+                    <Route path="*" element={
+                        <div className="w-screen h-screen flex items-center justify-center bg-black text-white">
+                            <h1 className="text-3xl font-mono">404 - Page Not Found</h1>
+                        </div>
+                    } />
+                </Routes>
+            </div>
         </BrowserRouter>
     );
 }
-
-
-//
-// {`
-// `}<span className="text-cyan-400">class</span> <span className="text-white">Developer</span> {"{"} <br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">String</span> devName = <span className="text-cyan-300">"Hari Hara Budra"</span>;<br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">String</span> domain = <span className="text-cyan-300">"Development"</span>;<br/><br/>
-//
-// &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">void</span> build() {"{"} <br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Crafting seamless experiences, one function at a time."</span>);<br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Specialized in scalable backends, optimized databases, and smooth front-end interactions."</span>);<br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;{"}"}<br/><br/>
-//
-// &nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-200">void</span> innovate() {"{"} <br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Writing efficient algorithms and architecting full-stack applications."</span>);<br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-cyan-500">System.out.println</span>(<span className="text-cyan-300">"Bringing ideas to life through clean, maintainable, and high-performance code."</span>);<br/>
-// &nbsp;&nbsp;&nbsp;&nbsp;{"}"}<br/>
-// {"}"}
