@@ -7,9 +7,10 @@ import DevelopmentLayout from "./pages/DevelopmentLayout.jsx";
 // --- Route Elements ---
 import Greetings from "./pages/Greetings.jsx";
 import DevelopmentIndexPage from "./pages/development/DevelopmentIndexPage.jsx";
-import AboutPage from "./pages/development/AboutPage.jsx";
+import DevAboutPage from "./pages/development/DevAboutPage.jsx";
 import ProjectsPage from "./pages/development/DevProjects.jsx";
-import DataScience from "./pages/DataScience.jsx";
+import DataScienceIndexPage from "./pages/data-science/DataScienceIndexPage.jsx";
+import DataScienceLayout from "./pages/DataScienceLayout.jsx";
 
 // --- Main App Component ---
 export default function App() {
@@ -21,11 +22,13 @@ export default function App() {
 
                     <Route path="/development" element={<DevelopmentLayout />}>
                         <Route index element={<DevelopmentIndexPage />} />
-                        <Route path="about" element={<AboutPage />} />
+                        <Route path="about" element={<DevAboutPage />} />
                         <Route path="projects" element={<ProjectsPage />} />
                     </Route>
 
-                    <Route path="/data-science" element={<DataScience />} />
+                    <Route path="/data-science" element={<DataScienceLayout />} >
+                        <Route index element={<DataScienceIndexPage/>}/>
+                    </Route>
 
                     <Route path="*" element={
                         <div className="w-screen h-screen flex items-center justify-center bg-black text-white">

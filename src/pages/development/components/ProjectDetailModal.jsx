@@ -164,7 +164,7 @@ const ProjectDetailModal = ({ isOpen, onClose, project }) => {
 
                 </div>
 
-                {/* Modal Footer (Links) */}
+                {/* Modal DevFooter (Links) */}
                 <div className="p-4 border-t border-gray-700/60 bg-gray-800/50 shrink-0 flex justify-end gap-3">
                     {project.repoUrl && (
                         <a

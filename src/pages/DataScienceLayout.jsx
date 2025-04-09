@@ -2,19 +2,17 @@
 import React from 'react';
 import { Outlet, useLocation } from "react-router-dom";
 import ClickSpark from "../components/ClickSpark.jsx";
-import DevFooter from "../sections/dev/DevFooter.jsx";
-import DevNavbar from "../sections/dev/DevNavbar.jsx";
+import DataNavbar from "../sections/data/DataNavbar.jsx";
+
 function DevelopmentLayout() {
 
     return (
 
-        <ClickSpark sparkColor={"rgba(38,211,238,0.8)"} sparkRadius={75} sparkSize={10} easing={"easeOutQuad"}>
-
-            <DevNavbar />
+        <ClickSpark  sparkColor={"rgba(250,204,21,0.8)"} sparkRadius={75} sparkSize={10} easing={"easeOutQuad"}>
+<DataNavbar/>
             <div className={`z-0 bg-black w-screen min-h-screen overflow-x-hidden`}>
                 <Outlet />
             </div>
-            <DevFooter choice={"development"} />
         </ClickSpark>
     );
 }

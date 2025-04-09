@@ -3,6 +3,7 @@ import { FaGithub } from 'react-icons/fa';
 import { motion, useInView } from "framer-motion";
 import Typed from "typed.js";
 import {devProjectData} from "../../utils/constants.js";
+import {useNavigate} from "react-router-dom";
 
 
 
@@ -175,11 +176,17 @@ const ProjectsComponent = () => {
         }
     }
 
+    const navigate = useNavigate();
 
     const [showUserCommandExecution, setShowUserCommandExecution] = useState(false);
     const [showDataProjects, setShowDataProjects] = useState(false);
 
     useEffect(() => {
+        if(userCommand === "ls -la"){
+            if (enterPressed) {
+                navigate(`/development/projects`);
+            }
+        }
         if(userCommand === "cd ../DataProjects & ls -l"){
             if (enterPressed) {
                 setShowUserCommandExecution(true);
@@ -268,7 +275,7 @@ const ProjectsComponent = () => {
             if (lsInstanceRef.current) lsInstanceRef.current.destroy();
             try {
                 lsInstanceRef.current = new Typed(typedLsCommandRef.current, {
-                    strings: ["ls -l"],
+                    strings: ["ls -l | head -n 3"],
                     typeSpeed: 70,
                     startDelay: 500,
                     showCursor: true,
@@ -284,7 +291,7 @@ const ProjectsComponent = () => {
                 });
             } catch (error) {
                 console.error("Typed.js (ls command) error:", error);
-                if (typedLsCommandRef.current) typedLsCommandRef.current.textContent = "ls -l";
+                if (typedLsCommandRef.current) typedLsCommandRef.current.textContent = "ls -l | head -n 3";
                 setShowExecution(true);
                 setShowTotalCount(true);
                 setShowDevProjects(true);
@@ -331,7 +338,7 @@ const ProjectsComponent = () => {
                         )}
                         {showExecution && (
                             <p className="text-sm md:text-lg font-bold font-mono tracking-tight text-gray-100 flex items-center justify-start gap-2">
-                                <span className="text-cyan-400">// Executing:</span> ls -l
+                                <span className="text-cyan-400">// Executing:</span> ls -l | head -n 3
                             </p>
                         )}
                         {showTotalCount && (
@@ -344,7 +351,7 @@ const ProjectsComponent = () => {
                        <>
                            <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 mb-6 md:mb-10">
                                {displayedProjects.map((project,index) => {
-
+                                    if(index > 2) return null;
                                    return(
                                        <ProjectCard
                                            key={project.id} // Key here
@@ -356,9 +363,12 @@ const ProjectsComponent = () => {
 
                            </div>
                            {showExecutionComplete && (
-                               <div className="font-mono text-sm lg:text-lg text-gray-500 mb-1">
-                                   <p>// Want to see my projects related to data science and machine learning ?</p>
-                                   <p>// Type in ""cd ../DataProjects & ls -l"" and press "Enter" key.</p>
+                               <div className="font-mono text-sm lg:text-lg text-gray-500 mb-1 ">
+                                   <div className={`mb-5`}><p>// Want to see more projects ?</p>
+                                       <p>// Type in ""ls -l"" and press "Enter" key.</p></div>
+
+                                   <div><p>// Want to see my projects related to data science and machine learning ?</p>
+                                       <p>// Type in ""cd ../DataProjects & ls -l"" and press "Enter" key.</p></div>
                                </div>
                            )}
                        </>

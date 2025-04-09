@@ -1,10 +1,10 @@
 
 import React,{useEffect} from 'react';
-import Hero from "../../sections/dev/Hero.jsx";
+import Hero from "../../sections/Hero.jsx";
 import Skills from "../../sections/dev/Skills.jsx";
-import Summary from "../../sections/dev/Summary.jsx";
+import Summary from "../../sections/Summary.jsx";
 import Projects from "../../sections/dev/Projects.jsx";
-import Contact from "../../sections/dev/Contact.jsx";
+import DevContact from "../../sections/dev/DevContact.jsx";
 
 
 function DevelopmentIndexPage() {
@@ -23,7 +23,7 @@ function DevelopmentIndexPage() {
             <Skills choice={"development"} />
             <Summary choice={"development"} />
             <Projects choice={"development"} />
-            <Contact choice={"development"} />
+            <DevContact choice={"development"} />
         </div>
     );
 }

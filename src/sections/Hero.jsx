@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import profileImage from "../../assets/dp.jpeg";
+import profileImage from "../assets/dp.jpeg";
 import { useState, useRef, useEffect } from "react";
 import Typed from "typed.js";
 import AboutMe from "./AboutMe.jsx";

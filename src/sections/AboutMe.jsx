@@ -122,8 +122,8 @@ budrahh@portfolio:~$ <span className={`text-white`}>cat ~/AboutMe/Developer.java
                         <pre className="w-full h-full text-cyan-500 max-w-full overflow-x-auto px-6 py-6 text-sm md:text-base font-mono text-left leading-relaxed scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
 budrahh@portfolio:~$ <span className={`text-white`}>cat ~/AboutMe/ml_engineer.py</span>
                         </pre>
-                            // --- Python Version (Using Color Variables Consistently) ---
-                            <pre className="w-full h-full max-w-full overflow-x-auto p-5 md:p-6 text-sm md:text-base font-mono text-left leading-relaxed scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+
+                            <pre className="w-full h-full max-w-full overflow-x-auto pb-6 px-6 text-sm md:text-base font-mono text-left leading-relaxed scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
                             <span className={commentColor}># File: ml_engineer.py</span><br/><br/>
                             <span className={keywordColor}>class</span> <span className={classColor}>MLEngineer</span>:<br/>
                                 &nbsp;&nbsp;&nbsp;&nbsp;<span className={keywordColor}>def</span> <span className={functionColor}>__init__</span>(<span className={selfColor}>self</span>):<br/>

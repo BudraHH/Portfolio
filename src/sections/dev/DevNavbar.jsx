@@ -16,7 +16,7 @@ const navLinks = [
     // Add other main sections if needed
 ];
 
-const Navbar = () => {
+const DevNavbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [hasScrolled, setHasScrolled] = useState(false);
     const location = useLocation(); // Hook to get the current page location
@@ -73,7 +73,6 @@ const Navbar = () => {
         }
     };
 
-    // --- Rendering ---
 
     return (
         <nav
@@ -96,10 +95,10 @@ const Navbar = () => {
                     onClick={closeMobileMenu}
                     aria-label="Homepage"
                 >
-                    <FaReact className="w-6 h-6 md:w-7 md:h-7 text-cyan-400 group-hover:text-cyan-300 group-hover:scale-110 transition-all duration-300" />
-                    <span className="text-lg md:text-xl font-bold font-mono tracking-tight group-hover:text-cyan-300 transition-colors duration-300">
-                        BudraHH<span className="text-cyan-400 group-hover:text-green-400 transition-colors duration-300 animate-pulse">_</span>
-                    </span>
+
+                    {"<"}<span className="text-lg md:text-xl font-bold font-mono tracking-tight group-hover:text-cyan-300 transition-colors duration-300">
+                        BudraHH
+                    </span>/ {">"}
                 </Link>
 
                 {/* Desktop Navigation Links (Center) */}
@@ -233,4 +232,4 @@ const Navbar = () => {
     );
 };
 
-export default Navbar;
+export default DevNavbar;

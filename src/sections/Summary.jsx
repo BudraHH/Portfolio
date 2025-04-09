@@ -351,7 +351,7 @@ const ContentViewer = ({ itemData, accentColorClass, themeGradient, currentDirec
 // --- Main Exported Component (Enhanced Structure/Styling) ---
 export default function GithubRepoSection({ choice }) {
     const containerRef = useRef(null);
-    const isInView = useInView(containerRef, { once: true, amount: 0.5 }); // Adjusted amount
+    const isInView = useInView(containerRef, { once: true, amount: 0.35 }); // Adjusted amount
     const [selectedItemId, setSelectedItemId] = useState(readmeData?.id || null);
     const [currentDirectoryId, setCurrentDirectoryId] = useState('root');
 
@@ -488,7 +488,7 @@ export default function GithubRepoSection({ choice }) {
             {/* Main Content Wrapper */}
             <div className=""> {/* Align items start */}
                 <h2 className={`container mx-auto relative mb-5 lg:text-xl font-mono`}>
-                    [ <span ref={typedExperienceRef}></span><span ref={typedEducationRef} className={`text-cyan-500`}></span> ]
+                    [ <span ref={typedExperienceRef}></span><span ref={typedEducationRef} className={`${choice === 'development' ? 'text-cyan-400' : 'text-yellow-400'}`}></span> ]
                 </h2>
 
                 {/* Repo Card Container */}
@@ -554,7 +554,7 @@ export default function GithubRepoSection({ choice }) {
                             />
                         </div>
                     </div>
-                    {/* Optional Footer */}
+                    {/* Optional DevFooter */}
                      <div className={`p-2 border-t ${ghBorderLight} text-xs ${ghTextSecondary} text-center`}></div>
                 </motion.div>
             </div>

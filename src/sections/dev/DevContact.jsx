@@ -4,7 +4,7 @@ import {useInView, useReducedMotion} from "framer-motion";
 import Typed from "typed.js";
 import {FaInstagram} from "react-icons/fa6";
 
-const Contact = () => {
+const DevContact = () => {
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [status, setStatus] = useState('idle'); // 'idle', 'submitting', 'success', 'error'
     const [statusMessage, setStatusMessage] = useState('');
@@ -67,7 +67,7 @@ const Contact = () => {
             typedMeRef.current.textContent = '';
 
             typedContactInstance = new Typed(typedContactRef.current, {
-                strings: ["Contact"], // Changed first word
+                strings: ["DevContact"], // Changed first word
                 typeSpeed: 70,
                 startDelay: 400,
                 showCursor: true,
@@ -116,7 +116,7 @@ const Contact = () => {
             if (cdInstanceRef.current) cdInstanceRef.current.destroy();
             try {
                 cdInstanceRef.current = new Typed(typedCdCommandRef.current, {
-                    strings: ["cd ./Contact"],
+                    strings: ["cd ./DevContact"],
                     typeSpeed: 70,
                     startDelay: 500,
                     showCursor: true,
@@ -129,7 +129,7 @@ const Contact = () => {
                 });
             } catch (error) {
                 console.error("Typed.js (cd command) error:", error);
-                if (typedCdCommandRef.current) typedCdCommandRef.current.textContent = "cd ./Contact";
+                if (typedCdCommandRef.current) typedCdCommandRef.current.textContent = "cd ./DevContact";
                 setTimeout(() => { setShowContactCommand(true); }, 100);
             }
         }
@@ -215,7 +215,7 @@ const Contact = () => {
                         {showContent && (
                             <div className="relative z-10 grid grid-cols-1 md:grid-cols-5 gap-10 lg:gap-12">
 
-                        {/* Column 1 & 2: Contact Info & Socials */}
+                        {/* Column 1 & 2: DevContact Info & Socials */}
                         <div className="md:col-span-2 flex flex-col space-y-8">
                             <div>
                                 <h3 className="text-xl lg:text-2xl font-semibold text-cyan-300 font-mono mb-4">// config.sys</h3>
@@ -264,7 +264,7 @@ const Contact = () => {
                             <div className="w-px h-full bg-gradient-to-b from-transparent via-gray-600/70 to-transparent"></div>
                         </div>
 
-                        {/* Column 4 & 5: Contact Form */}
+                        {/* Column 4 & 5: DevContact Form */}
                         <div className="md:col-span-2">
                             <h3 className="text-xl lg:text-2xl font-semibold text-cyan-300 font-mono mb-4">// message.send()</h3>
                             <form onSubmit={handleSubmit} className="space-y-5">
@@ -323,4 +323,4 @@ const Contact = () => {
     );
 };
 
-export default Contact;
+export default DevContact;

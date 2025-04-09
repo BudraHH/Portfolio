@@ -1,12 +1,12 @@
-import Hero from "../sections/dev/Hero.jsx";
-import ClickSpark from "../components/ClickSpark.jsx";
-import Summary from "../sections/dev/Summary.jsx";
+import Hero from "../../sections/Hero.jsx";
+import ClickSpark from "../../components/ClickSpark.jsx";
+import Summary from "../../sections/Summary.jsx";
 
-import Skills from "../sections/dev/Skills.jsx";
+import Skills from "../../sections/dev/Skills.jsx";
 import {useLocation} from "react-router-dom";
 
 
-export default function DataScience() {
+export default function DataScienceIndexPage() {
     const location = useLocation().pathname;
     // console.log(location.slice(1));
     const userChoice = location.slice(1);

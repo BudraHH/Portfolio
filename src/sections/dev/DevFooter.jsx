@@ -5,7 +5,7 @@ import { FaReact, FaGithub, FaLinkedin } from 'react-icons/fa';
 import { SiVite, SiTailwindcss } from 'react-icons/si';
 import {FaInstagram} from "react-icons/fa6";
 
-const Footer = () => {
+const DevFooter = () => {
     const currentYear = new Date().getFullYear();
     // Example timestamp - could be dynamic if needed, but static is fine for footer
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -74,4 +74,4 @@ const Footer = () => {
     );
 };
 
-export default Footer;
+export default DevFooter;
