@@ -1,8 +1,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Hero from '../sections/Hero';
-import About from "../sections/About.jsx";
-
+import Rest from "../sections/Rest.jsx";
 export default function ScrollSection() {
     const containerRef = useRef(null);
 
@@ -11,46 +10,40 @@ export default function ScrollSection() {
         offset: ["start start", "end center"]
     });
 
-    // Hero expands and fades out - completes at 20%
+    // Animation transforms
     const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 5]);
+    const heroRotateY = useTransform(scrollYProgress, [0, 0.2], [1, 5]);
     const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-    // About slides up from bottom - completes at 20%
-    const aboutScale = useTransform(scrollYProgress, [0, 0.2], [0.5, 1]);
-    const aboutY = useTransform(scrollYProgress, [0, 0.2], [0, 0]);
-    const aboutOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
+    const restScale = useTransform(scrollYProgress, [0, 0.2], [0.5, 1]);
+    const restY = useTransform(scrollYProgress, [0, 0.2], [100, 0]);
+    const restOpacity = useTransform(scrollYProgress, [0, 0.2], [0, 1]);
 
     return (
-        <div ref={containerRef} className="relative">
-            {/* Hero - expands and fades */}
+        <div ref={containerRef} style={{ minHeight: "300vh" }}>
+            {/* Fixed hero */}
             <motion.div
-                className="w-screen h-screen fixed top-0 left-0"
+                className="fixed top-0 left-0 w-full h-screen z-50"
                 style={{
                     scale: heroScale,
+                    rotateY: heroRotateY,
                     opacity: heroOpacity,
-                    zIndex: 5,
                 }}
             >
                 <Hero />
             </motion.div>
-
-            {/* About - hovers over Hero */}
+            {/* Fixed/animated Rest (left-side) */}
             <motion.div
-                className="w-screen h-screen fixed top-0 left-0 right-0"
+                className=" fixed left-0 right-0 w-full h-screen pointer-events-none"
                 style={{
-                    scale: aboutScale,
-                    y: aboutY,
-                    opacity: aboutOpacity,
+                    scale: restScale,
+                    y: restY,
+                    opacity: restOpacity,
                     zIndex: 10,
                 }}
-                // initial={{scale: 0, opacity: 0}}
-                // animate={{scale: 1, opacity: 1}}
             >
-                <About />
+                <Rest scrollProgress={scrollYProgress}/>
             </motion.div>
-
-            {/* Scrollable area */}
-            <div className="h-[200vh]" />
         </div>
     );
 }
