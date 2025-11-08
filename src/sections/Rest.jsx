@@ -68,6 +68,7 @@ export function Rest({scrollProgress}) {
     const [isAuto, setIsAuto] = useState(true);
     const [manualX, setManualX] = useState(800);
     const [useManualPosition, setUseManualPosition] = useState(false);
+    const [showProjects, setShowProjects] = useState(false);
 
     // ✅ Track when to switch from scroll-based to manual positioning
     useEffect(() => {
@@ -141,20 +142,24 @@ export function Rest({scrollProgress}) {
                 <Skills scrollProgress={scrollProgress} />
             </motion.div>
 
-            {/* Projects Section */}
-            <motion.div
-                className="absolute inset-0 flex items-center justify-start rounded-2xl"
-                style={{
-                    scale: projectsScale,
-                    opacity: projectsOpacity,
-                    zIndex: 4,
-                    pointerEvents: projectsPointerEvents,
-                    display: projectsDisplay,
-                }}
-                transition={{duration: 0.8}}
-            >
-                <Projects />
-            </motion.div>
+            {/* Projects Section - Only render when bash projects.sh is executed */}
+            {showProjects && (
+                <motion.div
+                    className="absolute inset-0 flex items-center justify-start rounded-2xl"
+                    style={{
+                        scale: projectsScale,
+                        opacity: projectsOpacity,
+                        zIndex: 4,
+                        pointerEvents: projectsPointerEvents,
+                        display: projectsDisplay,
+                    }}
+                    initial={{x: 600, scale: 0.25 }}
+                    animate={{x:0, scale: 1}}
+                    transition={{duration: 0.25}}
+                >
+                    <Projects />
+                </motion.div>
+            )}
 
             {/* Terminal */}
             <motion.div
@@ -175,6 +180,7 @@ export function Rest({scrollProgress}) {
                     isAuto={isAuto}
                     setIsAuto={setIsAuto}
                     setManualX={setManualX}
+                    onProjectsCommand={() => setShowProjects(true)}
                 />
             </motion.div>
         </section>

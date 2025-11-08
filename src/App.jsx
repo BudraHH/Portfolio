@@ -1,6 +1,7 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
 import Skills from './sections/Skills.jsx';
 import Terminal from "./components/Terminal.jsx";
+import Projects from "./sections/Projects.jsx";
 
 const Welcome = lazy(() => import('./sections/Welcome'));
 const ScrollSection = lazy(() => import('./components/ScrollSection'));
@@ -27,6 +28,7 @@ function App() {
             </Suspense>
             {/*<Terminal />*/}
             {/*<Skills />*/}
+            {/*<Projects />*/}
         </div>
     );
 }

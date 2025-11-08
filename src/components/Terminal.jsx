@@ -166,7 +166,7 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
 });
 
 
-export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto: propSetIsAuto, setManualX }) {
+export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto: propSetIsAuto, setManualX, onProjectsCommand }) {
     // ===== REFS =====
     const inputRef = useRef(null);
     const bottomRef = useRef(null);
@@ -204,7 +204,7 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
         "    ├── education/",
         "    │   └── education.jsx",
         "    ├── projects/",
-        "    │   └── projects.jsx",
+        "    │   └── projects.sh",
         "    ├── contact/",
         "    │   └── contact.jsx",
         "    └── resume/",
@@ -231,10 +231,10 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
         {scrollRange: [0.55, 0.62], command: "cat skills.jsx", section: "skills"},
         // Skills.jsx component appears: 0.63-0.76
 
-        // Projects section commands (scroll 0.71-0.78, BEFORE Projects.jsx at 0.79)
+        // Projects section commands (scroll 0.71-0.78, BEFORE Projects.sh at 0.79)
         {scrollRange: [0.71, 0.73], command: "cd ..", section: "projects"},
         {scrollRange: [0.74, 0.76], command: "cd projects", section: "projects"},
-        {scrollRange: [0.77, 0.78], command: "cat projects.jsx", section: "projects"},
+        {scrollRange: [0.77, 0.78], command: "bash projects.sh", section: "projects"},
         // Projects.jsx component appears: 0.79-0.95
     ];
 
@@ -580,7 +580,84 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     ];
                 }
             }
+            // eslint-disable-next-line no-dupe-else-if
+        } else if (cmd.startsWith("bash")) {
+            const fileName = cmd.split(" ").slice(1).join(" ").trim();
+
+            if (!fileName) {
+                output = ["bash: missing file operand", "Usage: bash <filename.sh>"];
+            } else {
+                // Remove leading ./, ~/, or /
+                let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
+
+                const pathParts = cleanPath.split("/").filter(Boolean);
+
+                // Define valid sections and script file names
+                const validSections = {
+                    info: "info.sh",
+                    skills: "skills.sh",
+                    education: "education.sh",
+                    projects: "projects.sh",
+                    contact: "contact.sh",
+                    resume: "resume.sh",
+                };
+
+                // Attempt to find the section in path parts
+                let targetSection = null;
+                let targetFile = pathParts[pathParts.length - 1]; // last part is file
+
+                // Check for 'portfolio' as root folder, or direct section at first folder
+                if (pathParts[0] === "portfolio" && pathParts.length > 1) {
+                    targetSection = pathParts[1];
+                } else if (validSections.hasOwnProperty(pathParts[0])) {
+                    targetSection = pathParts[0];
+                }
+
+                if (!targetFile) {
+                    output = [`bash: ${fileName}: Invalid path`];
+                } else if (
+                    targetSection &&
+                    validSections[targetSection] === targetFile
+                ) {
+                    const expectedPath1 = `~/portfolio/${targetSection}`;
+                    const expectedPath2 = `portfolio/${targetSection}`;
+                    const normalizedCurrentPath = currentPath.replace(/^~\//, "");
+
+                    if (
+                        normalizedCurrentPath === expectedPath1 ||
+                        normalizedCurrentPath === expectedPath2 ||
+                        cleanPath.includes(`portfolio/${targetSection}/${targetFile}`) ||
+                        cleanPath === targetFile // allows 'bash projects.sh' to work
+                    ) {
+                        output = [
+                            "Running script...",
+                            `✓ ${targetFile} executed successfully`,
+                            `Script location: /portfolio/${targetSection}`,
+                        ];
+                        if(targetFile === "projects.sh"){
+                            onProjectsCommand?.();
+                        }
+                    } else {
+                        output = [
+                            `bash: cannot find '${targetFile}'`,
+                            `Expected: ${expectedPath1}/${targetFile} or absolute path`,
+                        ];
+                    }
+                } else if (Object.values(validSections).includes(targetFile)) {
+                    output = [
+                        `bash: cannot find '${targetFile}'`,
+                        `Expected: ~/portfolio/<section>/${targetFile} or absolute path`,
+                    ];
+                } else {
+                    output = [
+                        `bash: ${fileName}: No such file or directory`,
+                        "Usage: bash <filename.sh>",
+                    ];
+                }
+            }
         }
+
+
         // Unknown command
         else {
             output = [`bash: ${cmd}: command not found`];
