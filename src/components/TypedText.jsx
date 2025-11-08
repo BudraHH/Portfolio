@@ -27,6 +27,12 @@ export default function TypedText({
     useEffect(() => {
         if (!el.current) return;
 
+        // Clean up previous instance if it exists
+        if (typed.current) {
+            typed.current.destroy();
+            typed.current = null;
+        }
+
         const options = {
             strings: strings,
             typeSpeed: typeSpeed,

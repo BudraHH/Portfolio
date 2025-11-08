@@ -1,11 +1,12 @@
 import { useState, useCallback, lazy, Suspense } from 'react';
+import Skills from './sections/Skills.jsx';
 import Terminal from "./components/Terminal.jsx";
 
 const Welcome = lazy(() => import('./sections/Welcome'));
 const ScrollSection = lazy(() => import('./components/ScrollSection'));
 
 function App() {
-    const [showHero, setShowHero] = useState(false);
+    const [showHero, setShowHero] = useState(true);
 
     const handleWelcomeComplete = useCallback(() => {
         setShowHero(true);
@@ -25,6 +26,7 @@ function App() {
                 {showHero && <ScrollSection />}
             </Suspense>
             {/*<Terminal />*/}
+            {/*<Skills />*/}
         </div>
     );
 }

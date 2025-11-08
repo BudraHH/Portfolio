@@ -1,29 +1,10 @@
 import { motion } from "framer-motion";
-
+import {projects} from "../utils/constants.js";
 export default function Projects() {
-    const projects = [
-        {
-            name: "Data Dashboard",
-            description:
-                "Built a live analytics dashboard using React and D3.js. Real-time updates and customizable views.",
-            tech: ["React", "D3.js", "WebSocket"],
-        },
-        {
-            name: "SaaS API Platform",
-            description:
-                "Designed REST APIs and microservices for a SaaS platform with 10K+ daily users.",
-            tech: ["Node.js", "Express", "MongoDB"],
-        },
-        {
-            name: "Collaboration Tool",
-            description:
-                "Created real-time collaboration features using Firebase and WebSocket.",
-            tech: ["Firebase", "WebSocket", "React"],
-        },
-    ];
+
 
     return (
-        <section className="p-16 w-8/12 h-full flex flex-col justify-center items-start relative z-10 rounded-2xl bg-transparent">
+        <section className="p-16 w-full max-w-[78rem]  h-full flex flex-col justify-center items-start relative z-10 rounded-2xl bg-transparent">
             {/* Background */}
             {/*<div className="absolute inset-0 bg-gradient-to-br from-cyan-600/5 via-black to-black pointer-events-none" />*/}
 
@@ -32,7 +13,7 @@ export default function Projects() {
                 initial={{ opacity: 0, y: 100 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="w-full max-w-4xl border border-cyan-500/30 backdrop-blur-2xl bg-white/5 rounded-3xl p-12 shadow-2xl hover:bg-white/5 transition-colors duration-300"
+                className="w-full border border-cyan-500/30 backdrop-blur-2xl bg-white/5 rounded-3xl p-12 shadow-2xl hover:bg-white/5 transition-colors duration-300"
             >
                 {/* Top accent line */}
                 <motion.div
