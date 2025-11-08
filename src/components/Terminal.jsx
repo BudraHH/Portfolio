@@ -8,6 +8,7 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
     const [cursorPos, setCursorPos] = useState(0);
     const [focused, setFocused] = useState(true);
 
+    // Focus input with multiple retries for visibility
     useEffect(() => {
         const focusInput = () => {
             if (ref?.current) {
@@ -23,19 +24,16 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
         };
 
         focusInput();
-        const timer1 = setTimeout(() => focusInput(), 0);
-        const timer2 = setTimeout(() => focusInput(), 100);
-        const timer3 = setTimeout(() => focusInput(), 300);
-        const timer4 = setTimeout(() => focusInput(), 800);
-
-        return () => {
-            clearTimeout(timer1);
-            clearTimeout(timer2);
-            clearTimeout(timer3);
-            clearTimeout(timer4);
-        };
+        const timers = [
+            setTimeout(focusInput, 0),
+            setTimeout(focusInput, 100),
+            setTimeout(focusInput, 300),
+            setTimeout(focusInput, 800)
+        ];
+        return () => timers.forEach(clearTimeout);
     }, [ref]);
 
+    // Keep cursor position in sync
     useEffect(() => {
         if (ref?.current && cursorPos !== null) {
             requestAnimationFrame(() => {
@@ -48,19 +46,19 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
     }, [cursorPos, inputValue, ref]);
 
     const handleKeyDown = (e) => {
-        const value = inputValue;
+        e.stopPropagation();
+        const val = inputValue;
 
         switch (e.key) {
             case "Enter":
                 e.preventDefault();
-                if (value.trim()) {
-                    onSubmit(value.trim());
+                if (val.trim()) {
+                    onSubmit(val.trim());
                     setInputValue("");
                     setHistoryIndex(null);
                     setCursorPos(0);
                 }
                 break;
-
             case "ArrowUp":
                 e.preventDefault();
                 if (history.length === 0) return;
@@ -74,30 +72,25 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
                     setCursorPos(history[historyIndex - 1].length);
                 }
                 break;
-
             case "ArrowDown":
                 e.preventDefault();
-                if (history.length === 0) return;
-                if (historyIndex === null) return;
+                if (history.length === 0 || historyIndex === null) return;
                 if (historyIndex === history.length - 1) {
                     setHistoryIndex(null);
                     setInputValue("");
                     setCursorPos(0);
-                } else if (historyIndex < history.length - 1) {
+                } else {
                     setHistoryIndex(historyIndex + 1);
                     setInputValue(history[historyIndex + 1]);
                     setCursorPos(history[historyIndex + 1].length);
                 }
                 break;
-
             case "ArrowLeft":
                 setCursorPos((pos) => Math.max(pos - 1, 0));
                 break;
-
             case "ArrowRight":
                 setCursorPos((pos) => Math.min(pos + 1, inputValue.length));
                 break;
-
             default:
                 setHistoryIndex(null);
                 break;
@@ -105,17 +98,14 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
     };
 
     const handleChange = (e) => {
-        const newValue = e.target.value;
-        const cursorPosition = e.target.selectionStart;
-        setInputValue(newValue);
-        setCursorPos(cursorPosition);
+        setInputValue(e.target.value);
+        setCursorPos(e.target.selectionStart);
     };
 
     return (
         <div className="relative">
             <span className="text-cyan-400">{user_name}</span>
             <span className="text-white">:{currentPath}$</span>
-
             <div className="relative inline-block z-20">
                 <input
                     ref={ref}
@@ -137,13 +127,11 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
                         setFocused(false);
                         onFocusChange?.(false);
                     }}
-                    onMouseDown={(e) => {
-                        e.stopPropagation();
-                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
                     style={{
                         width: `${Math.max(inputValue.length, 1)}ch`,
-                        minWidth: '1ch',
-                        position: 'relative',
+                        minWidth: "1ch",
+                        position: "relative",
                         zIndex: 20,
                     }}
                     className="bg-transparent border-none outline-none text-cyan-300 ml-2 font-mono caret-transparent"
@@ -158,21 +146,23 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
                         style={{ left: `calc(${cursorPos}ch)` }}
                         className="absolute ml-2 mt-1 w-[1ch] h-[1em] bg-cyan-300 animate-pulse pointer-events-none"
                     />
-
                 )}
             </div>
         </div>
     );
 });
 
-
-export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto: propSetIsAuto, setManualX, onProjectsCommand }) {
-    // ===== REFS =====
+export default function Terminal({
+                                     scrollProgress,
+                                     isAuto: propIsAuto,
+                                     setIsAuto: propSetIsAuto,
+                                     setManualX,
+                                     onProjectsCommand,
+                                 }) {
     const inputRef = useRef(null);
     const bottomRef = useRef(null);
     const terminalRef = useRef(null);
 
-    // ===== CONSTANTS =====
     const priorInstructions = [
         "╔════════════════════════════════════════════════════════════╗",
         "║            WELCOME TO PORTFOLIO TERMINAL v1.0              ║",
@@ -190,7 +180,7 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
         "4. Available Sections: info, skills, education, projects, contact, resume",
         "",
         "Type 'help' for all commands | Press ↑↓ for history",
-        "════════════════════════════════════════════════════════════"
+        "════════════════════════════════════════════════════════════",
     ];
 
     const treeOutput = [
@@ -210,136 +200,226 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
         "    └── resume/",
         "        └── resume.jsx",
         "",
-        "6 directories, 7 files"
+        "6 directories, 7 files",
     ];
 
-    // ✅ Map EACH command to its scroll range (for AUTO mode)
-    const COMMAND_SCROLL_DOWN_MAP = [
-        // Initial commands (scroll 0.10-0.30)
-        {scrollRange: [0.10, 0.22], command: "cat instructions.txt", section: "initial"},
-        {scrollRange: [0.23, 0.30], command: "tree", section: "initial"},
-
-        // Info section commands (scroll 0.36-0.46, BEFORE Info.jsx at 0.47)
-        {scrollRange: [0.36, 0.37], command: "cd portfolio", section: "info"},
-        {scrollRange: [0.39, 0.40], command: "cd info", section: "info"},
-        {scrollRange: [0.41, 0.46], command: "cat info.jsx", section: "info"},
-        // Info.jsx component appears: 0.47-0.57
-
-        // Skills section commands (scroll 0.52-0.62, BEFORE Skills.jsx at 0.63)
-        {scrollRange: [0.52, 0.54], command: "cd ..", section: "skills"},
-        {scrollRange: [0.53, 0.54], command: "cd skills", section: "skills"},
-        {scrollRange: [0.55, 0.62], command: "cat skills.jsx", section: "skills"},
-        // Skills.jsx component appears: 0.63-0.76
-
-        // Projects section commands (scroll 0.71-0.78, BEFORE Projects.sh at 0.79)
-        {scrollRange: [0.71, 0.73], command: "cd ..", section: "projects"},
-        {scrollRange: [0.74, 0.76], command: "cd projects", section: "projects"},
-        {scrollRange: [0.77, 0.78], command: "bash projects.sh", section: "projects"},
-        // Projects.jsx component appears: 0.79-0.95
+    // Commands when scrolling DOWN (forward navigation)
+    const SCROLL_DOWN_MAP = [
+        {
+            section: "initial",
+            scrollRange: [0.10, 0.35],
+            commands: [
+                { command: "cat instructions.txt", key: "cat-instructions" },
+                { command: "tree", key: "tree-initial" }
+            ]
+        },
+        {
+            section: "info",
+            scrollRange: [0.36, 0.51],
+            commands: [
+                { command: "cd ~/portfolio/info", key: "cd-portfolio-info" },
+                { command: "cat info.jsx", key: "cat-info" }
+            ]
+        },
+        {
+            section: "skills",
+            scrollRange: [0.52, 0.70],
+            commands: [
+                { command: "cd ~/portfolio/skills", key: "cd-portfolio-skills" },
+                { command: "cat skills.jsx", key: "cat-skills" }
+            ]
+        },
+        {
+            section: "projects",
+            scrollRange: [0.71, 0.85],
+            commands: [
+                { command: "cd ~/portfolio/projects", key: "cd-projects" },
+                { command: "bash projects.sh", key: "bash-projects" }
+            ]
+        }
     ];
 
-    // ===== STATE - Core Terminal =====
+// Commands when scrolling UP (backward navigation)
+// Use DIFFERENT section names to avoid conflicts
+    const SCROLL_UP_MAP = [
+        {
+            section: "projects-back",  // Changed name
+            scrollRange: [0.71, 0.85],
+            commands: [
+                { command: "cd ~/portfolio/skills", key: "back-to-skills" },
+                { command: "cat skills.jsx", key: "cat-skills-back" }
+            ]
+        },
+        {
+            section: "skills-back",  // Changed name
+            scrollRange: [0.52, 0.70],
+            commands: [
+                { command: "cd ~/portfolio/info", key: "back-to-info" },
+                { command: "cat info.jsx", key: "cat-info-back" }
+            ]
+        },
+        {
+            section: "info-back",  // Changed name
+            scrollRange: [0.36, 0.51],  // Fixed: added end range
+            commands: [
+                { command: "cd ~", key: "back-to-home" },
+            ]
+        },
+        {
+            section: "initial-back",  // Changed name
+            scrollRange: [0.10, 0.35],
+            commands: [
+                { command: "clear", key: "clear-terminal" },
+                { command: "cat instructions.txt", key: "prior_instructions" },
+                { command: "tree", key: "tree-initial" }
+            ]
+        }
+    ];
+
+
     const [basePath] = useState("~");
     const [currentPath, setCurrentPath] = useState(basePath);
     const [history, setHistory] = useState([]);
-
-    // ===== STATE - Auto/Manual Mode =====
     const [localIsAuto, setLocalIsAuto] = useState(propIsAuto || false);
+
+    const currentPathRef = useRef(currentPath);
+    useEffect(() => {
+        currentPathRef.current = currentPath;
+    }, [currentPath]);
+
     const isAuto = propSetIsAuto ? propIsAuto : localIsAuto;
     const setIsAuto = propSetIsAuto || setLocalIsAuto;
 
-    // ===== STATE - Auto Mode Execution =====
-    const [executedCommands, setExecutedCommands] = useState(new Set());
+    const [executedSections, setExecutedSections] = useState(new Set());
+    const [lastScrollProgress, setLastScrollProgress] = useState(0);
+    const [scrollDirection, setScrollDirection] = useState("down");
+
     const [currentTypingCommand, setCurrentTypingCommand] = useState("");
     const [currentTypingProgress, setCurrentTypingProgress] = useState(0);
     const [isTyping, setIsTyping] = useState(false);
 
-    // ===== STATE - Manual Mode =====
     const [priorInstructionsComplete, setPriorInstructionsComplete] = useState(false);
     const [isTreeExecuted, setIsTreeExecuted] = useState(false);
     const [isTreeOutputRendered, setIsTreeOutputRendered] = useState(false);
     const [inputFocused, setInputFocused] = useState(false);
 
-    // ===== DERIVED VALUES =====
-    const commandHistory = history.map((entry) => entry.command);
+    const commandHistory = history.map(({ command }) => command);
 
-    // ===== HANDLERS =====
-    const handleClickAuto = () => {
-        setIsAuto(true);
-    };
-
-    const handleClickManual = () => {
-        setIsAuto(false);
-    };
+    const handleClickAuto = () => setIsAuto(true);
+    const handleClickManual = () => setIsAuto(false);
 
     const handleTreeCommandExecuted = () => {
         setIsTreeExecuted(true);
+        setTimeout(() => {
+            setIsTreeOutputRendered(true);
+        }, 10);
     };
 
-    const handleInputFocusChange = (focused) => {
-        setInputFocused(focused);
-    };
+    const handleInputFocusChange = (focused) => setInputFocused(focused);
 
     const handleManualCommand = (input) => {
         let output = null;
-        let newPath = currentPath;
+        let newPath = currentPathRef.current; // Use latest path from ref
         const cmd = input.trim().toLowerCase();
 
-        setTimeout(() => {
-            inputRef?.current?.focus();
-        }, 0);
+        setTimeout(() => inputRef?.current?.focus(), 0);
 
-        // CD command
         if (cmd.startsWith("cd")) {
             const parts = cmd.split(" ");
             if (parts.length === 2) {
                 let destination = parts[1].trim().replace(/\/$/, "");
 
+                // Handle home directory shortcuts
                 if (destination === "~" || destination === "") {
                     newPath = "~";
                     output = null;
                 } else {
-                    destination = destination.replace(/^\.\/|^\//, "");
-                    const sectionNames = sections.map((section) => section.name);
-                    let currentParts = currentPath.replace(/^~\/?/, "").split("/");
-                    if (currentParts[0] === "") currentParts = [];
+                    // Get section names
+                    const sectionNames = sections.map((s) => s.name);
 
+                    // Parse current path into parts
+                    let currentParts = newPath.replace(/^~\/?/, "").split("/").filter(Boolean);
+
+                    // Check if destination is absolute (starts with ~/ or /)
+                    if (destination.startsWith("~")) {
+                        destination = destination.replace(/^~\/?/, "");
+                        currentParts = []; // Reset to home
+                    } else if (destination.startsWith("/")) {
+                        destination = destination.substring(1);
+                        currentParts = []; // Reset to root
+                    } else {
+                        // Remove leading ./ if present
+                        destination = destination.replace(/^\.\//, "");
+                    }
+
+                    // Navigate through destination parts
                     const destParts = destination.split("/").filter(Boolean);
+                    let errorOccurred = false;
 
                     for (let part of destParts) {
                         if (part === "~") {
+                            // Go to home
                             currentParts = [];
                         } else if (part === "..") {
-                            if (currentParts.length > 0) currentParts.pop();
+                            // Go up one directory
+                            if (currentParts.length > 0) {
+                                currentParts.pop();
+                            }
+                            // If already at root (~), stay there
                         } else if (part === ".") {
+                            // Stay in current directory
                             continue;
-                        } else if (part === "portfolio" && currentParts.length === 0) {
-                            currentParts.push("portfolio");
-                        } else if (sectionNames.includes(part)) {
-                            if (currentParts[0] === "portfolio") {
-                                currentParts = ["portfolio", part];
+                        } else if (part === "portfolio") {
+                            // Can only cd to portfolio from home (~)
+                            if (currentParts.length === 0) {
+                                currentParts.push("portfolio");
                             } else {
                                 output = [`bash: cd: ${destination}: No such file or directory`];
+                                errorOccurred = true;
+                                break;
+                            }
+                        } else if (sectionNames.includes(part)) {
+                            // Section names can only be accessed from ~/portfolio
+                            if (currentParts.length === 1 && currentParts[0] === "portfolio") {
+                                currentParts.push(part);
+                            } else if (currentParts.length === 0) {
+                                // If at home, show error
+                                output = [`bash: cd: ${part}: No such file or directory`];
+                                errorOccurred = true;
+                                break;
+                            } else {
+                                // If deeper than portfolio or not in portfolio
+                                output = [`bash: cd: ${destination}: No such file or directory`];
+                                errorOccurred = true;
                                 break;
                             }
                         } else {
+                            // Unknown directory
                             output = [`bash: cd: ${destination}: No such file or directory`];
+                            errorOccurred = true;
                             break;
                         }
                     }
 
-                    newPath = currentParts.length > 0 ? `~/${currentParts.join("/")}` : "~";
-                    if (!output) output = null;
+                    if (!errorOccurred) {
+                        newPath = currentParts.length > 0 ? `~/${currentParts.join("/")}` : "~";
+                        output = null;
+                    } else {
+                        // Keep current path on error
+                        newPath = currentPathRef.current;
+                    }
                 }
+            } else if (parts.length === 1) {
+                // Just "cd" with no arguments goes to home
+                newPath = "~";
+                output = null;
             } else {
-                output = ["bash: cd: missing operand"];
+                output = ["bash: cd: too many arguments"];
             }
         }
-        // LS command
         else if (cmd.startsWith("ls")) {
             const showDetails = cmd.includes("-la");
-
-            if (currentPath === "~") {
+            if (newPath === "~") {
                 output = showDetails
                     ? [
                         "drwxr-xr-x  5 dev  portfolio  4096 Jan 01 12:34 portfolio",
@@ -347,35 +427,25 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                         "drwxr-xr-x  1 dev  portfolio  1024 Jan 01 12:34 ..",
                     ]
                     : ["instructions.txt    portfolio"];
-            } else if (currentPath === "~/portfolio") {
+            } else if (newPath === "~/portfolio") {
                 output = showDetails
-                    ? sections.map(
-                        ({name, size, date}) =>
-                            `drwxr-xr-x  5 dev  portfolio  ${size} ${date} ${name}`
-                    )
-                    : [sections.map(({name}) => name).join("  ")];
-            } else if (currentPath.startsWith("~/portfolio/")) {
-                const currentSection = currentPath.split("/").pop();
+                    ? sections.map(({ name, size, date }) => `drwxr-xr-x  5 dev  portfolio  ${size} ${date} ${name}`)
+                    : [sections.map(({ name }) => name).join("  ")];
+            } else if (newPath.startsWith("~/portfolio/")) {
+                const currentSection = newPath.split("/").pop();
                 const section = sections.find((s) => s.name === currentSection);
-
-                if (section) {
-                    output = showDetails
-                        ? [
-                            `-rw-r--r--  1 dev  portfolio  ${section.size}  ${section.date}  ${section.file}`,
-                        ]
-                        : [section.file];
-                } else {
-                    output = ["(empty directory) No files or directories in this location."];
-                }
+                output = section
+                    ? showDetails
+                        ? [`-rw-r--r--  1 dev  portfolio  ${section.size}  ${section.date}  ${section.file}`]
+                        : [section.file]
+                    : ["(empty directory) No files or directories in this location."];
             } else {
                 output = ["(empty directory) No files or directories in this location."];
             }
         }
-        // TREE command
         else if (cmd === "tree") {
-            if (currentPath === "~") {
-                output = treeOutput;
-            } else if (currentPath === "~/portfolio") {
+            if (newPath === "~") output = treeOutput;
+            else if (newPath === "~/portfolio")
                 output = [
                     "~/portfolio",
                     "├── info/",
@@ -391,34 +461,21 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     "└── resume/",
                     "    └── resume.jsx",
                     "",
-                    "6 directories, 6 files"
+                    "6 directories, 6 files",
                 ];
-            } else if (currentPath.startsWith("~/portfolio/")) {
-                const currentSection = currentPath.split("/").pop();
+            else if (newPath.startsWith("~/portfolio/")) {
+                const currentSection = newPath.split("/").pop();
                 const section = sections.find((s) => s.name === currentSection);
-
-                if (section) {
-                    output = [
-                        `~/portfolio/${currentSection}`,
-                        `└── ${section.file}`,
-                        "",
-                        "0 directories, 1 file"
-                    ];
-                } else {
-                    output = ["(empty directory)"];
-                }
+                output = section
+                    ? [`~/portfolio/${currentSection}`, `└── ${section.file}`, "", "0 directories, 1 file"]
+                    : ["(empty directory)"];
             }
         }
-        // PWD command
-        else if (cmd === "pwd") {
-            output = [currentPath];
-        }
-        // CLEAR command
+        else if (cmd === "pwd") output = [newPath];
         else if (cmd === "cls" || cmd === "clear") {
             setHistory([]);
             output = null;
         }
-        // HELP command
         else if (cmd === "help") {
             output = [
                 "Available commands:",
@@ -442,32 +499,20 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                 "Tip: Use ↑ and ↓ arrows to navigate command history.",
             ];
         }
-        // DATE command
         else if (cmd === "date") {
             const now = new Date();
             output = [now.toString()];
         }
-        // CAT command
         else if (cmd.startsWith("cat")) {
-            if (cmd.includes("info.jsx")) {
-                output = ["Portfolio Information File"];
-            } else if (cmd.includes("skills.jsx")) {
-                output = ["Skills List File"];
-            } else if (cmd.includes("education.jsx")) {
-                output = ["Education Details File"];
-            } else if (cmd.includes("projects.jsx")) {
-                output = ["Projects Collection File"];
-            } else if (cmd.includes("contact.jsx")) {
-                output = ["Contact Information File"];
-            } else if (cmd.includes("resume.jsx")) {
-                output = ["Resume File"];
-            } else if (cmd.includes("instructions.txt")) {
-                output = priorInstructions;
-            } else {
-                output = [`bash: ${cmd}: command not found`];
-            }
-        } // NODE command
-        // NODE command
+            if (cmd.includes("info.jsx")) output = ["Portfolio Information File"];
+            else if (cmd.includes("skills.jsx")) output = ["Skills List File"];
+            else if (cmd.includes("education.jsx")) output = ["Education Details File"];
+            else if (cmd.includes("projects.jsx")) output = ["Projects Collection File"];
+            else if (cmd.includes("contact.jsx")) output = ["Contact Information File"];
+            else if (cmd.includes("resume.jsx")) output = ["Resume File"];
+            else if (cmd.includes("instructions.txt")) output = priorInstructions;
+            else output = [`bash: ${cmd}: command not found`];
+        }
         else if (cmd.startsWith("node")) {
             const fileName = cmd.split(" ")[1];
 
@@ -589,7 +634,6 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
             } else {
                 // Remove leading ./, ~/, or /
                 let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
-
                 const pathParts = cleanPath.split("/").filter(Boolean);
 
                 // Define valid sections and script file names
@@ -602,15 +646,23 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     resume: "resume.sh",
                 };
 
-                // Attempt to find the section in path parts
                 let targetSection = null;
                 let targetFile = pathParts[pathParts.length - 1]; // last part is file
 
-                // Check for 'portfolio' as root folder, or direct section at first folder
+                // Determine target section from path or current directory
                 if (pathParts[0] === "portfolio" && pathParts.length > 1) {
+                    // Path like: portfolio/projects/projects.sh
                     targetSection = pathParts[1];
-                } else if (validSections.hasOwnProperty(pathParts[0])) {
+                } else if (Object.prototype.hasOwnProperty.call(validSections, pathParts[0])) {
+                    // Path like: projects/projects.sh
                     targetSection = pathParts[0];
+                } else if (pathParts.length === 1 && Object.values(validSections).includes(targetFile)) {
+                    // Just filename like: projects.sh
+                    // Infer section from current path
+                    const currentPathParts = newPath.replace(/^~\//, "").split("/").filter(Boolean);
+                    if (currentPathParts[0] === "portfolio" && currentPathParts.length > 1) {
+                        targetSection = currentPathParts[1]; // Extract section from current path
+                    }
                 }
 
                 if (!targetFile) {
@@ -619,34 +671,31 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     targetSection &&
                     validSections[targetSection] === targetFile
                 ) {
-                    const expectedPath1 = `~/portfolio/${targetSection}`;
-                    const expectedPath2 = `portfolio/${targetSection}`;
-                    const normalizedCurrentPath = currentPath.replace(/^~\//, "");
+                    // Verify we're in the correct directory
+                    const expectedPath = `~/portfolio/${targetSection}`;
+                    const normalizedCurrentPath = newPath.replace(/^~\//, "");
+                    const expectedNormalized = expectedPath.replace(/^~\//, "");
 
-                    if (
-                        normalizedCurrentPath === expectedPath1 ||
-                        normalizedCurrentPath === expectedPath2 ||
-                        cleanPath.includes(`portfolio/${targetSection}/${targetFile}`) ||
-                        cleanPath === targetFile // allows 'bash projects.sh' to work
-                    ) {
+                    if (normalizedCurrentPath === expectedNormalized) {
                         output = [
                             "Running script...",
                             `✓ ${targetFile} executed successfully`,
                             `Script location: /portfolio/${targetSection}`,
                         ];
-                        if(targetFile === "projects.sh"){
+                        if (targetFile === "projects.sh") {
                             onProjectsCommand?.();
                         }
                     } else {
                         output = [
                             `bash: cannot find '${targetFile}'`,
-                            `Expected: ${expectedPath1}/${targetFile} or absolute path`,
+                            `You are in: ${newPath}`,
+                            `Expected: ${expectedPath}`,
                         ];
                     }
                 } else if (Object.values(validSections).includes(targetFile)) {
                     output = [
                         `bash: cannot find '${targetFile}'`,
-                        `Expected: ~/portfolio/<section>/${targetFile} or absolute path`,
+                        `Hint: Navigate to ~/portfolio/<section> first`,
                     ];
                 } else {
                     output = [
@@ -657,156 +706,166 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
             }
         }
 
-
-        // Unknown command
         else {
             output = [`bash: ${cmd}: command not found`];
         }
 
         setCurrentPath(newPath);
-        setHistory((prev) => [...prev, {command: input, output, path: currentPath}]);
+        currentPathRef.current = newPath;
+
+        setHistory((prev) => [...prev, { command: input, output, path: newPath }]);
     };
 
-    // ===== EFFECT 1: Auto Mode - Execute commands based on scroll =====
+// Auto Mode: handle bidirectional section-based command execution
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
 
         const unsubscribe = scrollProgress.on("change", (latest) => {
-            // Find command that should execute at current scroll position
-            const activeCommand = COMMAND_SCROLL_DOWN_MAP.find(cmd => {
-                const [start, end] = cmd.scrollRange;
-                const commandKey = `${cmd.command}-${cmd.section}`;
-                return latest >= start && latest < end && !executedCommands.has(commandKey);
+            const direction = latest > lastScrollProgress ? "down" : latest < lastScrollProgress ? "up" : scrollDirection;
+            setScrollDirection(direction);
+            setLastScrollProgress(latest);
+
+            const commandMap = direction === "down" ? SCROLL_DOWN_MAP : SCROLL_UP_MAP;
+
+            const currentSection = commandMap.find(({ scrollRange }) => {
+                const [start, end] = scrollRange;
+                return latest >= start && latest < end;
             });
 
-            if (activeCommand && !isTyping) {
+            const sectionKey = currentSection ? `${currentSection.section}-${direction}` : null;
+
+            if (currentSection && sectionKey && !executedSections.has(sectionKey) && !isTyping) {
                 setIsTyping(true);
-                const command = activeCommand.command;
-                const commandKey = `${command}-${activeCommand.section}`;
 
-                // Start typing animation
-                setCurrentTypingCommand(command);
-                setCurrentTypingProgress(0);
+                const executeSection = async () => {
+                    for (const { command, key } of currentSection.commands) {
+                        setCurrentTypingCommand(command);
+                        setCurrentTypingProgress(0);
 
-                const typingDuration = command.length * 50;
-                const totalDelay = typingDuration + 500;
+                        const typingDuration = command.length * 50;
+                        const totalDelay = typingDuration + 500;
 
-                // Animate typing
-                const typingInterval = setInterval(() => {
-                    setCurrentTypingProgress((prev) => {
-                        const newProgress = prev + 1;
-                        if (newProgress >= command.length) {
-                            clearInterval(typingInterval);
-                            return command.length;
-                        }
-                        return newProgress;
-                    });
-                }, 50);
+                        const typingInterval = setInterval(() => {
+                            setCurrentTypingProgress((prev) => {
+                                const next = prev + 1;
+                                if (next >= command.length) {
+                                    clearInterval(typingInterval);
+                                    return command.length;
+                                }
+                                return next;
+                            });
+                        }, 50);
 
-                // Execute command after typing
-                const timer = setTimeout(() => {
-                    handleManualCommand(command);
-                    setExecutedCommands((prev) => new Set(prev).add(commandKey));
+                        await new Promise((resolve) => {
+                            setTimeout(() => {
+                                handleManualCommand(command);
+                                clearInterval(typingInterval);
+                                setPriorInstructionsComplete(true);
+                                resolve();
+                            }, totalDelay);
+                        });
+
+                        await new Promise((resolve) => setTimeout(resolve, 100));
+                    }
+
+                    setExecutedSections((prev) => new Set(prev).add(sectionKey));
                     setIsTyping(false);
                     setCurrentTypingCommand("");
                     setCurrentTypingProgress(0);
-                    clearInterval(typingInterval);
-                    setPriorInstructionsComplete(true);
-                    setIsTreeOutputRendered(true);
-                }, totalDelay);
+                };
+
+                executeSection();
             }
         });
 
         return () => unsubscribe();
-    }, [scrollProgress, isAuto, executedCommands, isTyping]);
+    }, [scrollProgress, isAuto, executedSections, isTyping, lastScrollProgress, scrollDirection]);
 
-    // ===== EFFECT 2: Auto Mode - Reset executed commands on scroll backwards =====
+// Reset executed sections when scrolling past boundaries
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
 
         const unsubscribe = scrollProgress.on("change", (latest) => {
-            setExecutedCommands((prev) => {
+            setExecutedSections((prev) => {
                 const newSet = new Set();
-                COMMAND_SCROLL_DOWN_MAP.forEach(cmd => {
-                    const [start] = cmd.scrollRange;
-                    const commandKey = `${cmd.command}-${cmd.section}`;
-                    if (latest >= start && prev.has(commandKey)) {
-                        newSet.add(commandKey);
+
+                const direction = latest > lastScrollProgress ? "down" : "up";
+                const commandMap = direction === "down" ? SCROLL_DOWN_MAP : SCROLL_UP_MAP;
+
+                commandMap.forEach(({ section, scrollRange }) => {
+                    const [start] = scrollRange;
+                    const sectionKeyDown = `${section}-down`;
+                    const sectionKeyUp = `${section}-up`;
+
+                    if (latest >= start) {
+                        if (prev.has(sectionKeyDown)) newSet.add(sectionKeyDown);
+                        if (prev.has(sectionKeyUp)) newSet.add(sectionKeyUp);
                     }
                 });
+
                 return newSet;
             });
         });
 
         return () => unsubscribe();
-    }, [scrollProgress, isAuto]);
+    }, [scrollProgress, isAuto, lastScrollProgress]);
 
-    // ===== EFFECT 3: Manual Mode - Detect when priorInstructions complete =====
-    useEffect(() => {
-        // This is now handled by TypedText component onComplete callback
-        // Can be removed if not needed
-    }, []);
 
-    // ===== EFFECT 4: Manual Mode - Set tree output rendered after delay =====
+// Tree output rendered after delay to smooth UI
     useEffect(() => {
         if (isTreeExecuted && !isTreeOutputRendered) {
-            const timer = setTimeout(() => {
-                setIsTreeOutputRendered(true);
-            }, 100);
+            const timer = setTimeout(() => {}, 100);
             return () => clearTimeout(timer);
         }
     }, [isTreeExecuted, isTreeOutputRendered]);
 
-    // ===== EFFECT 5: Manual Mode - Check input focus state =====
+// Input focus detection in manual mode
     useEffect(() => {
         if (!isAuto && inputRef?.current) {
-            const isActuallyFocused = document.activeElement === inputRef.current;
-            if (isActuallyFocused !== inputFocused) {
-                setInputFocused(isActuallyFocused);
-            }
+            const isFocused = document.activeElement === inputRef.current;
+            if (isFocused !== inputFocused) setInputFocused(isFocused);
         }
     }, [isAuto, inputFocused]);
 
-    // ===== EFFECT 6: Manual Mode - Update terminal position based on focus =====
+// Adjust terminal X position based on input focus
     useEffect(() => {
         if (!isAuto) {
-            if (inputFocused) {
-                setManualX(650);
-            } else {
-                setManualX(800);
-            }
+            setManualX(inputFocused ? 650 : 800);
         }
     }, [isAuto, inputFocused, setManualX]);
 
-    // ===== EFFECT 7: Auto-scroll to bottom when history changes =====
+// Scroll to bottom on history or tree output change
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({behavior: "smooth"});
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [history, isTreeExecuted]);
 
-    // ===== EFFECT 8: Auto-focus input on mount and visibility =====
+// Auto-focus input on mount & when visible with intersection observer + fallback timers
     useEffect(() => {
         const focusInput = () => {
-            if (inputRef?.current) {
-                const rect = inputRef.current.getBoundingClientRect();
-                const isVisible = rect.width > 0 && rect.height > 0 &&
-                    rect.top >= 0 && rect.left >= 0 &&
-                    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-                    rect.right <= (window.innerWidth || document.documentElement.clientWidth);
-
-                if (isVisible) {
-                    inputRef.current.focus();
-                    return true;
-                }
-                return false;
+            if (!inputRef?.current) return false;
+            const rect = inputRef.current.getBoundingClientRect();
+            const isVisible =
+                rect.width > 0 &&
+                rect.height > 0 &&
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth);
+            if (isVisible) {
+                inputRef.current.focus();
+                return true;
             }
             return false;
         };
 
         focusInput();
-        const timer1 = setTimeout(() => focusInput(), 100);
-        const timer2 = setTimeout(() => focusInput(), 500);
-        const timer3 = setTimeout(() => focusInput(), 1000);
-        const timer4 = setTimeout(() => focusInput(), 2000);
+
+        const timers = [
+            setTimeout(focusInput, 100),
+            setTimeout(focusInput, 500),
+            setTimeout(focusInput, 1000),
+            setTimeout(focusInput, 2000),
+        ];
 
         let observer = null;
         const setupObserver = () => {
@@ -815,11 +874,11 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     (entries) => {
                         entries.forEach((entry) => {
                             if (entry.isIntersecting && entry.intersectionRatio > 0) {
-                                setTimeout(() => focusInput(), 100);
+                                setTimeout(focusInput, 100);
                             }
                         });
                     },
-                    {threshold: 0.1}
+                    { threshold: 0.1 }
                 );
                 observer.observe(inputRef.current);
             }
@@ -828,61 +887,54 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
         setTimeout(setupObserver, 100);
         setTimeout(setupObserver, 500);
 
-        const handleKeyDown = (e) => {
-            if (document.activeElement !== inputRef?.current &&
-                !e.ctrlKey && !e.metaKey && !e.altKey &&
+        const handleGlobalKeyDown = (e) => {
+            if (
+                document.activeElement !== inputRef?.current &&
+                !e.ctrlKey &&
+                !e.metaKey &&
+                !e.altKey &&
                 e.key.length === 1 &&
-                inputRef?.current) {
+                inputRef?.current
+            ) {
                 focusInput();
             }
         };
 
-        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener("keydown", handleGlobalKeyDown);
 
         return () => {
-            clearTimeout(timer1);
-            clearTimeout(timer2);
-            clearTimeout(timer3);
-            clearTimeout(timer4);
-            if (observer && inputRef?.current) {
-                observer.unsubscribe(inputRef.current);
-            }
-            window.removeEventListener('keydown', handleKeyDown);
+            timers.forEach(clearTimeout);
+            if (observer && inputRef?.current) observer.unsubscribe?.(inputRef.current);
+            window.removeEventListener("keydown", handleGlobalKeyDown);
         };
     }, []);
+
 
     return (
         <div
             ref={terminalRef}
             tabIndex={-1}
-            onFocus={(e) => {
-                if (e.target === e.currentTarget) {
-                    inputRef?.current?.focus();
-                }
-            }}
+            onFocus={(e) => e.target === e.currentTarget && inputRef?.current?.focus()}
             onClick={(e) => {
-                if (e.target === e.currentTarget || !e.target.closest('input')) {
-                    setTimeout(() => {
-                        inputRef?.current?.focus();
-                    }, 0);
+                if (e.target === e.currentTarget || !e.target.closest("input")) {
+                    setTimeout(() => inputRef?.current?.focus(), 0);
                 }
             }}
             className="relative w-[60rem] max-w-3xl h-[30rem] rounded-2xl overflow-hidden font-mono text-white
-         bg-[radial-gradient(circle_at_50%_20%,rgba(0,255,255,0.08)_0%,rgba(0,0,0,0.9)_100%)]
-         backdrop-blur-[24px] backdrop-brightness-75 border border-cyan-500/20
-         shadow-[0_0_60px_rgba(0,255,255,0.15),inset_0_0_20px_rgba(0,255,255,0.05)]
-         transition-transform duration-500"
+      bg-[radial-gradient(circle_at_50%_20%,rgba(0,255,255,0.08)_0%,rgba(0,0,0,0.9)_100%)]
+      backdrop-blur-[24px] backdrop-brightness-75 border border-cyan-500/20
+      shadow-[0_0_60px_rgba(0,255,255,0.15),inset_0_0_20px_rgba(0,255,255,0.05)]
+      transition-transform duration-500"
         >
-            {/* ===== HEADER BAR ===== */}
-            <div
-                className="flex flex-row justify-between items-center bg-gradient-to-r from-[#0f0f0f]/90 to-[#1a1a1a]/90 border-b border-cyan-500/20">
+            {/* Header */}
+            <div className="flex flex-row justify-between items-center bg-gradient-to-r from-[#0f0f0f]/90 to-[#1a1a1a]/90 border-b border-cyan-500/20">
                 <div className="flex items-center gap-2 px-4 py-3">
-                    <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)]"></span>
-                    <span className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]"></span>
-                    <span className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]"></span>
+                    <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)]" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]" />
+                    <span className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
                     <span className="ml-3 text-sm text-cyan-400/70 select-none tracking-wide">
-                    {user_name}: {currentPath}$
-                </span>
+            {user_name}: {currentPath}$
+          </span>
                 </div>
                 <div className="flex flex-row text-sm gap-2 justify-center items-center h-full px-5 py-2 mt-1">
                     <button
@@ -903,29 +955,23 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                 </div>
             </div>
 
-            {/* ===== TERMINAL CONTENT ===== */}
+            {/* Terminal content */}
             <div
                 className="relative z-10 px-5 py-4 text-sm leading-relaxed text-gray-200 space-y-2 overflow-y-auto max-h-[calc(100%-4rem)]"
                 onClick={(e) => {
-                    if (e.target === e.currentTarget || !e.target.closest('input')) {
-                        setTimeout(() => {
-                            inputRef?.current?.focus();
-                        }, 0);
+                    if (e.target === e.currentTarget || !e.target.closest("input")) {
+                        setTimeout(() => inputRef?.current?.focus(), 0);
                     }
                 }}
                 onMouseDown={(e) => {
-                    if (e.target === e.currentTarget || !e.target.closest('input')) {
-                        setTimeout(() => {
-                            inputRef?.current?.focus();
-                        }, 0);
+                    if (e.target === e.currentTarget || !e.target.closest("input")) {
+                        setTimeout(() => inputRef?.current?.focus(), 0);
                     }
                 }}
             >
-
-                {/* ===== COMMAND HISTORY (Both Auto & Manual) ===== */}
-                {history.map(({command, output, path}, idx) => (
+                {/* Command history */}
+                {history.map(({ command, output, path }, idx) => (
                     <div key={idx}>
-                        {/* Command line */}
                         {(command !== "cls" && command !== "clear") && (
                             <p>
                                 <span className="text-cyan-400">{user_name}</span>
@@ -933,9 +979,7 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                                 <span className="text-cyan-300 ml-2">{command}</span>
                             </p>
                         )}
-
-                        {/* Command output */}
-                        {output && output.map((line, i) => (
+                        {output?.map((line, i) => (
                             <p key={i} className="text-cyan-100/75 whitespace-pre-wrap">
                                 {line}
                             </p>
@@ -943,63 +987,24 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     </div>
                 ))}
 
-                {/* ===== AUTO MODE: Current Typing Command ===== */}
+                {/* Auto mode typing */}
                 {isAuto && currentTypingCommand && (
                     <div>
                         <p>
                             <span className="text-cyan-400">{user_name}</span>
                             <span className="text-white">:{currentPath}$</span>
-                            <span className="text-cyan-300 ml-2">
-                                {currentTypingCommand.slice(0, currentTypingProgress)}
-                            </span>
-                            <span className="absolute  p-1 w-[1ch] h-[1.2rem] bg-cyan-300 animate-pulse pointer-events-none">
-                                &nbsp;
-                            </span>
+                            <span className="text-cyan-300 ml-2">{currentTypingCommand.slice(0, currentTypingProgress)}</span>
+                            <span className="absolute p-1 w-[1ch] h-[1.2rem] bg-cyan-300 animate-pulse pointer-events-none">&nbsp;</span>
                         </p>
                     </div>
                 )}
 
 
 
-                {/*/!* ===== MANUAL MODE: Initial Commands ===== *!/*/}
-                {!isAuto && !priorInstructionsComplete && (
-                    <>
-                        {/* Tree command typing */}
-                        <div>
-                            <p>
-                                <span className="text-cyan-400">{user_name}</span>
-                                <span className="text-white">:{currentPath}$</span>
-                                <span className="text-cyan-300 ml-2">
-                                <TypedText
-                                    strings={["tree"]}
-                                    onComplete={handleTreeCommandExecuted}
-                                    showCursor={false}
-                                    typeSpeed={50}
-                                />
-                            </span>
-                                {!isTreeExecuted && (
-                                    <span className="absolute mt-1 w-[1ch] h-[1em] bg-cyan-300 animate-pulse pointer-events-none">
-                                        &nbsp;
-                                    </span>
-                                )}
-                            </p>
-                        </div>
 
-                        {/* Tree output */}
-                        {isTreeExecuted && (
-                            <div>
-                                {treeOutput.map((line, i) => (
-                                    <p key={i} className="text-cyan-100/75 whitespace-pre-wrap">
-                                        {line}
-                                    </p>
-                                ))}
-                            </div>
-                        )}
-                    </>
-                )}
 
-                {/* ===== MANUAL MODE: Input Command Prompt ===== */}
-                {!isAuto && isTreeOutputRendered && (
+                {/* Manual mode input */}
+                {!isAuto && (
                     <NewCommand
                         ref={inputRef}
                         user_name={user_name}
@@ -1010,19 +1015,14 @@ export default function Terminal({scrollProgress, isAuto: propIsAuto, setIsAuto:
                     />
                 )}
 
-                {/* Bottom scroll anchor */}
-                <div ref={bottomRef}/>
+                <div ref={bottomRef} />
             </div>
 
-            {/* ===== OVERLAYS ===== */}
-            <div
-                className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%)] pointer-events-none"/>
-            <div
-                className="absolute inset-0 rounded-2xl ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)] pointer-events-none"/>
-            <div
-                className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)] mix-blend-overlay opacity-30 pointer-events-none"/>
-            <div
-                className="absolute -inset-1 rounded-2xl bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none"/>
+            {/* Visual overlays */}
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%)] pointer-events-none" />
+            <div className="absolute inset-0 rounded-2xl ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)] mix-blend-overlay opacity-30 pointer-events-none" />
+            <div className="absolute -inset-1 rounded-2xl bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none" />
         </div>
     );
 }
