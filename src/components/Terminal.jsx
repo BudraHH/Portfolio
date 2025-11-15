@@ -832,10 +832,12 @@ export default function Terminal({
                 handleManualCommand(command);
 
                 // Wait 300ms for output to render, then clear and resolve
-                setTimeout(() => {
-                    setCurrentAutoCommand(null);
-                    resolve();
-                }, 300);
+                // setTimeout(() => {
+                //     setCurrentAutoCommand(null);
+                //     resolve();
+                // }, 100);
+                setCurrentAutoCommand(null);
+                resolve()
             }, typingDuration);
         });
     }, [handleManualCommand]);
