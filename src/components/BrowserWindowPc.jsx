@@ -14,7 +14,7 @@ export default function BrowserWindowPc({
                                             browserActions,
                                             renderTabContent,
                                             scrollProgress,
-                                            sectionScrollRange
+                                            sectionScrollRange, pid
                                         }) {
     const {
         tabs,
@@ -149,6 +149,7 @@ export default function BrowserWindowPc({
                         >
                             <FaRegWindowMaximize className="text-[5px] xs:text-[6px] text-green-900 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
+                        {pid}
                     </div>
 
                     <div className="flex-1 flex items-center gap-1 mx-2 xs:mx-3 sm:mx-4 overflow-x-auto scrollbar-thin scrollbar-thumb-cyan-500/20 scrollbar-track-transparent">

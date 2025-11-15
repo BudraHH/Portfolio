@@ -183,8 +183,8 @@ export default function Terminal({
                                      scrollToProgress,
                                      onSkillsCommand, onInfoCommand, onCareerJourneyCommand, onContactCommand,
                                      onProjectsCommand,
-                                     infoPid,setInfoPid,skillsPid,setSkillsPid,journeyPid,setJourneyPid,projectsPid,setProjectsPid,contactPid,setContactPid
-                                 }) {
+                                     infoPid,setInfoPid,skillsPid,setSkillsPid,journeyPid,setJourneyPid,projectsPid,setProjectsPid,contactPid,setContactPid,
+                                 setDisplayEnd}) {
     // ========================================
     // REFS
     // ========================================
@@ -816,7 +816,13 @@ export default function Terminal({
                 output = ["firefox: missing URL", "Usage: firefox <url>"];
             } else if (urlMatch[1] === "https://portfoliobudra.com/info") {
                 if (newPath === "~/portfolio/info") {
-                    const newPid = Math.floor(Math.random() * 29001) + 1000;
+                    // ✅ Use PID cache to ensure same PID on re-execution
+                    const cacheKey = "info-firefox";
+                    if (!pidCacheRef.current[cacheKey]) {
+                        pidCacheRef.current[cacheKey] = Math.floor(Math.random() * 29001) + 1000;
+                    }
+                    const newPid = pidCacheRef.current[cacheKey];
+
                     const timestamp = new Date().toLocaleTimeString('en-US', {
                         hour12: false,
                         hour: '2-digit',
@@ -850,6 +856,7 @@ export default function Terminal({
                 output = [`firefox: ${urlMatch[1]}: Unknown URL`];
             }
         }
+
 
         else if (cmd.startsWith("kill")) {
             const parts = cmd.split(" ");
@@ -891,8 +898,10 @@ export default function Terminal({
                         killedFile = "firefox https://portfoliobudra.com/info";
                         wasRunning = true;
                         setInfoPid(null);
-                        onInfoCommand?.(false); // Close the section
-                    } else if (targetPid === skillsPid && skillsPid !== null && skillsPid !== 0) {
+                        onInfoCommand?.(false);
+                        delete pidCacheRef.current["info-firefox"]; // ✅ Clear firefox cache too
+
+                } else if (targetPid === skillsPid && skillsPid !== null && skillsPid !== 0) {
                         killedSection = "skills";
                         killedFile = "skills-manager.sh";
                         wasRunning = true;
@@ -921,6 +930,7 @@ export default function Terminal({
                         setContactPid(null);
                         onContactCommand?.(false); // Close the section
                         delete pidCacheRef.current["contact-get-in-touch.sh"];
+                        setDisplayEnd(true);
                     }
 
                     if (wasRunning && killedSection) {
@@ -1157,7 +1167,15 @@ export default function Terminal({
             const sectionKey = currentSection ? `${currentSection.section}-${direction}` : null;
 
             if (currentSection && sectionKey && !executedSections.has(sectionKey) && !isProcessingAuto) {
-                const commandsToAdd = currentSection.commands.map(({ command }) => command);
+                // Dynamically resolve kill commands to use current PID values
+                // This fixes the info section PID mismatch where kill command was evaluated at initialization
+                const commandsToAdd = currentSection.commands.map(({ command }) => {
+                    // If this is a kill command for info section, use current infoPid value
+                    if (command.startsWith("kill ") && currentSection.section === "info-kill") {
+                        return infoPid && infoPid !== 0 ? `kill ${infoPid}` : command;
+                    }
+                    return command;
+                });
                 setAutoCommandQueue((prev) => [...prev, ...commandsToAdd]);
                 setExecutedSections((prev) => new Set(prev).add(sectionKey));
                 setPriorInstructionsComplete(true);
@@ -1177,7 +1195,7 @@ export default function Terminal({
                 cancelAnimationFrame(rafId);
             }
         };
-    }, [scrollProgress, isAuto, executedSections, isProcessingAuto, lastScrollProgress, scrollDirection]);
+    }, [scrollProgress, isAuto, executedSections, isProcessingAuto, lastScrollProgress, scrollDirection, infoPid]);
 
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;

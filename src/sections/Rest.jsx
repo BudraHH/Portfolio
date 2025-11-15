@@ -149,7 +149,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const [journeyPid, setJourneyPid] = useState(0);
     const [projectsPid, setProjectsPid] = useState(0);
     const [contactPid, setContactPid] = useState(0);
-    
+    const [displayEnd, setDisplayEnd] = useState(false);
     // Track scroll for manual position mode only (not for section visibility)
     useEffect(() => {
         if (!scrollProgress) return;
@@ -348,6 +348,9 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 <Contact pid={contactPid} />
             </Section>
 
+            {displayEnd && (
+                <Closing/>
+            )}
             {/* Terminal */}
             <motion.div
                 className="absolute flex justify-center items-center touch-none"
@@ -383,6 +386,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                         setContactPid={setContactPid}
                         projectsPid={projectsPid}
                         setProjectsPid={setProjectsPid}
+                        setDisplayEnd={setDisplayEnd}
                     />
                 </div>
             </motion.div>

@@ -15,7 +15,7 @@ import NewTabPc from "../components/NewTabPc.jsx";
 import NewTabMobile from "../components/NewTabMobile.jsx";
 import DownloadsTab from "../components/DownloadsTab.jsx";
 
-export default function Info({ onClose, scrollProgress, sectionScrollRange }) {
+export default function Info({ onClose, scrollProgress, sectionScrollRange, pid }) {
     // State variables
     const [tabs, setTabs] = useState([
         {
@@ -283,6 +283,7 @@ export default function Info({ onClose, scrollProgress, sectionScrollRange }) {
     const browserProps = {
         scrollProgress,
         sectionScrollRange,
+        pid,
         browserState: {
             tabs,
             activeTabId,
