@@ -376,6 +376,8 @@ export default function Terminal({
     const [autoCommandQueue, setAutoCommandQueue] = useState([]);
     const [currentAutoCommand, setCurrentAutoCommand] = useState(null);
     const [isProcessingAuto, setIsProcessingAuto] = useState(false);
+    const isProcessingRef = useRef(false);
+    const lastCommandRef = useRef({ command: null, timestamp: 0 });
 
     const [priorInstructionsComplete, setPriorInstructionsComplete] = useState(false);
     const [isTreeExecuted, setIsTreeExecuted] = useState(false);
@@ -406,7 +408,7 @@ export default function Terminal({
 
     const handleInputFocusChange = (focused) => setInputFocused(focused);
 
-    const handleManualCommand = (input) => {
+    const handleManualCommand = useCallback((input) => {
         let output = null;
         let newPath = currentPathRef.current; // Use latest path from ref
         const cmd = input.trim().toLowerCase();
@@ -792,8 +794,28 @@ export default function Terminal({
         setCurrentPath(newPath);
         currentPathRef.current = newPath;
 
-        setHistory((prev) => [...prev, { command: input, output, path: newPath }]);
-    };
+        // Use a ref to track the last command to prevent duplicate history entries
+        // This prevents race conditions where setHistory might be called twice with the same command
+        const now = Date.now();
+        
+        // Check if this is a duplicate: same command within a short time window (500ms)
+        const isDuplicate = lastCommandRef.current.command === input && 
+                            (now - lastCommandRef.current.timestamp) < 500;
+        
+        if (!isDuplicate) {
+            lastCommandRef.current = { command: input, timestamp: now };
+            setHistory((prev) => {
+                // Double-check: ensure the last entry is not the same command with same path
+                // This provides an additional safeguard against race conditions
+                const lastEntry = prev[prev.length - 1];
+                if (lastEntry && lastEntry.command === input && lastEntry.path === newPath) {
+                    // Duplicate detected, don't add
+                    return prev;
+                }
+                return [...prev, { command: input, output, path: newPath }];
+            });
+        }
+    }, [isAuto, scrollToProgress, SECTION_SCROLL_TARGETS, onProjectsCommand, onSkillsCommand, onCareerJourneyCommand, onContactCommand, onInfoCommand]);
 
     // Execute a single auto command with typing animation
     const executeAutoCommand = useCallback((command) => {
@@ -816,23 +838,28 @@ export default function Terminal({
                 }, 300);
             }, typingDuration);
         });
-    }, []);
+    }, [handleManualCommand]);
 
     // Process the auto command queue
-    const processAutoCommandQueue = useCallback(async () => {
-        if (isProcessingAuto) {
+    const processAutoCommandQueue = useCallback(() => {
+        // Use ref to prevent race conditions
+        if (isProcessingRef.current) {
             return;
         }
 
+        isProcessingRef.current = true;
         setIsProcessingAuto(true);
 
-        const processNext = async () => {
+        const processNext = () => {
             setAutoCommandQueue((prev) => {
                 if (prev.length === 0) {
+                    // Queue is empty, stop processing
+                    isProcessingRef.current = false;
                     setIsProcessingAuto(false);
                     return prev;
                 }
 
+                // Dequeue the first command
                 const [command, ...rest] = prev;
 
                 // Process the command asynchronously
@@ -841,6 +868,10 @@ export default function Terminal({
                     setTimeout(() => {
                         processNext();
                     }, 100);
+                }).catch((error) => {
+                    // If there's an error, reset processing state
+                    isProcessingRef.current = false;
+                    setIsProcessingAuto(false);
                 });
 
                 return rest;
@@ -848,11 +879,11 @@ export default function Terminal({
         };
 
         processNext();
-    }, [isProcessingAuto, executeAutoCommand]);
+    }, [executeAutoCommand]);
 
     // Process queue when it changes
     useEffect(() => {
-        if (isAuto && autoCommandQueue.length > 0 && !isProcessingAuto) {
+        if (isAuto && autoCommandQueue.length > 0 && !isProcessingAuto && !isProcessingRef.current) {
             processAutoCommandQueue();
         }
     }, [isAuto, autoCommandQueue.length, isProcessingAuto, processAutoCommandQueue]);
