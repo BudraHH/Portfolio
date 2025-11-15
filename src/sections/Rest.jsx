@@ -74,26 +74,29 @@ export function Rest({ scrollProgress, scrollToProgress }) {
 
     // Memoized transform configurations
     const transforms = useMemo(() => ({
-        terminalXAuto:       [0.10,0.115,0.15, 0.195, 0.20, 0.245, 0.26 ],
-        terminalXAutoValues: [0,   50,  400,  400,  800,  800,  400],
+        terminalXAuto:       [0.10,0.115,0.15, 0.16, 0.17, 0.20, 0.21, 0.25, 0.26, 0.30, 0.31, 0.35, 0.36, 0.40, 0.41, 0.45, 0.46, 0.50, 0.51, 0.55, 0.56, 0.60, 0.61],
+        terminalXAutoValues: [0,   50,   400,  400,   800, 800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400],
         terminalXManual: [0.26, 0.30, 0.36],
         terminalXManualValues: [0, 50, 650],
         terminalScale: [0.10,0.115,0.15],
         terminalScaleValues: [1.5,1.2,1],
 
-        info: { scale: [0.18, 0.20, 0.24,0.26], values: [0, 1, 1, 1.5],
+        info: {
+            scale: [0.18, 0.20, 0.24,0.26], values: [0, 1, 1, 1.5],
             opacity: [0.18, 0.20, 0.24,0.26], opacityValues: [0, 1, 1, 0],
             pointerEvents: [0.18, 0.20, 0.24,0.26], pointerValues: ['none', 'auto', 'auto', 'none'],
             display: [0.18, 0.20, 0.24,0.26], displayValues: ['none', 'flex', 'flex', 'none'] ,
             infoX: [0.18, 0.20, 0.24,0.26],infoXValues: [400,0,0,800], },
 
-        skills: { scale: [0.27, 0.29, 0.35, 0.37], values: [0, 1, 1, 1.5],
+        skills: {
+            scale: [0.27, 0.29, 0.35, 0.37], values: [0, 1, 1, 1.5],
             opacity: [0.27, 0.29, 0.35, 0.37], opacityValues: [0, 1, 1, 0],
             pointerEvents: [0.27, 0.29, 0.35, 0.37], pointerValues: ['none', 'auto', 'auto', 'none'],
             display: [0.27, 0.29, 0.35, 0.37], displayValues: ['none', 'flex', 'flex', 'none'] },
             skillsX: [0.27, 0.29, 0.35, 0.37], skillsXValues: [400,0,0,800],
 
-        journey: { scale: [0.69, 0.79, 0.82, 0.87], values: [0, 1, 1, 1.5],
+        journey: {
+            scale: [0.37, 0.79, 0.82, 0.87], values: [0, 1, 1, 1.5],
             opacity: [0.69, 0.79, 0.82, 0.87], opacityValues: [0, 1, 1, 0],
             pointerEvents: [0.68, 0.79, 0.82, 0.88], pointerValues: ['none', 'auto', 'auto', 'none'],
             display: [0.68, 0.69, 0.87, 0.88], displayValues: ['none', 'flex', 'flex', 'none'] },
@@ -140,8 +143,6 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const contactOpacity = useTransform(scrollProgress, transforms.contact.opacity, transforms.contact.opacityValues);
     const contactPointerEvents = useTransform(scrollProgress, transforms.contact.pointerEvents, transforms.contact.pointerValues);
     const contactDisplay = useTransform(scrollProgress, transforms.contact.display, transforms.contact.displayValues);
-
-    const [startDisplaySkills, setStartDisplaySkills] = useState(false);
 
     const [infoPid, setInfoPid] = useState(0);
     const [skillsPid, setSkillsPid] = useState(0);
@@ -196,77 +197,51 @@ export function Rest({ scrollProgress, scrollToProgress }) {
 
     // Memoized callbacks to track section execution
     const handleShowSection = useMemo(() => ({
-        info: () => {
+        info: (shouldShow = true) => {
             setExecutedSections(prev => {
-                if (isAuto) {
-                    // Auto mode: replace previous section (only one visible at a time)
-                    return ['info'];
-                } else {
-                    // Manual mode: add to executed sections if not already present
-                    if (!prev.includes('info')) {
-                        return [...prev, 'info'];
-                    }
-                    return prev;
+                if (!shouldShow) {
+                    // Close section
+                    return prev.filter(s => s !== 'info');
                 }
+                if (isAuto) return ['info'];
+                if (!prev.includes('info')) return [...prev, 'info'];
+                return prev;
             });
         },
-        skills: () => {
+        skills: (shouldShow = true) => {
             setExecutedSections(prev => {
-                if (isAuto) {
-                    // Auto mode: replace previous section
-                    return ['skills'];
-                } else {
-                    // Manual mode: add to executed sections if not already present
-                    if (!prev.includes('skills')) {
-                        return [...prev, 'skills'];
-                    }
-                    return prev;
-                }
+                if (!shouldShow) return prev.filter(s => s !== 'skills');
+                if (isAuto) return ['skills'];
+                if (!prev.includes('skills')) return [...prev, 'skills'];
+                return prev;
             });
         },
-        journey: () => {
+        journey: (shouldShow = true) => {
             setExecutedSections(prev => {
-                if (isAuto) {
-                    // Auto mode: replace previous section
-                    return ['journey'];
-                } else {
-                    // Manual mode: add to executed sections if not already present
-                    if (!prev.includes('journey')) {
-                        return [...prev, 'journey'];
-                    }
-                    return prev;
-                }
+                if (!shouldShow) return prev.filter(s => s !== 'journey');
+                if (isAuto) return ['journey'];
+                if (!prev.includes('journey')) return [...prev, 'journey'];
+                return prev;
             });
         },
-        projects: () => {
+        projects: (shouldShow = true) => {
             setExecutedSections(prev => {
-                if (isAuto) {
-                    // Auto mode: replace previous section
-                    return ['projects'];
-                } else {
-                    // Manual mode: add to executed sections if not already present
-                    if (!prev.includes('projects')) {
-                        return [...prev, 'projects'];
-                    }
-                    return prev;
-                }
+                if (!shouldShow) return prev.filter(s => s !== 'projects');
+                if (isAuto) return ['projects'];
+                if (!prev.includes('projects')) return [...prev, 'projects'];
+                return prev;
             });
         },
-        contact: () => {
+        contact: (shouldShow = true) => {
             setExecutedSections(prev => {
-                if (isAuto) {
-                    // Auto mode: replace previous section
-                    return ['contact'];
-                } else {
-                    // Manual mode: add to executed sections if not already present
-                    if (!prev.includes('contact')) {
-                        return [...prev, 'contact'];
-                    }
-                    return prev;
-                }
+                if (!shouldShow) return prev.filter(s => s !== 'contact');
+                if (isAuto) return ['contact'];
+                if (!prev.includes('contact')) return [...prev, 'contact'];
+                return prev;
             });
         }
     }), [isAuto]);
+
 
 
     // Calculate z-index for manual mode (most recent on top)
@@ -302,7 +277,11 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('info')}
                 xPosition={activeSections.info ? 0 : infoX}
             >
-                <Info scrollProgress={scrollProgress} sectionScrollRange={[0.20,0.24]} />
+                <Info
+                    // scrollProgress={scrollProgress}
+                    // sectionScrollRange={[0.20,0.24]}
+                    pid={infoPid}
+                />
             </Section>
 
             {/* Skills Section */}
@@ -315,7 +294,11 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('skills')}
                 xPosition={activeSections.skills ? 0 : skillsX}
             >
-                <Skills scrollProgress={scrollProgress} sectionScrollRange={[0.30, 0.34]} startDisplay={startDisplaySkills} pid={skillsPid} />
+                <Skills
+                    // scrollProgress={scrollProgress}
+                    // sectionScrollRange={[0.30, 0.34]}
+                    pid={skillsPid}
+                />
             </Section>
 
             {/* Journey Section */}
@@ -329,9 +312,9 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 xPosition={activeSections.journey ? 0 : 0}
             >
                 <CareerJourney 
-                    scrollProgress={scrollProgress} 
-                    sectionScrollRange={[0.68, 0.88]}
-                    onScrollProgressChange={scrollToProgress}
+                    // scrollProgress={scrollProgress}
+                    // sectionScrollRange={[0.68, 0.88]}
+                    pid={journeyPid}
                 />
             </Section>
 
@@ -345,7 +328,11 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('projects')}
                 xPosition={activeSections.projects ? 0 : 0}
             >
-                <Projects scrollProgress={scrollProgress} sectionScrollRange={[0.87, 0.99]} />
+                <Projects
+                    // scrollProgress={scrollProgress}
+                    // sectionScrollRange={[0.87, 0.99]}
+                    pid={projectsPid}
+                />
             </Section>
 
             {/* Contact Section */}
@@ -358,7 +345,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('contact')}
                 xPosition={activeSections.contact ? 0 : 0}
             >
-                <Contact />
+                <Contact pid={contactPid} />
             </Section>
 
             {/* Terminal */}

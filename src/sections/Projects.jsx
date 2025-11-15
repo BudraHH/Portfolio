@@ -83,7 +83,7 @@ const ProjectCard = memo(({ project, index, onClick }) => (
 
 ProjectCard.displayName = 'ProjectCard';
 
-export default function Projects({ scrollProgress, sectionScrollRange }) {
+export default function Projects({ scrollProgress, sectionScrollRange, pid }) {
     const [output, setOutput] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [spinnerStep, setSpinnerStep] = useState(0);
@@ -92,7 +92,7 @@ export default function Projects({ scrollProgress, sectionScrollRange }) {
     const terminalLines = useMemo(() => [
         "$ bash projects.sh",
         "Starting child process...",
-        "PID: 4821",
+        `PID: ${pid}`,
         "[1/4] Fetching metadata...",
         "[2/4] Installing dependencies...",
         "[3/4] Building projects...",
@@ -196,7 +196,7 @@ export default function Projects({ scrollProgress, sectionScrollRange }) {
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)] ml-1.5 xs:ml-2" />
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)] ml-1.5 xs:ml-2" />
                     <span className="ml-2 xs:ml-3 text-[10px] xs:text-xs sm:text-sm text-cyan-400/70 select-none tracking-wide truncate">
-                        projects.jsx - child process [PID: 4821]
+                        projects.jsx - child process [PID: {pid}]
                     </span>
                 </div>
 

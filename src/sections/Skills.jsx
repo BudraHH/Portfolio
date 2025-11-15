@@ -154,37 +154,57 @@ const SkillCategory = memo(({ category, isLast }) => (
 
 SkillCategory.displayName = 'SkillCategory';
 
-export default function Skills({ scrollProgress, sectionScrollRange, startDisplay, pid }) {
+export default function Skills({ scrollProgress, sectionScrollRange, pid }) {
+    // ========================================
+    // REFS
+    // ========================================
+    const scrollRef = useRef(null);
+
+    // ========================================
+    // STATE
+    // ========================================
     const [output, setOutput] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [spinnerStep, setSpinnerStep] = useState(0);
-    console.log("pid in skills: ",pid);
-    // Memoized calculations
-    const totalTech = useMemo(() =>
-            SKILLS.reduce((sum, skill) => sum + skill.technologies.length, 0),
+    const [startDisplay, setStartDisplay] = useState(false);
+
+    // ========================================
+    // MEMOIZED VALUES
+    // ========================================
+    const totalTech = useMemo(
+        () => SKILLS.reduce((sum, skill) => sum + skill.technologies.length, 0),
         []
     );
 
-    const spinnerFrame = useMemo(() => spinnerFrames[spinnerStep], [spinnerStep]);
+    const spinnerFrame = useMemo(
+        () => spinnerFrames[spinnerStep],
+        [spinnerStep]
+    );
 
-    const terminalLines = useMemo(() => [
-        "$ bash skills-manager.sh --fork",
-        "Loading skill packages...",
-        `PID: ${pid}`,
-        "[1/4] Scanning installed packages...",
-        "[2/4] Checking dependencies...",
-        "[3/4] Verifying versions...",
-        "[4/4] Building package tree...",
-        `✓ Found ${totalTech} installed packages across ${SKILLS.length} categories`,
-        "",
-    ], [totalTech]);
+    const terminalLines = useMemo(
+        () => [
+            "$ bash skills-manager.sh --fork",
+            "Loading skill packages...",
+            `PID: ${pid}`,
+            "[1/4] Scanning installed packages...",
+            "[2/4] Checking dependencies...",
+            "[3/4] Verifying versions...",
+            "[4/4] Building package tree...",
+            `✓ Found ${totalTech} installed packages across ${SKILLS.length} categories`,
+            "",
+        ],
+        [pid, totalTech]
+    );
 
-    // Spinner effect
+    // ========================================
+    // EFFECTS
+    // ========================================
+
+    // Initial display delay
     useEffect(() => {
-        if (!isLoading) return;
-        const spinner = setInterval(() => setSpinnerStep(s => (s + 1) % 4), 70);
-        return () => clearInterval(spinner);
-    }, [isLoading]);
+        const timer = setTimeout(() => setStartDisplay(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     // Terminal output animation
     useEffect(() => {
@@ -205,22 +225,36 @@ export default function Skills({ scrollProgress, sectionScrollRange, startDispla
         return () => clearInterval(interval);
     }, [terminalLines]);
 
-    const scrollRef = useRef(null);
+    // Spinner animation
+    useEffect(() => {
+        if (!isLoading) return;
 
-    // Sync internal scroll with global scroll progress
+        const spinner = setInterval(
+            () => setSpinnerStep(s => (s + 1) % 4),
+            70
+        );
+
+        return () => clearInterval(spinner);
+    }, [isLoading]);
+
+    // Scroll synchronization
     useEffect(() => {
         if (!scrollProgress || !sectionScrollRange || !scrollRef.current) return;
 
         const unsubscribe = scrollProgress.on("change", (latest) => {
             const [sectionStart, sectionEnd] = sectionScrollRange;
+
             if (latest >= sectionStart && latest <= sectionEnd) {
                 const localProgress = (latest - sectionStart) / (sectionEnd - sectionStart);
                 const scrollableElement = scrollRef.current.querySelector('[data-scrollable-content]');
+
                 if (scrollableElement) {
                     const maxScroll = scrollableElement.scrollHeight - scrollableElement.clientHeight;
+
                     if (maxScroll > 0) {
                         scrollableElement.dataset.syncing = 'true';
                         scrollableElement.scrollTop = localProgress * maxScroll;
+
                         setTimeout(() => {
                             if (scrollableElement) {
                                 scrollableElement.dataset.syncing = 'false';
@@ -233,7 +267,6 @@ export default function Skills({ scrollProgress, sectionScrollRange, startDispla
 
         return () => unsubscribe();
     }, [scrollProgress, sectionScrollRange]);
-
 
     return (
         <section className="w-full h-full flex flex-col justify-center items-start

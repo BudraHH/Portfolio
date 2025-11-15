@@ -50,7 +50,7 @@ const ContactMethod = memo(({ icon: Icon, title, subtitle, value, linkHref, onCo
                 <p className="text-cyan-400/60 text-[9px] xs:text-[10px] truncate">{subtitle}</p>
             </div>
         </div>
-        <div className="ml-10 xs:ml-11 sm:ml-13 flex items-center justify-between bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-1.5 xs:p-2 group-hover:border-cyan-500/30 transition-colors">
+        <div className=" flex items-center justify-between bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-1.5 xs:p-2 group-hover:border-cyan-500/30 transition-colors">
             <a href={linkHref} className="text-cyan-300 hover:text-cyan-200 text-[10px] xs:text-xs font-mono truncate flex-1 min-w-0">
                 {value}
             </a>
@@ -68,7 +68,7 @@ const ContactMethod = memo(({ icon: Icon, title, subtitle, value, linkHref, onCo
 
 ContactMethod.displayName = 'ContactMethod';
 
-export default function Contact() {
+export default function Contact({pid}) {
     const [output, setOutput] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [spinnerStep, setSpinnerStep] = useState(0);
@@ -83,7 +83,7 @@ export default function Contact() {
     const terminalLines = useMemo(() => [
         "$ bash get-in-touch.sh --initialize",
         "Loading contact information...",
-        "PID: 5120",
+        `PID: ${pid}`,
         "[1/3] Fetching contact methods...",
         "[2/3] Validating social links...",
         "[3/3] Preparing contact form...",
@@ -196,7 +196,7 @@ export default function Contact() {
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]" />
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
                     <span className="ml-2 xs:ml-3 text-[10px] xs:text-xs sm:text-sm text-cyan-400/70 select-none tracking-wide truncate">
-                        get-in-touch.sh - Get in Touch [PID: 5120]
+                        get-in-touch.sh - Get in Touch [PID: {pid}]
                     </span>
                 </div>
 
@@ -335,12 +335,12 @@ export default function Contact() {
                             </div>
 
                             {/* Right Panel - Contact Form */}
-                            <div className="flex-1 ">
+                            <div className="w-full flex justify-center items-center">
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4 }}
-                                    className="p-4 xs:p-5 sm:p-6 md:p-8"
+                                    className="w-full p-4 xs:p-5 sm:p-6 md:p-8"
                                 >
                                     <div className="max-w-xl mx-auto">
                                         <h3 className="text-xl xs:text-2xl font-bold text-cyan-100 mb-1 xs:mb-2">Send a Message</h3>

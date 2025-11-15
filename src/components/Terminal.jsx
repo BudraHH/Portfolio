@@ -183,13 +183,21 @@ export default function Terminal({
                                      scrollToProgress,
                                      onSkillsCommand, onInfoCommand, onCareerJourneyCommand, onContactCommand,
                                      onProjectsCommand,
-    infoPid,setInfoPid,skillsPid,setSkillsPid,journeyPid,setJourneyPid,projectsPid,setProjectsPid,contactPid,setContactPid
-
+                                     infoPid,setInfoPid,skillsPid,setSkillsPid,journeyPid,setJourneyPid,projectsPid,setProjectsPid,contactPid,setContactPid
                                  }) {
+    // ========================================
+    // REFS
+    // ========================================
     const inputRef = useRef(null);
     const bottomRef = useRef(null);
     const terminalRef = useRef(null);
-
+    const currentPathRef = useRef("~");
+    const isProcessingRef = useRef(false);
+    const lastCommandRef = useRef({ command: null, timestamp: 0 });
+    const pidCacheRef = useRef({});
+    // ========================================
+    // CONSTANTS
+    // ========================================
     const priorInstructions = [
         "╔════════════════════════════════════════════════════════════╗",
         "║            WELCOME TO PORTFOLIO TERMINAL v1.0              ║",
@@ -209,6 +217,7 @@ export default function Terminal({
         "Type 'help' for all commands | Press ↑↓ for history",
         "════════════════════════════════════════════════════════════",
     ];
+
     const treeOutput = [
         "~",
         "├── instructions.txt",
@@ -229,9 +238,6 @@ export default function Terminal({
         "7 directories, 7 files",
     ];
 
-// Commands when scrolling DOWN (forward navigation)
-    // Aligned with Rest.jsx section display ranges for smooth transitions
-    // Sections activate slightly before they become visible (0.01-0.02 earlier)
     const SCROLL_DOWN_MAP = [
         {
             section: "initial-1",
@@ -249,61 +255,85 @@ export default function Terminal({
         },
         {
             section: "info",
-            scrollRange: [0.16, 0.20], // Section appears at 0.36-0.37, disappears at 0.57-0.58
+            scrollRange: [0.16, 0.20],
             commands: [
                 { command: "cd ~/portfolio/info", key: "cd-portfolio-info" },
-                { command: "firefox https://portfoliobudra.com/info", key: "cat-info" }
+                { command: "firefox https://portfoliobudra.com/info &", key: "cat-info" }
             ]
         },
         {
-            section: "info",
-            scrollRange: [0.21, 0.24], // Section appears at 0.36-0.37, disappears at 0.57-0.58
+            section: "info-kill",
+            scrollRange: [0.21, 0.24],
             commands: [
                 { command: `kill ${infoPid}`, key: "kill-portfolio-info" },
-
             ]
         },
         {
             section: "skills",
-            scrollRange: [0.25, 0.31], // Section appears at 0.52-0.53, disappears at 0.76-0.77
+            scrollRange: [0.25, 0.30],
             commands: [
                 { command: "cd ~/portfolio/skills", key: "cd-portfolio-skills" },
-                { command: "bash skills-manager.sh", key: "bash-skills" }
+                { command: "bash skills-manager.sh &", key: "bash-skills" }
             ]
         },
-
+        {
+            section: "skills-kill",
+            scrollRange: [0.31, 0.34],
+            commands: [
+                { command: `kill ${skillsPid}`, key: "kill-portfolio-skills" },
+            ]
+        },
         {
             section: "journey",
-            scrollRange: [0.67, 0.87], // Section appears at 0.68-0.69, disappears at 0.87-0.88
+            scrollRange: [0.35, 0.40],
             commands: [
                 { command: "cd ~/portfolio/journey", key: "cd-journey" },
-                { command: "bash career-journey.sh", key: "bash-journey" }
+                { command: "bash career-journey.sh &", key: "bash-journey" }
+            ]
+        },
+        {
+            section: "journey-kill",
+            scrollRange: [0.41, 0.44],
+            commands: [
+                { command: `kill ${journeyPid}`, key: "kill-journey" },
             ]
         },
         {
             section: "projects",
-            scrollRange: [0.86, 0.98], // Section appears at 0.87-0.88, disappears at 0.98-0.99
+            scrollRange: [0.45, 0.50],
             commands: [
                 { command: "cd ~/portfolio/projects", key: "cd-projects" },
-                { command: "bash projects.sh", key: "bash-projects" }
+                { command: "bash projects.sh &", key: "bash-projects" }
+            ]
+        },
+        {
+            section: "projects-kill",
+            scrollRange: [0.51, 0.54],
+            commands: [
+                { command: `kill ${projectsPid}`, key: "kill-projects" }
             ]
         },
         {
             section: "contact",
-            scrollRange: [0.97, 1.0], // Section appears at 0.98-0.99
+            scrollRange: [0.55, 0.60],
             commands: [
                 { command: "cd ~/portfolio/contact", key: "cd-contact" },
-                { command: "bash get-in-touch.sh", key: "bash-contact" }
+                { command: "bash get-in-touch.sh &", key: "bash-contact" }
+            ]
+        },
+        {
+            section: "contact-kill",
+            scrollRange: [0.61, 0.64],
+            commands: [
+                { command: `kill ${contactPid}`, key: "kill-contact" },
             ]
         }
     ];
 
-// Commands when scrolling UP (backward navigation)
-    // Aligned with Rest.jsx section display ranges for smooth transitions
     const SCROLL_UP_MAP = [
         {
             section: "contact-back",
-            scrollRange: [0.97, 1.0], // Exit contact section
+            scrollRange: [0.97, 1.0],
             commands: [
                 { command: "cd ~/portfolio/projects", key: "back-to-projects" },
                 { command: "bash projects.sh", key: "bash-projects-back" }
@@ -311,7 +341,7 @@ export default function Terminal({
         },
         {
             section: "projects-back",
-            scrollRange: [0.86, 0.97], // Exit projects, enter journey
+            scrollRange: [0.86, 0.97],
             commands: [
                 { command: "cd ~/portfolio/journey", key: "back-to-journey" },
                 { command: "bash career-journey.sh", key: "bash-journey-back" }
@@ -319,7 +349,7 @@ export default function Terminal({
         },
         {
             section: "journey-back",
-            scrollRange: [0.67, 0.86], // Exit journey, enter skills
+            scrollRange: [0.67, 0.86],
             commands: [
                 { command: "cd ~/portfolio/skills", key: "back-to-skills" },
                 { command: "bash skills-manager.sh", key: "bash-skills-back" }
@@ -327,7 +357,7 @@ export default function Terminal({
         },
         {
             section: "skills-back",
-            scrollRange: [0.51, 0.67], // Exit skills, enter info
+            scrollRange: [0.51, 0.67],
             commands: [
                 { command: "cd ~/portfolio/info", key: "back-to-info" },
                 { command: "firefox https://portfoliobudra.com/info", key: "cat-info-back" }
@@ -335,77 +365,72 @@ export default function Terminal({
         },
         {
             section: "info-back",
-            scrollRange: [0.35, 0.51], // Exit info, return to home
+            scrollRange: [0.35, 0.51],
             commands: [
                 { command: "cd ~", key: "back-to-home" },
             ]
         },
         {
             section: "initial-back-2",
-            scrollRange: [0.23, 0.26], // Return to initial state
+            scrollRange: [0.23, 0.26],
             commands: [
-                // { command: "clear", key: "clear-terminal" },
-                // { command: "cat instructions.txt", key: "prior_instructions" },
                 { command: "tree", key: "tree-initial" }
             ]
         },
         {
             section: "initial-back-1",
-            scrollRange: [0.20, 0.23], // Return to initial state
+            scrollRange: [0.20, 0.23],
             commands: [
-                // { command: "clear", key: "clear-terminal" },
                 { command: "cat instructions.txt", key: "prior_instructions" },
-                // { command: "tree", key: "tree-initial" }
             ]
         }
     ];
 
-
-
+    // ========================================
+    // STATE
+    // ========================================
     const [basePath] = useState("~");
     const [currentPath, setCurrentPath] = useState(basePath);
     const [history, setHistory] = useState([]);
-    const isMobile = useIsMobile();
-
-    const currentPathRef = useRef(currentPath);
-    useEffect(() => {
-        currentPathRef.current = currentPath;
-    }, [currentPath]);
-
     const [localIsAuto, setLocalIsAuto] = useState(propIsAuto || false);
-
-    // Force auto mode on mobile
-    const isAuto = isMobile ? true : (propSetIsAuto ? propIsAuto : localIsAuto);
-    const setIsAuto = propSetIsAuto || setLocalIsAuto;
-
     const [executedSections, setExecutedSections] = useState(new Set());
     const [lastScrollProgress, setLastScrollProgress] = useState(0);
     const [scrollDirection, setScrollDirection] = useState("down");
-
-    // Auto mode state management
     const [autoCommandQueue, setAutoCommandQueue] = useState([]);
     const [currentAutoCommand, setCurrentAutoCommand] = useState(null);
     const [isProcessingAuto, setIsProcessingAuto] = useState(false);
-    const isProcessingRef = useRef(false);
-    const lastCommandRef = useRef({ command: null, timestamp: 0 });
-
     const [priorInstructionsComplete, setPriorInstructionsComplete] = useState(false);
     const [isTreeExecuted, setIsTreeExecuted] = useState(false);
     const [isTreeOutputRendered, setIsTreeOutputRendered] = useState(false);
     const [inputFocused, setInputFocused] = useState(false);
 
+    const isMobile = useIsMobile();
+    const isAuto = isMobile ? true : (propSetIsAuto ? propIsAuto : localIsAuto);
+    const setIsAuto = propSetIsAuto || setLocalIsAuto;
+
+    // ========================================
+    // COMPUTED VALUES
+    // ========================================
     const commandHistory = history.map(({ command }) => command);
 
-    // Map section commands to target scrollProgress values (where sections are at scale 1)
-    // Based on Rest.jsx scale ranges: scale reaches 1 at the middle of the range
     const SECTION_SCROLL_TARGETS = useMemo(() => ({
-        "info": 0.48,           // scale [0.37, 0.47, 0.49, 0.57] -> scale 1 at 0.47-0.49, target 0.48
-        "skills": 0.645,       // scale [0.53, 0.63, 0.66, 0.76] -> scale 1 at 0.63-0.66, target 0.645
-        "journey": 0.805,      // scale [0.69, 0.79, 0.82, 0.87] -> scale 1 at 0.79-0.82, target 0.805
-        "projects": 0.94,      // scale [0.88, 0.93, 0.95, 0.98] -> scale 1 at 0.93-0.95, target 0.94
-        "contact": 0.995       // scale [0.99, 1.0] -> scale 1 at 0.99-1.0, target 0.995
+        "info": 0.48,
+        "skills": 0.645,
+        "journey": 0.805,
+        "projects": 0.94,
+        "contact": 0.995
     }), []);
 
+    // ========================================
+    // EFFECTS - Update Refs
+    // ========================================
+    useEffect(() => {
+        currentPathRef.current = currentPath;
+    }, [currentPath]);
+
+    // ========================================
+    // HANDLERS
+    // ========================================
     const handleClickAuto = () => setIsAuto(true);
     const handleClickManual = () => setIsAuto(false);
 
@@ -420,8 +445,9 @@ export default function Terminal({
 
     const handleManualCommand = useCallback((input) => {
         let output = null;
-        let newPath = currentPathRef.current; // Use latest path from ref
-        const cmd = input.trim().toLowerCase();
+        let newPath = currentPathRef.current;
+        const cleanInput = input.trim().replace(/\s*&\s*$/, '');
+        const cmd = cleanInput.toLowerCase();
 
         setTimeout(() => inputRef?.current?.focus(), 0);
 
@@ -430,30 +456,23 @@ export default function Terminal({
             if (parts.length === 2) {
                 let destination = parts[1].trim().replace(/\/$/, "");
 
-                // Handle home directory shortcuts
                 if (destination === "~" || destination === "") {
                     newPath = "~";
                     output = null;
                 } else {
-                    // Get section names
                     const sectionNames = sections.map((s) => s.name);
-
-                    // Parse current path into parts
                     let currentParts = newPath.replace(/^~\/?/, "").split("/").filter(Boolean);
 
-                    // Check if destination is absolute (starts with ~/ or /)
                     if (destination.startsWith("~")) {
                         destination = destination.replace(/^~\/?/, "");
-                        currentParts = []; // Reset to home
+                        currentParts = [];
                     } else if (destination.startsWith("/")) {
                         destination = destination.substring(1);
-                        currentParts = []; // Reset to root
+                        currentParts = [];
                     } else {
-                        // Remove leading ./ if present
                         destination = destination.replace(/^\.\//, "");
                     }
 
-                    // Navigate through destination parts
                     const destParts = destination.split("/").filter(Boolean);
                     let errorOccurred = false;
 
@@ -610,25 +629,21 @@ export default function Terminal({
             if (!fileName) {
                 output = ["node: missing file operand", "Usage: node <filename.jsx>"];
             } else {
-                // Define valid node files
                 const validNodeFiles = {
                     info: "info.jsx",
                     resume: "resume.jsx"
                 };
 
-                // Clean path
                 let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
                 const pathParts = cleanPath.split("/").filter(Boolean);
                 let targetSection = null;
                 let targetFile = pathParts[pathParts.length - 1];
 
-                // Determine target section
                 if (pathParts[0] === "portfolio" && pathParts.length > 1) {
                     targetSection = pathParts[1];
                 } else if (Object.prototype.hasOwnProperty.call(validNodeFiles, pathParts[0])) {
                     targetSection = pathParts[0];
                 } else if (pathParts.length === 1 && Object.values(validNodeFiles).includes(targetFile)) {
-                    // Infer from current path
                     const currentPathParts = newPath.replace(/^~\//, "").split("/").filter(Boolean);
                     if (currentPathParts[0] === "portfolio" && currentPathParts.length > 1) {
                         targetSection = currentPathParts[1];
@@ -669,12 +684,12 @@ export default function Terminal({
             }
         }
         else if (cmd.startsWith("bash")) {
-            const fileName = cmd.split(" ").slice(1).join(" ").trim();
+            // Strip & and get clean filename
+            const fileName = cmd.split(" ").slice(1).join(" ").trim().replace(/\s*&\s*$/, '');
 
             if (!fileName) {
                 output = ["bash: missing file operand", "Usage: bash <filename.sh>"];
             } else {
-                // Define valid bash scripts
                 const validBashScripts = {
                     skills: "skills-manager.sh",
                     journey: "career-journey.sh",
@@ -682,19 +697,16 @@ export default function Terminal({
                     contact: "get-in-touch.sh"
                 };
 
-                // Clean path
                 let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
                 const pathParts = cleanPath.split("/").filter(Boolean);
                 let targetSection = null;
                 let targetFile = pathParts[pathParts.length - 1];
 
-                // Determine target section
                 if (pathParts[0] === "portfolio" && pathParts.length > 1) {
                     targetSection = pathParts[1];
                 } else if (Object.prototype.hasOwnProperty.call(validBashScripts, pathParts[0])) {
                     targetSection = pathParts[0];
                 } else if (pathParts.length === 1 && Object.values(validBashScripts).includes(targetFile)) {
-                    // Infer from current path
                     const currentPathParts = newPath.replace(/^~\//, "").split("/").filter(Boolean);
                     if (currentPathParts[0] === "portfolio" && currentPathParts.length > 1) {
                         targetSection = currentPathParts[1];
@@ -709,58 +721,70 @@ export default function Terminal({
                     const expectedNormalized = expectedPath.replace(/^~\//, "");
 
                     if (normalizedCurrentPath === expectedNormalized) {
-                        const newPid = Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000;
-                        console.log("newPid in bash: ", newPid);
+                        // ✅ Check if PID already exists for this section, if not generate new one
+                        const cacheKey = `${targetSection}-${targetFile}`;
+                        if (!pidCacheRef.current[cacheKey]) {
+                            pidCacheRef.current[cacheKey] = Math.floor(Math.random() * 29001) + 1000;
+                        }
+                        const newPid = pidCacheRef.current[cacheKey];
+
+                        const timestamp = new Date().toLocaleTimeString('en-US', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+
                         output = [
-                            "Running script...",
-                            `✓ ${targetFile} executed successfully`,
-                            `Script location: /portfolio/${targetSection}`,
-                            `PID: ${newPid}`
+                            `[${timestamp}] bash ${targetFile}`,
+                            `[1] ${newPid}`,
+                            `Executing: /portfolio/${targetSection}/${targetFile}`,
+                            ``,
+                            `Process running in background...`,
+                            `Use 'kill ${newPid}' to terminate`,
+                            ``,
+                            `[1]+ ${newPid} Running                bash ${targetFile} &`
                         ];
-                        // Trigger section callbacks
+
+                        // Only set state once per section
                         if (targetFile === "projects.sh") {
                             setProjectsPid(newPid);
+                            console.log("projects.sh : ", newPid);
                             onProjectsCommand?.();
-                            // Auto-scroll to section in auto mode
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
                                 if (targetProgress !== undefined) {
-                                    setTimeout(() => {
-                                        scrollToProgress(targetProgress);
-                                    }, 300); // Small delay to ensure section is activated first
+                                    setTimeout(() => scrollToProgress(targetProgress), 300);
                                 }
                             }
                         } else if (targetFile === "skills-manager.sh") {
                             setSkillsPid(newPid);
-                            onSkillsCommand?.();
+                            console.log("skills.sh : ", newPid)
+                            onSkillsCommand?.(); // Call without argument (defaults to true)
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
                                 if (targetProgress !== undefined) {
-                                    setTimeout(() => {
-                                        scrollToProgress(targetProgress);
-                                    }, 300);
+                                    setTimeout(() => scrollToProgress(targetProgress), 300);
                                 }
                             }
                         } else if (targetFile === "career-journey.sh") {
                             setJourneyPid(newPid);
+                            console.log("Career journey.sh : ", newPid );
                             onCareerJourneyCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
                                 if (targetProgress !== undefined) {
-                                    setTimeout(() => {
-                                        scrollToProgress(targetProgress);
-                                    }, 300);
+                                    setTimeout(() => scrollToProgress(targetProgress), 300);
                                 }
                             }
                         } else if (targetFile === "get-in-touch.sh") {
                             setContactPid(newPid);
+                            console.log("contact pid in bash : ", contactPid)
                             onContactCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
                                 if (targetProgress !== undefined) {
-                                    setTimeout(() => {
-                                        scrollToProgress(targetProgress);
-                                    }, 300);
+                                    setTimeout(() => scrollToProgress(targetProgress), 300);
                                 }
                             }
                         }
@@ -771,7 +795,6 @@ export default function Terminal({
                             `Expected: ${expectedPath}`
                         ];
                     }
-
                 } else if (Object.values(validBashScripts).includes(targetFile)) {
                     output = [
                         `bash: cannot find '${targetFile}'`,
@@ -785,84 +808,287 @@ export default function Terminal({
                 }
             }
         }
-        else if (cmd === "firefox https://portfoliobudra.com/info") {
-            if (newPath === "~/portfolio/info") {
-                output = ["[1]+  Done                    firefox https://portfoliobudra.com/info\n"];
-                setInfoPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000)
-                onInfoCommand?.();
-                // Auto-scroll to info section in auto mode
-                if (isAuto && scrollToProgress) {
-                    const targetProgress = SECTION_SCROLL_TARGETS["info"];
-                    if (targetProgress !== undefined) {
-                        setTimeout(() => {
-                            scrollToProgress(targetProgress);
-                        }, 300);
+        else if (cmd.startsWith("firefox")) {
+            // Extract URL and strip & if present
+            const urlMatch = input.match(/firefox\s+(https?:\/\/[^\s&]+)/i);
+
+            if (!urlMatch) {
+                output = ["firefox: missing URL", "Usage: firefox <url>"];
+            } else if (urlMatch[1] === "https://portfoliobudra.com/info") {
+                if (newPath === "~/portfolio/info") {
+                    const newPid = Math.floor(Math.random() * 29001) + 1000;
+                    const timestamp = new Date().toLocaleTimeString('en-US', {
+                        hour12: false,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    });
+
+                    output = [
+                        `[${timestamp}] firefox ${urlMatch[1]}`,
+                        `[1] ${newPid}`,
+                        ``,
+                        `[1]+ ${newPid} Running                firefox ${urlMatch[1]} &`
+                    ];
+
+                    setInfoPid(newPid);
+                    console.log("info pid : ", newPid);
+                    onInfoCommand?.();
+
+                    if (isAuto && scrollToProgress) {
+                        const targetProgress = SECTION_SCROLL_TARGETS["info"];
+                        if (targetProgress !== undefined) {
+                            setTimeout(() => {
+                                scrollToProgress(targetProgress);
+                            }, 300);
+                        }
+                    }
+                } else {
+                    output = ["Command restricted to ~/portfolio/info directory"];
+                }
+            } else {
+                output = [`firefox: ${urlMatch[1]}: Unknown URL`];
+            }
+        }
+
+        else if (cmd.startsWith("kill")) {
+            const parts = cmd.split(" ");
+
+            if (parts.length === 1) {
+                // No PID provided
+                output = [
+                    "kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec",
+                    `Try 'kill <pid>' or 'kill -9 <pid>'`
+                ];
+            } else if (parts.length === 2) {
+                // Basic kill command: kill <pid>
+                const targetPid = parseInt(parts[1]);
+                console.log("target pid : ",targetPid);
+                console.log("info pid : ", infoPid);
+                console.log("skills pid : ", skillsPid);
+                console.log("journey pid : ", journeyPid);
+                console.log("projects pid : ", projectsPid);
+                console.log("contact pid : ", contactPid);
+                // Validate PID is a number
+                if (isNaN(targetPid)) {
+                    console.log("if");
+                    output = [`bash: kill: ${parts[1]}: arguments must be process or job IDs`];
+                } else {
+                    console.log("else");
+                    // console.log("target pid : ",targetPid);
+                    // console.log("info pid : ", infoPid);
+                    // console.log("skills pid : ", skillsPid);
+                    // console.log("journey pid : ", journeyPid);
+                    // console.log("projects pid : ", projectsPid);
+                    // console.log("contact pid : ", contactPid);
+                    // Check which section this PID belongs to
+                    let killedSection = null;
+                    let killedFile = null;
+                    let wasRunning = false;
+
+                    if (targetPid === infoPid && infoPid !== null && infoPid !== 0) {
+                        killedSection = "info";
+                        killedFile = "firefox https://portfoliobudra.com/info";
+                        wasRunning = true;
+                        setInfoPid(null);
+                        onInfoCommand?.(false); // Close the section
+                    } else if (targetPid === skillsPid && skillsPid !== null && skillsPid !== 0) {
+                        killedSection = "skills";
+                        killedFile = "skills-manager.sh";
+                        wasRunning = true;
+                        setSkillsPid(null);
+                        onSkillsCommand?.(false); // Close the section
+                        // Clear PID cache to allow re-execution
+                        delete pidCacheRef.current["skills-skills-manager.sh"];
+                    } else if (targetPid === journeyPid && journeyPid !== null && journeyPid !== 0) {
+                        killedSection = "journey";
+                        killedFile = "career-journey.sh";
+                        wasRunning = true;
+                        setJourneyPid(null);
+                        onCareerJourneyCommand?.(false); // Close the section
+                        delete pidCacheRef.current["journey-career-journey.sh"];
+                    } else if (targetPid === projectsPid && projectsPid !== null && projectsPid !== 0) {
+                        killedSection = "projects";
+                        killedFile = "projects.sh";
+                        wasRunning = true;
+                        setProjectsPid(null);
+                        onProjectsCommand?.(false); // Close the section
+                        delete pidCacheRef.current["projects-projects.sh"];
+                    } else if (targetPid === contactPid && contactPid !== null && contactPid !== 0) {
+                        killedSection = "contact";
+                        killedFile = "get-in-touch.sh";
+                        wasRunning = true;
+                        setContactPid(null);
+                        onContactCommand?.(false); // Close the section
+                        delete pidCacheRef.current["contact-get-in-touch.sh"];
+                    }
+
+                    if (wasRunning && killedSection) {
+                        const timestamp = new Date().toLocaleTimeString('en-US', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+
+                        // Generate realistic execution time (10-60 seconds)
+                        const seconds = Math.floor(Math.random() * 51) + 10;
+                        const milliseconds = Math.floor(Math.random() * 900) + 100;
+                        const execTime = `${seconds}.${milliseconds}s`;
+
+                        // Format output based on file type (firefox vs bash scripts)
+                        const processName = killedFile.startsWith("firefox") 
+                            ? killedFile 
+                            : `bash ${killedFile}`;
+                        
+                        output = [
+                            `[${timestamp}] Terminating process ${targetPid}...`,
+                            ``,
+                            `✓ Process ${targetPid} terminated successfully`,
+                            `Signal: SIGTERM (15)`,
+                            `Exit status: 0`,
+                            `Total runtime: ${execTime}`,
+                            ``,
+                            `[1]+  Terminated              ${processName}`
+                        ];
+                    } else {
+                        // PID not found or already terminated
+                        output = [
+                            `bash: kill: (${targetPid}) - No such process`,
+                            `Hint: Use 'ps' to list running processes`
+                        ];
+                    }
+                }
+            } else if (parts.length === 3 && (parts[1] === "-9" || parts[1] === "-KILL")) {
+                // Force kill: kill -9 <pid>
+                const targetPid = parseInt(parts[2]);
+
+                if (isNaN(targetPid)) {
+                    output = [`bash: kill: ${parts[2]}: arguments must be process or job IDs`];
+                } else {
+                    let killedSection = null;
+                    let killedFile = null;
+                    let wasRunning = false;
+
+                    // Same PID matching logic as above
+                    if (targetPid === infoPid && infoPid !== null && infoPid !== 0) {
+                        killedSection = "info";
+                        killedFile = "firefox https://portfoliobudra.com/info";
+                        wasRunning = true;
+                        setInfoPid(null);
+                        onInfoCommand?.(false);
+                    } else if (targetPid === skillsPid && skillsPid !== null && skillsPid !== 0) {
+                        killedSection = "skills";
+                        killedFile = "skills-manager.sh";
+                        wasRunning = true;
+                        setSkillsPid(null);
+                        onSkillsCommand?.(false);
+                        delete pidCacheRef.current["skills-skills-manager.sh"];
+                    } else if (targetPid === journeyPid && journeyPid !== null && journeyPid !== 0) {
+                        killedSection = "journey";
+                        killedFile = "career-journey.sh";
+                        wasRunning = true;
+                        setJourneyPid(null);
+                        onCareerJourneyCommand?.(false);
+                        delete pidCacheRef.current["journey-career-journey.sh"];
+                    } else if (targetPid === projectsPid && projectsPid !== null && projectsPid !== 0) {
+                        killedSection = "projects";
+                        killedFile = "projects.sh";
+                        wasRunning = true;
+                        setProjectsPid(null);
+                        onProjectsCommand?.(false);
+                        delete pidCacheRef.current["projects-projects.sh"];
+                    } else if (targetPid === contactPid && contactPid !== null && contactPid !== 0) {
+                        killedSection = "contact";
+                        killedFile = "get-in-touch.sh";
+                        wasRunning = true;
+                        setContactPid(null);
+                        onContactCommand?.(false);
+                        delete pidCacheRef.current["contact-get-in-touch.sh"];
+                    }
+
+                    if (wasRunning && killedSection) {
+                        const timestamp = new Date().toLocaleTimeString('en-US', {
+                            hour12: false,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                        });
+
+                        const seconds = Math.floor(Math.random() * 51) + 10;
+                        const milliseconds = Math.floor(Math.random() * 900) + 100;
+                        const execTime = `${seconds}.${milliseconds}s`;
+
+                        // Format output based on file type (firefox vs bash scripts)
+                        const processName = killedFile.startsWith("firefox") 
+                            ? killedFile 
+                            : `bash ${killedFile}`;
+                        
+                        output = [
+                            `[${timestamp}] Force killing process ${targetPid}...`,
+                            ``,
+                            `✓ Process ${targetPid} killed (SIGKILL)`,
+                            `Signal: SIGKILL (9)`,
+                            `Exit status: 137`,
+                            `Total runtime: ${execTime}`,
+                            ``,
+                            `[1]+  Killed                  ${processName}`
+                        ];
+                    } else {
+                        output = [
+                            `bash: kill: (${targetPid}) - No such process`,
+                            `Hint: Use 'ps' to list running processes`
+                        ];
                     }
                 }
             } else {
-                output = ["Command restricted to ~/portfolio/info directory"];
+                // Too many arguments
+                output = [
+                    "bash: kill: too many arguments",
+                    "Usage: kill [-s sigspec | -signum] pid",
+                    "       kill -9 pid (force kill)"
+                ];
             }
         }
+
+
         else {
             output = [`bash: ${cmd}: command not found`];
         }
 
-
-
         setCurrentPath(newPath);
         currentPathRef.current = newPath;
 
-        // Use a ref to track the last command to prevent duplicate history entries
-        // This prevents race conditions where setHistory might be called twice with the same command
         const now = Date.now();
-        
-        // Check if this is a duplicate: same command within a short time window (500ms)
-        const isDuplicate = lastCommandRef.current.command === input && 
-                            (now - lastCommandRef.current.timestamp) < 500;
-        
+        const isDuplicate = lastCommandRef.current.command === input &&
+            (now - lastCommandRef.current.timestamp) < 500;
+
         if (!isDuplicate) {
             lastCommandRef.current = { command: input, timestamp: now };
             setHistory((prev) => {
-                // Double-check: ensure the last entry is not the same command with same path
-                // This provides an additional safeguard against race conditions
                 const lastEntry = prev[prev.length - 1];
                 if (lastEntry && lastEntry.command === input && lastEntry.path === newPath) {
-                    // Duplicate detected, don't add
                     return prev;
                 }
                 return [...prev, { command: input, output, path: newPath }];
             });
         }
-    }, [isAuto, scrollToProgress, SECTION_SCROLL_TARGETS, onProjectsCommand, onSkillsCommand, onCareerJourneyCommand, onContactCommand, onInfoCommand]);
+    }, [isAuto, scrollToProgress, SECTION_SCROLL_TARGETS, onProjectsCommand, onSkillsCommand, onCareerJourneyCommand, onContactCommand, onInfoCommand, infoPid, skillsPid, journeyPid, projectsPid, contactPid, setInfoPid, setSkillsPid, setJourneyPid, setProjectsPid, setContactPid]);
 
-    // Execute a single auto command with typing animation
     const executeAutoCommand = useCallback((command) => {
         return new Promise((resolve) => {
-            // Set current command for typing animation
             setCurrentAutoCommand(command);
-
-            // Calculate typing duration (50ms per character)
             const typingDuration = command.length * 50;
 
-            // Wait for typing to complete, then pause 300ms before executing
             setTimeout(() => {
-                // Execute the command using handleManualCommand (called only once)
                 handleManualCommand(command);
-
-                // Wait 300ms for output to render, then clear and resolve
-                // setTimeout(() => {
-                //     setCurrentAutoCommand(null);
-                //     resolve();
-                // }, 100);
                 setCurrentAutoCommand(null);
                 resolve()
             }, typingDuration);
         });
     }, [handleManualCommand]);
 
-    // Process the auto command queue
     const processAutoCommandQueue = useCallback(() => {
-        // Use ref to prevent race conditions
         if (isProcessingRef.current) {
             return;
         }
@@ -873,23 +1099,18 @@ export default function Terminal({
         const processNext = () => {
             setAutoCommandQueue((prev) => {
                 if (prev.length === 0) {
-                    // Queue is empty, stop processing
                     isProcessingRef.current = false;
                     setIsProcessingAuto(false);
                     return prev;
                 }
 
-                // Dequeue the first command
                 const [command, ...rest] = prev;
 
-                // Process the command asynchronously
                 executeAutoCommand(command).then(() => {
-                    // Small delay between commands
                     setTimeout(() => {
                         processNext();
                     }, 100);
                 }).catch((error) => {
-                    // If there's an error, reset processing state
                     isProcessingRef.current = false;
                     setIsProcessingAuto(false);
                 });
@@ -901,23 +1122,23 @@ export default function Terminal({
         processNext();
     }, [executeAutoCommand]);
 
-    // Process queue when it changes
+    // ========================================
+    // EFFECTS - Auto Mode
+    // ========================================
     useEffect(() => {
         if (isAuto && autoCommandQueue.length > 0 && !isProcessingAuto && !isProcessingRef.current) {
             processAutoCommandQueue();
         }
     }, [isAuto, autoCommandQueue.length, isProcessingAuto, processAutoCommandQueue]);
 
-// Auto Mode: handle scroll-based command queueing
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
 
         let rafId = null;
         let lastProcessedProgress = -1;
-        const SCROLL_THRESHOLD = 0.001; // Minimum change to process
+        const SCROLL_THRESHOLD = 0.001;
 
         const processScroll = (latest) => {
-            // Skip if change is too small (throttling)
             if (Math.abs(latest - lastProcessedProgress) < SCROLL_THRESHOLD) {
                 return;
             }
@@ -935,9 +1156,7 @@ export default function Terminal({
 
             const sectionKey = currentSection ? `${currentSection.section}-${direction}` : null;
 
-            // Add commands to queue when section threshold is crossed
             if (currentSection && sectionKey && !executedSections.has(sectionKey) && !isProcessingAuto) {
-                // Add all commands from this section to the queue
                 const commandsToAdd = currentSection.commands.map(({ command }) => command);
                 setAutoCommandQueue((prev) => [...prev, ...commandsToAdd]);
                 setExecutedSections((prev) => new Set(prev).add(sectionKey));
@@ -946,7 +1165,6 @@ export default function Terminal({
         };
 
         const unsubscribe = scrollProgress.on("change", (latest) => {
-            // Use requestAnimationFrame for smoother updates
             if (rafId !== null) {
                 cancelAnimationFrame(rafId);
             }
@@ -961,8 +1179,6 @@ export default function Terminal({
         };
     }, [scrollProgress, isAuto, executedSections, isProcessingAuto, lastScrollProgress, scrollDirection]);
 
-// Reset executed sections when scrolling past boundaries
-    // Only clear sections that are no longer in range to prevent premature clearing
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
 
@@ -973,15 +1189,12 @@ export default function Terminal({
                 const newSet = new Set();
                 const direction = latest > lastScrollProgress ? "down" : "up";
 
-                // Check both directions to maintain state when scrolling back
                 [SCROLL_DOWN_MAP, SCROLL_UP_MAP].forEach((commandMap) => {
                     commandMap.forEach(({ section, scrollRange }) => {
                         const [start, end] = scrollRange;
                         const sectionKeyDown = `${section}-down`;
                         const sectionKeyUp = `${section}-up`;
 
-                        // Keep section if it's in range or was recently visited
-                        // Use a buffer zone (0.05) to prevent premature clearing
                         if (latest >= start - 0.05 && latest <= end + 0.05) {
                             if (prev.has(sectionKeyDown)) newSet.add(sectionKeyDown);
                             if (prev.has(sectionKeyUp)) newSet.add(sectionKeyUp);
@@ -1008,8 +1221,9 @@ export default function Terminal({
         };
     }, [scrollProgress, isAuto, lastScrollProgress]);
 
-
-// Tree output rendered after delay to smooth UI
+    // ========================================
+    // EFFECTS - UI Updates
+    // ========================================
     useEffect(() => {
         if (isTreeExecuted && !isTreeOutputRendered) {
             const timer = setTimeout(() => {}, 100);
@@ -1017,7 +1231,6 @@ export default function Terminal({
         }
     }, [isTreeExecuted, isTreeOutputRendered]);
 
-// Input focus detection in manual mode
     useEffect(() => {
         if (!isAuto && inputRef?.current) {
             const isFocused = document.activeElement === inputRef.current;
@@ -1025,19 +1238,16 @@ export default function Terminal({
         }
     }, [isAuto, inputFocused]);
 
-// Adjust terminal X position based on input focus
     useEffect(() => {
         if (!isAuto) {
             setManualX(inputFocused ? 650 : 800);
         }
     }, [isAuto, inputFocused, setManualX]);
 
-// Scroll to bottom on history or tree output change
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [history, isTreeExecuted]);
 
-// Auto-focus input on mount & when visible with intersection observer + fallback timers
     useEffect(() => {
         const focusInput = () => {
             if (!inputRef?.current) return false;
@@ -1106,7 +1316,6 @@ export default function Terminal({
             window.removeEventListener("keydown", handleGlobalKeyDown);
         };
     }, []);
-
 
     return (
         <div

@@ -62,7 +62,8 @@ TimelineEntry.displayName = 'TimelineEntry';
 export default function CareerJourney({
                                           scrollProgress,
                                           sectionScrollRange,
-                                          onScrollProgressChange // ✅ NEW: Add callback to update global scroll
+                                          onScrollProgressChange,
+    pid
                                       }) {
     const [output, setOutput] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -79,7 +80,7 @@ export default function CareerJourney({
     const terminalLines = useMemo(() => [
         "$ bash career-journey.sh --timeline",
         "Initializing timeline loader...",
-        "PID: 3912",
+        `PID: ${pid}`,
         "[1/4] Fetching career data...",
         "[2/4] Parsing timeline entries...",
         "[3/4] Validating dates...",
@@ -192,7 +193,7 @@ export default function CareerJourney({
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]" />
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
                     <span className="ml-2 xs:ml-3 text-[10px] xs:text-xs sm:text-sm text-cyan-400/70 select-none tracking-wide truncate">
-                        career-journey.sh - timeline [PID: 3912]
+                        career-journey.sh - timeline [PID: {pid}]
                     </span>
                 </div>
 
