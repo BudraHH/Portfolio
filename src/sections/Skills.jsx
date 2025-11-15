@@ -158,7 +158,7 @@ export default function Skills({ scrollProgress, sectionScrollRange, startDispla
     const [output, setOutput] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [spinnerStep, setSpinnerStep] = useState(0);
-
+    console.log("pid in skills: ",pid);
     // Memoized calculations
     const totalTech = useMemo(() =>
             SKILLS.reduce((sum, skill) => sum + skill.technologies.length, 0),

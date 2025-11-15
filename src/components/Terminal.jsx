@@ -709,9 +709,17 @@ export default function Terminal({
                     const expectedNormalized = expectedPath.replace(/^~\//, "");
 
                     if (normalizedCurrentPath === expectedNormalized) {
+                        const newPid = Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000;
+                        console.log("newPid in bash: ", newPid);
+                        output = [
+                            "Running script...",
+                            `✓ ${targetFile} executed successfully`,
+                            `Script location: /portfolio/${targetSection}`,
+                            `PID: ${newPid}`
+                        ];
                         // Trigger section callbacks
                         if (targetFile === "projects.sh") {
-                            setProjectsPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
+                            setProjectsPid(newPid);
                             onProjectsCommand?.();
                             // Auto-scroll to section in auto mode
                             if (isAuto && scrollToProgress && targetSection) {
@@ -723,7 +731,7 @@ export default function Terminal({
                                 }
                             }
                         } else if (targetFile === "skills-manager.sh") {
-                            setSkillsPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
+                            setSkillsPid(newPid);
                             onSkillsCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
@@ -734,7 +742,7 @@ export default function Terminal({
                                 }
                             }
                         } else if (targetFile === "career-journey.sh") {
-                            setJourneyPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
+                            setJourneyPid(newPid);
                             onCareerJourneyCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
@@ -745,7 +753,7 @@ export default function Terminal({
                                 }
                             }
                         } else if (targetFile === "get-in-touch.sh") {
-                            setContactPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
+                            setContactPid(newPid);
                             onContactCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
@@ -763,12 +771,7 @@ export default function Terminal({
                             `Expected: ${expectedPath}`
                         ];
                     }
-                    output = [
-                        "Running script...",
-                        `✓ ${targetFile} executed successfully`,
-                        `Script location: /portfolio/${targetSection}`,
-                        `PID: ${infoPid||skillsPid||projectsPid||journeyPid||contactPid}`
-                    ];
+
                 } else if (Object.values(validBashScripts).includes(targetFile)) {
                     output = [
                         `bash: cannot find '${targetFile}'`,
