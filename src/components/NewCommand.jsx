@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from "react";
+import React, { forwardRef, useEffect, useState, useCallback, useMemo } from "react";
 
 const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFocusChange }, ref) => {
     const [inputValue, setInputValue] = useState("");
@@ -6,34 +6,33 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
     const [cursorPos, setCursorPos] = useState(0);
     const [focused, setFocused] = useState(true);
 
-    useEffect(() => {
-        const focusInput = () => {
-            if (ref?.current) {
-                const rect = ref.current.getBoundingClientRect();
-                const isVisible = rect.width > 0 && rect.height > 0;
-                if (isVisible) {
-                    ref.current.focus();
-                    return true;
-                }
-                return false;
+    // Memoized focus function
+    const focusInput = useCallback(() => {
+        if (ref?.current) {
+            const rect = ref.current.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                ref.current.focus();
+                return true;
             }
-            return false;
-        };
-
-        focusInput();
-        const timer1 = setTimeout(() => focusInput(), 0);
-        const timer2 = setTimeout(() => focusInput(), 100);
-        const timer3 = setTimeout(() => focusInput(), 300);
-        const timer4 = setTimeout(() => focusInput(), 800);
-
-        return () => {
-            clearTimeout(timer1);
-            clearTimeout(timer2);
-            clearTimeout(timer3);
-            clearTimeout(timer4);
-        };
+        }
+        return false;
     }, [ref]);
 
+    // Initial focus with progressive delays
+    useEffect(() => {
+        focusInput();
+
+        const timers = [
+            setTimeout(focusInput, 0),
+            setTimeout(focusInput, 100),
+            setTimeout(focusInput, 300),
+            setTimeout(focusInput, 800)
+        ];
+
+        return () => timers.forEach(clearTimeout);
+    }, [focusInput]);
+
+    // Cursor position management
     useEffect(() => {
         if (ref?.current && cursorPos !== null) {
             requestAnimationFrame(() => {
@@ -45,7 +44,8 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
         }
     }, [cursorPos, inputValue, ref]);
 
-    const handleKeyDown = (e) => {
+    // Memoized key handlers
+    const handleKeyDown = useCallback((e) => {
         const value = inputValue;
 
         switch (e.key) {
@@ -62,52 +62,87 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
             case "ArrowUp":
                 e.preventDefault();
                 if (history.length === 0) return;
-                if (historyIndex === null) {
-                    setHistoryIndex(history.length - 1);
-                    setInputValue(history[history.length - 1]);
-                    setCursorPos(history[history.length - 1].length);
-                } else if (historyIndex > 0) {
-                    setHistoryIndex(historyIndex - 1);
-                    setInputValue(history[historyIndex - 1]);
-                    setCursorPos(history[historyIndex - 1].length);
+
+                const upIndex = historyIndex === null ? history.length - 1 : Math.max(historyIndex - 1, 0);
+                if (upIndex !== historyIndex) {
+                    setHistoryIndex(upIndex);
+                    setInputValue(history[upIndex]);
+                    setCursorPos(history[upIndex].length);
                 }
                 break;
 
             case "ArrowDown":
                 e.preventDefault();
-                if (history.length === 0) return;
-                if (historyIndex === null) return;
+                if (history.length === 0 || historyIndex === null) return;
+
                 if (historyIndex === history.length - 1) {
                     setHistoryIndex(null);
                     setInputValue("");
                     setCursorPos(0);
-                } else if (historyIndex < history.length - 1) {
-                    setHistoryIndex(historyIndex + 1);
-                    setInputValue(history[historyIndex + 1]);
-                    setCursorPos(history[historyIndex + 1].length);
+                } else {
+                    const downIndex = historyIndex + 1;
+                    setHistoryIndex(downIndex);
+                    setInputValue(history[downIndex]);
+                    setCursorPos(history[downIndex].length);
                 }
                 break;
 
             case "ArrowLeft":
-                setCursorPos((pos) => Math.max(pos - 1, 0));
+                e.preventDefault();
+                setCursorPos(pos => Math.max(pos - 1, 0));
                 break;
 
             case "ArrowRight":
-                setCursorPos((pos) => Math.min(pos + 1, inputValue.length));
+                e.preventDefault();
+                setCursorPos(pos => Math.min(pos + 1, inputValue.length));
                 break;
 
             default:
-                setHistoryIndex(null);
+                if (historyIndex !== null) {
+                    setHistoryIndex(null);
+                }
                 break;
         }
-    };
+    }, [inputValue, history, historyIndex, onSubmit]);
 
-    const handleChange = (e) => {
+    const handleChange = useCallback((e) => {
         const newValue = e.target.value;
         const cursorPosition = e.target.selectionStart;
         setInputValue(newValue);
         setCursorPos(cursorPosition);
-    };
+    }, []);
+
+    const handleClick = useCallback((e) => {
+        e.stopPropagation();
+        setCursorPos(e.target.selectionStart);
+        ref?.current?.focus();
+    }, [ref]);
+
+    const handleFocus = useCallback(() => {
+        setFocused(true);
+        onFocusChange?.(true);
+    }, [onFocusChange]);
+
+    const handleBlur = useCallback(() => {
+        setFocused(false);
+        onFocusChange?.(false);
+    }, [onFocusChange]);
+
+    const handleMouseDown = useCallback((e) => {
+        e.stopPropagation();
+    }, []);
+
+    // Memoized input width
+    const inputWidth = useMemo(() =>
+            `${Math.max(inputValue.length, 1)}ch`,
+        [inputValue.length]
+    );
+
+    // Memoized cursor position
+    const cursorLeft = useMemo(() =>
+            `calc(${cursorPos}ch)`,
+        [cursorPos]
+    );
 
     return (
         <div className="relative">
@@ -121,39 +156,25 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
                     value={inputValue}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
+                    onClick={handleClick}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    onMouseDown={handleMouseDown}
                     spellCheck={false}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setCursorPos(e.target.selectionStart);
-                        ref?.current?.focus();
-                    }}
-                    onFocus={() => {
-                        setFocused(true);
-                        onFocusChange?.(true);
-                    }}
-                    onBlur={() => {
-                        setFocused(false);
-                        onFocusChange?.(false);
-                    }}
-                    onMouseDown={(e) => {
-                        e.stopPropagation();
-                    }}
+                    autoComplete="off"
+                    autoFocus
+                    tabIndex={0}
                     style={{
-                        width: `${Math.max(inputValue.length, 1)}ch`,
+                        width: inputWidth,
                         minWidth: '1ch',
                         position: 'relative',
                         zIndex: 20,
                     }}
                     className="bg-transparent border-none outline-none text-cyan-300 ml-2 font-mono caret-transparent"
-                    autoComplete="off"
-                    autoFocus
-                    tabIndex={0}
-                    readOnly={false}
-                    disabled={false}
                 />
                 {focused && (
                     <span
-                        style={{ left: `calc(${cursorPos}ch)` }}
+                        style={{ left: cursorLeft }}
                         className="absolute ml-2 mt-1 w-[1ch] h-[1em] bg-cyan-300 animate-pulse pointer-events-none"
                     />
                 )}

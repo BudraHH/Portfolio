@@ -2,9 +2,13 @@ import { useState, useCallback, lazy, Suspense } from 'react';
 import Skills from './sections/Skills.jsx';
 import Terminal from "./components/Terminal.jsx";
 import Projects from "./sections/Projects.jsx";
+import Info from "./sections/Info.jsx";
+import CareerJourney from "./sections/CareerJourney.jsx";
+import Contact from "./sections/Contact.jsx";
+import Closing from "./sections/Closing.jsx";
 
 const Welcome = lazy(() => import('./sections/Welcome'));
-const ScrollSection = lazy(() => import('./components/ScrollSection'));
+const ScrollSection = lazy(() => import('./sections/ScrollSection.jsx'));
 
 function App() {
     const [showHero, setShowHero] = useState(true);
@@ -20,15 +24,20 @@ function App() {
             <Suspense fallback={null}>
                 {/* Welcome Screen */}
                 {!showHero && (
-                    <Welcome onComplete={handleWelcomeComplete} />
+                    <Welcome onComplete={handleWelcomeComplete}/>
                 )}
 
                 {/* Hero & Rest Sections - only render when ready */}
-                {showHero && <ScrollSection />}
+                {showHero && <ScrollSection/>}
             </Suspense>
+            {/*<Welcome />*/}
+            {/*<Info />*/}
             {/*<Terminal />*/}
             {/*<Skills />*/}
+            {/*<CareerJourney/>*/}
             {/*<Projects />*/}
+            {/*<Contact/>*/}
+            {/*<Closing/>*/}
         </div>
     );
 }

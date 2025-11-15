@@ -1,171 +1,325 @@
 import { motion, useTransform } from "framer-motion";
+import { useState, useEffect, useMemo, memo } from "react";
 import Info from "./Info.jsx";
 import Terminal from "../components/Terminal.jsx";
 import Projects from "./Projects.jsx";
 import Skills from "./Skills.jsx";
-import { useState, useEffect } from "react";
+import CareerJourney from "./CareerJourney.jsx";
+import Contact from "./Contact.jsx";
+import Closing from "./Closing.jsx";
 
-export function Rest({scrollProgress}) {
-    // Auto mode: Terminal moves based on scroll
-    const terminalXAuto = useTransform(
-        scrollProgress,
-        [0.26, 0.30, 0.36, 0.47, 0.49, 0.52, 0.55, 0.63, 0.66, 0.69, 0.75, 0.79, 0.82],
-        [0, 50, 600, 800, 800, 600, 600, 800, 800, 600, 600, 800, 800]
-    );
+// Memoized section wrapper to prevent unnecessary re-renders
+const Section = memo(({
+                          show,
+                          scale,
+                          opacity,
+                          pointerEvents,
+                          display,
+                          zIndex,
+                            xPosition,
+                          children
+                      }) => {
+    if (!show) return null;
 
-    // Manual mode (before 0.36): Terminal moves based on scroll
-    const terminalXManual = useTransform(
-        scrollProgress,
-        [0.26, 0.30, 0.36],
-        [0, 50, 650]
-    );
+    return (
+        <motion.div
+            className="fixed inset-0 w-full h-full md:p-16 flex items-center justify-center overflow-hidden"
+            style={{ scale, opacity, zIndex, pointerEvents, display,
+                        x: xPosition}}
 
-    const terminalScale = useTransform(scrollProgress, [0.26, 0.30, 0.36], [1.5, 1.35, 1]);
+            transition={{ duration: 0.25 }}
+        >
+            {children}
+        </motion.div>
+    );
+});
 
-    // Info section animations
-    const aboutScale = useTransform(scrollProgress, [0.37, 0.47, 0.49, 0.57], [0, 1, 1, 1.5]);
-    const aboutOpacity = useTransform(scrollProgress, [0.37, 0.47, 0.49, 0.57], [0, 1, 1, 0]);
-    const aboutPointerEvents = useTransform(
-        scrollProgress,
-        [0.36, 0.47, 0.49, 0.58],
-        ['none', 'auto', 'auto', 'none']
-    );
-    const aboutDisplay = useTransform(
-        scrollProgress,
-        [0.36, 0.37, 0.57, 0.58],
-        ['none', 'flex', 'flex', 'none']
-    );
+Section.displayName = 'Section';
 
-    // Skills section animations
-    const skillsScale = useTransform(scrollProgress, [0.53, 0.63, 0.66, 0.76], [0, 1, 1, 1.5]);
-    const skillsOpacity = useTransform(scrollProgress, [0.53, 0.63, 0.66, 0.76], [0, 1, 1, 0]);
-    const skillsPointerEvents = useTransform(
-        scrollProgress,
-        [0.52, 0.63, 0.66, 0.77],
-        ['none', 'auto', 'auto', 'none']
-    );
-    const skillsDisplay = useTransform(
-        scrollProgress,
-        [0.52, 0.53, 0.76, 0.77],
-        ['none', 'flex', 'flex', 'none']
-    );
-
-    // Projects section animations
-    const projectsScale = useTransform(scrollProgress, [0.69, 0.79, 0.82, 0.95], [0, 1, 1, 1.5]);
-    const projectsOpacity = useTransform(scrollProgress, [0.69, 0.79, 0.82, 0.95], [0, 1, 1, 0]);
-    const projectsPointerEvents = useTransform(
-        scrollProgress,
-        [0.71, 0.75, 0.78, 0.86],
-        ['none', 'auto', 'auto', 'none']
-    );
-    const projectsDisplay = useTransform(
-        scrollProgress,
-        [0.71, 0.72, 0.85, 0.86],
-        ['none', 'flex', 'flex', 'none']
-    );
-
+export function Rest({ scrollProgress, scrollToProgress }) {
     // State management
     const [isAuto, setIsAuto] = useState(true);
     const [manualX, setManualX] = useState(800);
     const [useManualPosition, setUseManualPosition] = useState(false);
-    const [showProjects, setShowProjects] = useState(false);
+    const [activeSections, setActiveSections] = useState({
+        info: false,
+        skills: false,
+        journey: false,
+        projects: false,
+        contact: false,
+        closing: false
+    });
 
-    // ✅ Track when to switch from scroll-based to manual positioning
+    // Memoized transform configurations
+    const transforms = useMemo(() => ({
+        terminalXAuto:       [0.10,0.115,0.15, 0.195, 0.20, 0.245, 0.26 ],
+        terminalXAutoValues: [0,   50,  400,  400,  800,  800,  400],
+        terminalXManual: [0.26, 0.30, 0.36],
+        terminalXManualValues: [0, 50, 650],
+        terminalScale: [0.10,0.115,0.15],
+        terminalScaleValues: [1.5,1.2,1],
+
+        info: { scale: [0.18, 0.20, 0.24,0.26], values: [0, 1, 1, 1.5],
+            opacity: [0.18, 0.20, 0.24,0.26], opacityValues: [0, 1, 1, 0],
+            pointerEvents: [0.18, 0.20, 0.24,0.26], pointerValues: ['none', 'auto', 'auto', 'none'],
+            display: [0.18, 0.20, 0.24,0.26], displayValues: ['none', 'flex', 'flex', 'none'] ,
+            infoX: [0.18, 0.20, 0.24,0.26],infoXValues: [400,0,0,800], },
+
+        skills: { scale: [0.27, 0.29, 0.35, 0.37], values: [0, 1, 1, 1.5],
+            opacity: [0.27, 0.29, 0.35, 0.37], opacityValues: [0, 1, 1, 0],
+            pointerEvents: [0.27, 0.29, 0.35, 0.37], pointerValues: ['none', 'auto', 'auto', 'none'],
+            display: [0.27, 0.29, 0.35, 0.37], displayValues: ['none', 'flex', 'flex', 'none'] },
+            skillsX: [0.27, 0.29, 0.35, 0.37], skillsXValues: [400,0,0,800],
+
+        journey: { scale: [0.69, 0.79, 0.82, 0.87], values: [0, 1, 1, 1.5],
+            opacity: [0.69, 0.79, 0.82, 0.87], opacityValues: [0, 1, 1, 0],
+            pointerEvents: [0.68, 0.79, 0.82, 0.88], pointerValues: ['none', 'auto', 'auto', 'none'],
+            display: [0.68, 0.69, 0.87, 0.88], displayValues: ['none', 'flex', 'flex', 'none'] },
+
+        projects: { scale: [0.87, 0.93, 0.95, 0.99], values: [0, 1, 1, 1.5],
+            opacity: [0.87, 0.93, 0.95, 0.99], opacityValues: [0, 1, 1, 0],
+            pointerEvents: [0.87, 0.93, 0.95, 0.99], pointerValues: ['none', 'auto', 'auto', 'none'],
+            display: [0.86, 0.87, 0.99, 1.0], displayValues: ['none', 'flex', 'flex', 'none'] },
+
+        contact: { scale: [0.98, 1.0], values: [0, 1],
+            opacity: [0.98, 1.0], opacityValues: [0, 1],
+            pointerEvents: [0.98, 1.0], pointerValues: ['none', 'auto'],
+            display: [0.97, 0.98, 1.0, 1.01], displayValues: ['none', 'flex', 'flex', 'flex'] }
+    }), []);
+
+    // Create transforms
+    const terminalXAuto = useTransform(scrollProgress, transforms.terminalXAuto, transforms.terminalXAutoValues);
+    const terminalXManual = useTransform(scrollProgress, transforms.terminalXManual, transforms.terminalXManualValues);
+    const terminalScale = useTransform(scrollProgress, transforms.terminalScale, transforms.terminalScaleValues);
+
+    const infoScale = useTransform(scrollProgress, transforms.info.scale, transforms.info.values);
+    const infoOpacity = useTransform(scrollProgress, transforms.info.opacity, transforms.info.opacityValues);
+    const infoPointerEvents = useTransform(scrollProgress, transforms.info.pointerEvents, transforms.info.pointerValues);
+    const infoDisplay = useTransform(scrollProgress, transforms.info.display, transforms.info.displayValues);
+    const infoX = useTransform(scrollProgress, transforms.info.infoX, transforms.info.infoXValues);
+
+    const skillsScale = useTransform(scrollProgress, transforms.skills.scale, transforms.skills.values);
+    const skillsOpacity = useTransform(scrollProgress, transforms.skills.opacity, transforms.skills.opacityValues);
+    const skillsPointerEvents = useTransform(scrollProgress, transforms.skills.pointerEvents, transforms.skills.pointerValues);
+    const skillsDisplay = useTransform(scrollProgress, transforms.skills.display, transforms.skills.displayValues);
+    const skillsX = useTransform(scrollProgress, transforms.skillsX, transforms.skillsXValues);
+
+    const journeyScale = useTransform(scrollProgress, transforms.journey.scale, transforms.journey.values);
+    const journeyOpacity = useTransform(scrollProgress, transforms.journey.opacity, transforms.journey.opacityValues);
+    const journeyPointerEvents = useTransform(scrollProgress, transforms.journey.pointerEvents, transforms.journey.pointerValues);
+    const journeyDisplay = useTransform(scrollProgress, transforms.journey.display, transforms.journey.displayValues);
+
+    const projectsScale = useTransform(scrollProgress, transforms.projects.scale, transforms.projects.values);
+    const projectsOpacity = useTransform(scrollProgress, transforms.projects.opacity, transforms.projects.opacityValues);
+    const projectsPointerEvents = useTransform(scrollProgress, transforms.projects.pointerEvents, transforms.projects.pointerValues);
+    const projectsDisplay = useTransform(scrollProgress, transforms.projects.display, transforms.projects.displayValues);
+
+    const contactScale = useTransform(scrollProgress, transforms.contact.scale, transforms.contact.values);
+    const contactOpacity = useTransform(scrollProgress, transforms.contact.opacity, transforms.contact.opacityValues);
+    const contactPointerEvents = useTransform(scrollProgress, transforms.contact.pointerEvents, transforms.contact.pointerValues);
+    const contactDisplay = useTransform(scrollProgress, transforms.contact.display, transforms.contact.displayValues);
+
+    const [startDisplaySkills, setStartDisplaySkills] = useState(false);
+    // Track scroll and manual mode, manage section visibility
     useEffect(() => {
         if (!scrollProgress) return;
 
-        // If in auto mode, always use scroll-based animation
-        if (isAuto) {
-            setUseManualPosition(false);
-            return;
-        }
+        let scrollEndTimer;
+        let rafId = null;
 
-        // Manual mode: listen to scroll progress
-        const unsubscribe = scrollProgress.on("change", (latest) => {
-            if (latest >= 0.36) {
-                // After 36%, use manual position (user-controlled)
+        const handleScroll = (latest) => {
+            // Update manual position mode
+            if (!isAuto && latest >= 0.26) {
                 setUseManualPosition(true);
-            } else {
-                // Before 36%, use scroll-based animation
+            } else if (!isAuto && latest < 0.26) {
                 setUseManualPosition(false);
             }
+
+            // Manage section visibility based on scroll progress
+            // Sections are shown/hidden based on their display ranges
+            setActiveSections((prev) => {
+                const newState = { ...prev };
+
+                // Info section: display [0.36, 0.37, 0.57, 0.58]
+                if (latest >= 0.18 && latest <= 0.26) {
+                    if (!prev.info) newState.info = true;
+                } else if (latest < 0.18 || latest > 0.26) {
+                    if (prev.info) newState.info = false;
+                }
+
+                // Skills section: display [0.52, 0.53, 0.76, 0.77]
+                if (latest >= 0.27 && latest <= 0.37) {
+                    if (!prev.skills) newState.skills = true;
+                    if (latest >= 0.29) setStartDisplaySkills(true);
+                } else if (latest < 0.27 || latest > 0.37) {
+                    if (prev.skills) newState.skills = false;
+                    setStartDisplaySkills(false);
+                }
+
+                // Journey section: display [0.68, 0.69, 0.87, 0.88]
+                if (latest >= 0.68 && latest <= 0.88) {
+                    if (!prev.journey) newState.journey = true;
+                } else if (latest < 0.68 || latest > 0.88) {
+                    if (prev.journey) newState.journey = false;
+                }
+
+                // Projects section: display [0.87, 0.88, 0.98, 0.99]
+                if (latest >= 0.87 && latest <= 0.99) {
+                    if (!prev.projects) newState.projects = true;
+                } else if (latest < 0.87 || latest > 0.99) {
+                    if (prev.projects) newState.projects = false;
+                }
+
+                // Contact section: display [0.98, 0.99]
+                if (latest >= 0.98) {
+                    if (!prev.contact) newState.contact = true;
+                } else if (latest < 0.98) {
+                    if (prev.contact) newState.contact = false;
+                }
+
+                // Show closing when scrolled to the fullest (>= 99%)
+                if (latest >= 0.99 && !prev.closing) {
+                    if (scrollEndTimer) clearTimeout(scrollEndTimer);
+                    scrollEndTimer = setTimeout(() => {
+                        setActiveSections((p) => ({ ...p, closing: true }));
+                    }, 300);
+                } else if (latest < 0.99 && prev.closing) {
+                    newState.closing = false;
+                }
+
+                return newState;
+            });
+        };
+
+        const unsubscribe = scrollProgress.on("change", (latest) => {
+            // Use requestAnimationFrame for smoother updates
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
+            rafId = requestAnimationFrame(() => handleScroll(latest));
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            if (scrollEndTimer) clearTimeout(scrollEndTimer);
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
+        };
     }, [scrollProgress, isAuto]);
 
-    // ✅ Calculate terminal X position based on mode
-    const getTerminalX = () => {
+    // Reset manual position when switching to auto
+    useEffect(() => {
         if (isAuto) {
-            return terminalXAuto;  // Auto: oscillates with scroll
+            setUseManualPosition(false);
         }
+    }, [isAuto]);
 
-        if (useManualPosition) {
-            return manualX;  // Manual + after 36%: user-controlled (650 or 800)
-        }
+    // Calculate terminal X position
+    const terminalX = useMemo(() => {
+        if (isAuto) return terminalXAuto;
+        if (useManualPosition) return manualX;
+        return terminalXManual;
+    }, [isAuto, useManualPosition, manualX, terminalXAuto, terminalXManual]);
 
-        return terminalXManual;  // Manual + before 36%: scroll-based
-    };
+    // Memoized callbacks
+    const handleShowSection = useMemo(() => ({
+        info: () => setActiveSections(prev => ({ ...prev, info: true })),
+        skills: () => setActiveSections(prev => ({ ...prev, skills: true })),
+        journey: () => setActiveSections(prev => ({ ...prev, journey: true })),
+        projects: () => setActiveSections(prev => ({ ...prev, projects: true })),
+        contact: () => setActiveSections(prev => ({ ...prev, contact: true }))
+    }), []);
+
 
     return (
-        <section className="relative w-full h-full flex flex-row justify-center items-center">
-
+        <section className="fixed inset-0 w-full h-full flex justify-center items-center overflow-hidden">
             {/* Info Section */}
-            <motion.div
-                className="absolute left-0 inset-0 flex items-center justify-start rounded-2xl"
-                style={{
-                    scale: aboutScale,
-                    opacity: aboutOpacity,
-                    zIndex: 2,
-                    willChange: "transform, opacity",
-                    pointerEvents: aboutPointerEvents,
-                    display: aboutDisplay,
-                }}
-                transition={{duration: 0.8}}
+            <Section
+                show={activeSections.info}
+                scale={infoScale}
+                opacity={infoOpacity}
+                pointerEvents={infoPointerEvents}
+                display={infoDisplay}
+                zIndex={2}
+                xPosition={infoX}
             >
-                <Info scrollProgress={scrollProgress} />
-            </motion.div>
+                <Info scrollProgress={scrollProgress} sectionScrollRange={[0.20,0.24]} />
+            </Section>
 
             {/* Skills Section */}
-            <motion.div
-                className="absolute inset-0 flex items-center justify-start rounded-2xl"
-                style={{
-                    scale: skillsScale,
-                    opacity: skillsOpacity,
-                    zIndex: 3,
-                    willChange: "transform, opacity",
-                    pointerEvents: skillsPointerEvents,
-                    display: skillsDisplay,
-                }}
-                transition={{duration: 0.8}}
+            <Section
+                show={activeSections.skills}
+                scale={skillsScale}
+                opacity={skillsOpacity}
+                pointerEvents={skillsPointerEvents}
+                display={skillsDisplay}
+                zIndex={3}
+                xPosition={skillsX}
             >
-                <Skills scrollProgress={scrollProgress} />
-            </motion.div>
+                <Skills scrollProgress={scrollProgress} sectionScrollRange={[0.30, 0.34]} startDisplay={startDisplaySkills} />
+            </Section>
 
-            {/* Projects Section - Only render when bash projects.sh is executed */}
-            {showProjects && (
-                <motion.div
-                    className="absolute inset-0 flex items-center justify-start rounded-2xl"
-                    style={{
-                        scale: projectsScale,
-                        opacity: projectsOpacity,
-                        zIndex: 4,
-                        pointerEvents: projectsPointerEvents,
-                        display: projectsDisplay,
-                    }}
-                    initial={{x: 600, scale: 0.25 }}
-                    animate={{x:0, scale: 1}}
-                    transition={{duration: 0.25}}
-                >
-                    <Projects />
-                </motion.div>
-            )}
+            {/*/!* Projects Section *!/*/}
+            {/*<Section*/}
+            {/*    show={activeSections.projects}*/}
+            {/*    scale={projectsScale}*/}
+            {/*    opacity={projectsOpacity}*/}
+            {/*    pointerEvents={projectsPointerEvents}*/}
+            {/*    display={projectsDisplay}*/}
+            {/*    zIndex={4}*/}
+            {/*>*/}
+            {/*    <Projects scrollProgress={scrollProgress} sectionScrollRange={[0.87, 0.99]} />*/}
+            {/*</Section>*/}
+
+            {/*/!* Journey Section *!/*/}
+            {/*<Section*/}
+            {/*    show={activeSections.journey}*/}
+            {/*    scale={journeyScale}*/}
+            {/*    opacity={journeyOpacity}*/}
+            {/*    pointerEvents={journeyPointerEvents}*/}
+            {/*    display={journeyDisplay}*/}
+            {/*    zIndex={5}*/}
+            {/*>*/}
+            {/*    <CareerJourney */}
+            {/*        scrollProgress={scrollProgress} */}
+            {/*        sectionScrollRange={[0.68, 0.88]}*/}
+            {/*        onScrollProgressChange={scrollToProgress}*/}
+            {/*    />*/}
+            {/*</Section>*/}
+
+
+
+            {/*/!* Contact Section *!/*/}
+            {/*<Section*/}
+            {/*    show={activeSections.contact}*/}
+            {/*    scale={contactScale}*/}
+            {/*    opacity={contactOpacity}*/}
+            {/*    pointerEvents={contactPointerEvents}*/}
+            {/*    display={contactDisplay}*/}
+            {/*    zIndex={6}*/}
+            {/*>*/}
+            {/*    <Contact />*/}
+            {/*</Section>*/}
+
+            {/*/!* Closing Section *!/*/}
+            {/*{activeSections.closing && (*/}
+            {/*    <motion.div*/}
+            {/*        className="fixed inset-0 z-50 overflow-hidden"*/}
+            {/*        initial={{ opacity: 0 }}*/}
+            {/*        animate={{ opacity: 1 }}*/}
+            {/*        transition={{ duration: 0.5 }}*/}
+            {/*        zIndex={7}*/}
+            {/*    >*/}
+            {/*        <Closing scrollProgress={scrollProgress} />*/}
+            {/*    </motion.div>*/}
+            {/*)}*/}
 
             {/* Terminal */}
             <motion.div
-                className="absolute flex justify-center items-center"
+                className="absolute flex justify-center items-center touch-none"
                 style={{
-                    x: getTerminalX(),  // ✅ Use function to calculate position
+                    x: terminalX,
                     scale: terminalScale,
                     pointerEvents: "auto",
                     zIndex: 10
@@ -175,13 +329,19 @@ export function Rest({scrollProgress}) {
                     scale: { duration: 0.8, ease: "easeInOut" }
                 }}
             >
-                <Terminal
-                    scrollProgress={scrollProgress}
-                    isAuto={isAuto}
-                    setIsAuto={setIsAuto}
-                    setManualX={setManualX}
-                    onProjectsCommand={() => setShowProjects(true)}
-                />
+                <div className="w-full max-w-[95vw] h-full p-16 sm:max-w-none flex justify-center items-center">
+                    <Terminal
+                        scrollProgress={scrollProgress}
+                        isAuto={isAuto}
+                        setIsAuto={setIsAuto}
+                        setManualX={setManualX}
+                        onInfoCommand={handleShowSection.info}
+                        onSkillsCommand={handleShowSection.skills}
+                        onCareerJourneyCommand={handleShowSection.journey}
+                        onProjectsCommand={handleShowSection.projects}
+                        onContactCommand={handleShowSection.contact}
+                    />
+                </div>
             </motion.div>
         </section>
     );

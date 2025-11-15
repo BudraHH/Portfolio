@@ -35,7 +35,9 @@ export default {
             },
             animation: {
                 'fade-in': 'fadeIn 0.3s ease-in',
+                'pulse': 'pulse 1s ease-in-out infinite',
                 'pulse-slow': 'pulse 3s ease-in-out infinite',
+                'blink': 'blink 1s step-end infinite'
             },
         },
     },

@@ -1,6 +1,7 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { user_name, sections } from "../utils/constants.js";
 import TypedText from "./TypedText.jsx";
+import AutoCommand from "./AutoCommand.jsx";
 
 const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFocusChange }, ref) => {
     const [inputValue, setInputValue] = useState("");
@@ -103,10 +104,10 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
     };
 
     return (
-        <div className="relative">
-            <span className="text-cyan-400">{user_name}</span>
-            <span className="text-white">:{currentPath}$</span>
-            <div className="relative inline-block z-20">
+        <div className="relative flex items-center flex-wrap">
+            <span className="text-cyan-400 text-[10px] xs:text-xs sm:text-sm">{user_name}</span>
+            <span className="text-white text-[10px] xs:text-xs sm:text-sm">:{currentPath}$</span>
+            <div className="relative inline-block z-20 min-w-[1ch]">
                 <input
                     ref={ref}
                     type="text"
@@ -133,8 +134,9 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
                         minWidth: "1ch",
                         position: "relative",
                         zIndex: 20,
+                        fontSize: 'inherit',
                     }}
-                    className="bg-transparent border-none outline-none text-cyan-300 ml-2 font-mono caret-transparent"
+                    className="bg-transparent border-none outline-none text-cyan-300 ml-1 xs:ml-2 font-mono caret-transparent text-[10px] xs:text-xs sm:text-sm"
                     autoComplete="off"
                     autoFocus
                     tabIndex={0}
@@ -143,8 +145,8 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
                 />
                 {focused && (
                     <span
-                        style={{ left: `calc(${cursorPos}ch)` }}
-                        className="absolute ml-2 mt-1 w-[1ch] h-[1em] bg-cyan-300 animate-pulse pointer-events-none"
+                        style={{ left: `calc(${cursorPos}ch + 0.25rem)` }}
+                        className="absolute ml-1 xs:ml-2 mt-0.5 xs:mt-1 w-[0.5ch] xs:w-[1ch] h-[1em] bg-cyan-300 animate-pulse pointer-events-none"
                     />
                 )}
             </div>
@@ -152,12 +154,36 @@ const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFo
     );
 });
 
+const useIsMobile = () => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            const width = window.innerWidth;
+            // Consider devices with width < 768px as mobile (Tailwind's md breakpoint)
+            setIsMobile(width < 768);
+        };
+
+        // Check on mount
+        checkMobile();
+
+        // Add resize listener
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    return isMobile;
+};
+
 export default function Terminal({
                                      scrollProgress,
                                      isAuto: propIsAuto,
                                      setIsAuto: propSetIsAuto,
                                      setManualX,
+                                     scrollToProgress,
+                                     onSkillsCommand, onInfoCommand, onCareerJourneyCommand, onContactCommand,
                                      onProjectsCommand,
+
                                  }) {
     const inputRef = useRef(null);
     const bottomRef = useRef(null);
@@ -182,121 +208,174 @@ export default function Terminal({
         "Type 'help' for all commands | Press ↑↓ for history",
         "════════════════════════════════════════════════════════════",
     ];
-
     const treeOutput = [
         "~",
         "├── instructions.txt",
         "└── portfolio/",
         "    ├── info/",
-        "    │   └── info.jsx",
+        "    │   └── info.sh",
         "    ├── skills/",
-        "    │   └── skills.jsx",
-        "    ├── education/",
-        "    │   └── education.jsx",
+        "    │   └── skills-manager.sh",
+        "    ├── journey/",
+        "    │   └── career-journey.sh",
         "    ├── projects/",
         "    │   └── projects.sh",
         "    ├── contact/",
-        "    │   └── contact.jsx",
+        "    │   └── get-in-touch.sh",
         "    └── resume/",
         "        └── resume.jsx",
         "",
-        "6 directories, 7 files",
+        "7 directories, 7 files",
     ];
 
-    // Commands when scrolling DOWN (forward navigation)
+// Commands when scrolling DOWN (forward navigation)
+    // Aligned with Rest.jsx section display ranges for smooth transitions
+    // Sections activate slightly before they become visible (0.01-0.02 earlier)
     const SCROLL_DOWN_MAP = [
         {
-            section: "initial",
-            scrollRange: [0.10, 0.35],
+            section: "initial-1",
+            scrollRange: [0.06, 0.08],
             commands: [
                 { command: "cat instructions.txt", key: "cat-instructions" },
+            ]
+        },
+        {
+            section: "initial-2",
+            scrollRange: [0.07, 0.09],
+            commands: [
                 { command: "tree", key: "tree-initial" }
             ]
         },
         {
             section: "info",
-            scrollRange: [0.36, 0.51],
+            scrollRange: [0.16, 0.20], // Section appears at 0.36-0.37, disappears at 0.57-0.58
             commands: [
                 { command: "cd ~/portfolio/info", key: "cd-portfolio-info" },
-                { command: "cat info.jsx", key: "cat-info" }
+                { command: "firefox https://portfoliobudra.com/info", key: "cat-info" }
             ]
         },
         {
             section: "skills",
-            scrollRange: [0.52, 0.70],
+            scrollRange: [0.27, 0.31], // Section appears at 0.52-0.53, disappears at 0.76-0.77
             commands: [
                 { command: "cd ~/portfolio/skills", key: "cd-portfolio-skills" },
-                { command: "cat skills.jsx", key: "cat-skills" }
+                { command: "bash skills-manager.sh", key: "bash-skills" }
+            ]
+        },
+        {
+            section: "journey",
+            scrollRange: [0.67, 0.87], // Section appears at 0.68-0.69, disappears at 0.87-0.88
+            commands: [
+                { command: "cd ~/portfolio/journey", key: "cd-journey" },
+                { command: "bash career-journey.sh", key: "bash-journey" }
             ]
         },
         {
             section: "projects",
-            scrollRange: [0.71, 0.85],
+            scrollRange: [0.86, 0.98], // Section appears at 0.87-0.88, disappears at 0.98-0.99
             commands: [
                 { command: "cd ~/portfolio/projects", key: "cd-projects" },
                 { command: "bash projects.sh", key: "bash-projects" }
+            ]
+        },
+        {
+            section: "contact",
+            scrollRange: [0.97, 1.0], // Section appears at 0.98-0.99
+            commands: [
+                { command: "cd ~/portfolio/contact", key: "cd-contact" },
+                { command: "bash get-in-touch.sh", key: "bash-contact" }
             ]
         }
     ];
 
 // Commands when scrolling UP (backward navigation)
-// Use DIFFERENT section names to avoid conflicts
+    // Aligned with Rest.jsx section display ranges for smooth transitions
     const SCROLL_UP_MAP = [
         {
-            section: "projects-back",  // Changed name
-            scrollRange: [0.71, 0.85],
+            section: "contact-back",
+            scrollRange: [0.97, 1.0], // Exit contact section
+            commands: [
+                { command: "cd ~/portfolio/projects", key: "back-to-projects" },
+                { command: "bash projects.sh", key: "bash-projects-back" }
+            ]
+        },
+        {
+            section: "projects-back",
+            scrollRange: [0.86, 0.97], // Exit projects, enter journey
+            commands: [
+                { command: "cd ~/portfolio/journey", key: "back-to-journey" },
+                { command: "bash career-journey.sh", key: "bash-journey-back" }
+            ]
+        },
+        {
+            section: "journey-back",
+            scrollRange: [0.67, 0.86], // Exit journey, enter skills
             commands: [
                 { command: "cd ~/portfolio/skills", key: "back-to-skills" },
-                { command: "cat skills.jsx", key: "cat-skills-back" }
+                { command: "bash skills-manager.sh", key: "bash-skills-back" }
             ]
         },
         {
-            section: "skills-back",  // Changed name
-            scrollRange: [0.52, 0.70],
+            section: "skills-back",
+            scrollRange: [0.51, 0.67], // Exit skills, enter info
             commands: [
                 { command: "cd ~/portfolio/info", key: "back-to-info" },
-                { command: "cat info.jsx", key: "cat-info-back" }
+                { command: "firefox https://portfoliobudra.com/info", key: "cat-info-back" }
             ]
         },
         {
-            section: "info-back",  // Changed name
-            scrollRange: [0.36, 0.51],  // Fixed: added end range
+            section: "info-back",
+            scrollRange: [0.35, 0.51], // Exit info, return to home
             commands: [
                 { command: "cd ~", key: "back-to-home" },
             ]
         },
         {
-            section: "initial-back",  // Changed name
-            scrollRange: [0.10, 0.35],
+            section: "initial-back-2",
+            scrollRange: [0.23, 0.26], // Return to initial state
             commands: [
-                { command: "clear", key: "clear-terminal" },
-                { command: "cat instructions.txt", key: "prior_instructions" },
+                // { command: "clear", key: "clear-terminal" },
+                // { command: "cat instructions.txt", key: "prior_instructions" },
                 { command: "tree", key: "tree-initial" }
+            ]
+        },
+        {
+            section: "initial-back-1",
+            scrollRange: [0.20, 0.23], // Return to initial state
+            commands: [
+                // { command: "clear", key: "clear-terminal" },
+                { command: "cat instructions.txt", key: "prior_instructions" },
+                // { command: "tree", key: "tree-initial" }
             ]
         }
     ];
 
 
+
     const [basePath] = useState("~");
     const [currentPath, setCurrentPath] = useState(basePath);
     const [history, setHistory] = useState([]);
-    const [localIsAuto, setLocalIsAuto] = useState(propIsAuto || false);
+    const isMobile = useIsMobile();
 
     const currentPathRef = useRef(currentPath);
     useEffect(() => {
         currentPathRef.current = currentPath;
     }, [currentPath]);
 
-    const isAuto = propSetIsAuto ? propIsAuto : localIsAuto;
+    const [localIsAuto, setLocalIsAuto] = useState(propIsAuto || false);
+
+    // Force auto mode on mobile
+    const isAuto = isMobile ? true : (propSetIsAuto ? propIsAuto : localIsAuto);
     const setIsAuto = propSetIsAuto || setLocalIsAuto;
 
     const [executedSections, setExecutedSections] = useState(new Set());
     const [lastScrollProgress, setLastScrollProgress] = useState(0);
     const [scrollDirection, setScrollDirection] = useState("down");
 
-    const [currentTypingCommand, setCurrentTypingCommand] = useState("");
-    const [currentTypingProgress, setCurrentTypingProgress] = useState(0);
-    const [isTyping, setIsTyping] = useState(false);
+    // Auto mode state management
+    const [autoCommandQueue, setAutoCommandQueue] = useState([]);
+    const [currentAutoCommand, setCurrentAutoCommand] = useState(null);
+    const [isProcessingAuto, setIsProcessingAuto] = useState(false);
 
     const [priorInstructionsComplete, setPriorInstructionsComplete] = useState(false);
     const [isTreeExecuted, setIsTreeExecuted] = useState(false);
@@ -304,6 +383,16 @@ export default function Terminal({
     const [inputFocused, setInputFocused] = useState(false);
 
     const commandHistory = history.map(({ command }) => command);
+
+    // Map section commands to target scrollProgress values (where sections are at scale 1)
+    // Based on Rest.jsx scale ranges: scale reaches 1 at the middle of the range
+    const SECTION_SCROLL_TARGETS = useMemo(() => ({
+        "info": 0.48,           // scale [0.37, 0.47, 0.49, 0.57] -> scale 1 at 0.47-0.49, target 0.48
+        "skills": 0.645,       // scale [0.53, 0.63, 0.66, 0.76] -> scale 1 at 0.63-0.66, target 0.645
+        "journey": 0.805,      // scale [0.69, 0.79, 0.82, 0.87] -> scale 1 at 0.79-0.82, target 0.805
+        "projects": 0.94,      // scale [0.88, 0.93, 0.95, 0.98] -> scale 1 at 0.93-0.95, target 0.94
+        "contact": 0.995       // scale [0.99, 1.0] -> scale 1 at 0.99-1.0, target 0.995
+    }), []);
 
     const handleClickAuto = () => setIsAuto(true);
     const handleClickManual = () => setIsAuto(false);
@@ -358,19 +447,14 @@ export default function Terminal({
 
                     for (let part of destParts) {
                         if (part === "~") {
-                            // Go to home
                             currentParts = [];
                         } else if (part === "..") {
-                            // Go up one directory
                             if (currentParts.length > 0) {
                                 currentParts.pop();
                             }
-                            // If already at root (~), stay there
                         } else if (part === ".") {
-                            // Stay in current directory
                             continue;
                         } else if (part === "portfolio") {
-                            // Can only cd to portfolio from home (~)
                             if (currentParts.length === 0) {
                                 currentParts.push("portfolio");
                             } else {
@@ -379,22 +463,18 @@ export default function Terminal({
                                 break;
                             }
                         } else if (sectionNames.includes(part)) {
-                            // Section names can only be accessed from ~/portfolio
                             if (currentParts.length === 1 && currentParts[0] === "portfolio") {
                                 currentParts.push(part);
                             } else if (currentParts.length === 0) {
-                                // If at home, show error
                                 output = [`bash: cd: ${part}: No such file or directory`];
                                 errorOccurred = true;
                                 break;
                             } else {
-                                // If deeper than portfolio or not in portfolio
                                 output = [`bash: cd: ${destination}: No such file or directory`];
                                 errorOccurred = true;
                                 break;
                             }
                         } else {
-                            // Unknown directory
                             output = [`bash: cd: ${destination}: No such file or directory`];
                             errorOccurred = true;
                             break;
@@ -405,12 +485,10 @@ export default function Terminal({
                         newPath = currentParts.length > 0 ? `~/${currentParts.join("/")}` : "~";
                         output = null;
                     } else {
-                        // Keep current path on error
                         newPath = currentPathRef.current;
                     }
                 }
             } else if (parts.length === 1) {
-                // Just "cd" with no arguments goes to home
                 newPath = "~";
                 output = null;
             } else {
@@ -449,19 +527,19 @@ export default function Terminal({
                 output = [
                     "~/portfolio",
                     "├── info/",
-                    "│   └── info.jsx",
+                    "│   └── info.sh",
                     "├── skills/",
-                    "│   └── skills.jsx",
-                    "├── education/",
-                    "│   └── education.jsx",
+                    "│   └── skills-manager.sh",
+                    "├── journey/",
+                    "│   └── career-journey.sh",
                     "├── projects/",
-                    "│   └── projects.jsx",
+                    "│   └── projects.sh",
                     "├── contact/",
-                    "│   └── contact.jsx",
+                    "│   └── get-in-touch.sh",
                     "└── resume/",
                     "    └── resume.jsx",
                     "",
-                    "6 directories, 6 files",
+                    "7 directories, 7 files",
                 ];
             else if (newPath.startsWith("~/portfolio/")) {
                 const currentSection = newPath.split("/").pop();
@@ -492,7 +570,8 @@ export default function Terminal({
                 "",
                 "Examples:",
                 "  cd portfolio",
-                "  cd ./portfolio/skills",
+                "  cd ./portfolio/contact",
+                "  bash get-in-touch.sh",
                 "  tree",
                 "  ls -la",
                 "",
@@ -504,120 +583,71 @@ export default function Terminal({
             output = [now.toString()];
         }
         else if (cmd.startsWith("cat")) {
-            if (cmd.includes("info.jsx")) output = ["Portfolio Information File"];
-            else if (cmd.includes("skills.jsx")) output = ["Skills List File"];
-            else if (cmd.includes("education.jsx")) output = ["Education Details File"];
-            else if (cmd.includes("projects.jsx")) output = ["Projects Collection File"];
-            else if (cmd.includes("contact.jsx")) output = ["Contact Information File"];
+            if (cmd.includes("info.sh")) output = ["Portfolio Information File"];
+            else if (cmd.includes("skills-manager.sh")) output = ["Skills Package Manager Script"];
+            else if (cmd.includes("career-journey.sh")) output = ["Career Journey Timeline Script"];
+            else if (cmd.includes("projects.sh")) output = ["Projects Collection Script"];
+            else if (cmd.includes("get-in-touch.sh")) output = ["Contact & Communication Script"];
             else if (cmd.includes("resume.jsx")) output = ["Resume File"];
             else if (cmd.includes("instructions.txt")) output = priorInstructions;
-            else output = [`bash: ${cmd}: command not found`];
+            else output = [`bash: cat: ${cmd.split(" ")[1]}: No such file or directory`];
         }
         else if (cmd.startsWith("node")) {
-            const fileName = cmd.split(" ")[1];
+            const fileName = cmd.split(" ").slice(1).join(" ").trim();
 
             if (!fileName) {
                 output = ["node: missing file operand", "Usage: node <filename.jsx>"];
             } else {
-                // Parse file path and extract section name
-                const cleanPath = fileName.replace(/^\.\/|^\//, ""); // Remove ./ or /
-                let targetSection = null;
-                let targetFile = null;
+                // Define valid node files
+                const validNodeFiles = {
+                    info: "info.jsx",
+                    resume: "resume.jsx"
+                };
 
-                // Check if it's a path or just a filename
-                if (cleanPath.includes("/")) {
-                    const pathParts = cleanPath.split("/");
-                    if (pathParts.includes("portfolio")) {
-                        const sectionIndex = pathParts.indexOf("portfolio") + 1;
-                        targetSection = pathParts[sectionIndex];
-                        targetFile = pathParts[pathParts.length - 1];
-                    }
-                } else {
-                    targetFile = cleanPath;
-                    // Extract section from current path
-                    if (currentPath.startsWith("~/portfolio/")) {
-                        targetSection = currentPath.split("/").pop();
+                // Clean path
+                let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
+                const pathParts = cleanPath.split("/").filter(Boolean);
+                let targetSection = null;
+                let targetFile = pathParts[pathParts.length - 1];
+
+                // Determine target section
+                if (pathParts[0] === "portfolio" && pathParts.length > 1) {
+                    targetSection = pathParts[1];
+                } else if (Object.prototype.hasOwnProperty.call(validNodeFiles, pathParts[0])) {
+                    targetSection = pathParts[0];
+                } else if (pathParts.length === 1 && Object.values(validNodeFiles).includes(targetFile)) {
+                    // Infer from current path
+                    const currentPathParts = newPath.replace(/^~\//, "").split("/").filter(Boolean);
+                    if (currentPathParts[0] === "portfolio" && currentPathParts.length > 1) {
+                        targetSection = currentPathParts[1];
                     }
                 }
 
-                // Validate section and file match
-                const validSections = {
-                    "info": "info.jsx",
-                    "skills": "skills.jsx",
-                    "education": "education.jsx",
-                    "projects": "projects.jsx",
-                    "contact": "contact.jsx",
-                    "resume": "resume.jsx"
-                };
-
                 if (!targetFile) {
                     output = [`node: ${fileName}: Invalid path`];
-                } else if (targetFile.includes("info.jsx")) {
-                    const expectedPath = "~/portfolio/info";
-                    if (currentPath === expectedPath || cleanPath.includes("portfolio/info/info.jsx")) {
+                } else if (targetSection && validNodeFiles[targetSection] === targetFile) {
+                    const expectedPath = `~/portfolio/${targetSection}`;
+                    const normalizedCurrentPath = newPath.replace(/^~\//, "");
+                    const expectedNormalized = expectedPath.replace(/^~\//, "");
+
+                    if (normalizedCurrentPath === expectedNormalized) {
                         output = [
                             "Initializing component...",
-                            "✓ Info.jsx rendered successfully",
-                            "Component mounted at /portfolio/info"
+                            `✓ ${targetFile} rendered successfully`,
+                            `Component mounted at /portfolio/${targetSection}`
                         ];
                     } else {
-                        output = [`node: cannot find 'info.jsx'`, `Expected: ${expectedPath}/info.jsx or absolute path`];
-                    }
-                } else if (targetFile.includes("skills.jsx")) {
-                    const expectedPath = "~/portfolio/skills";
-                    if (currentPath === expectedPath || cleanPath.includes("portfolio/skills/skills.jsx")) {
                         output = [
-                            "Initializing component...",
-                            "✓ Skills.jsx rendered successfully",
-                            "Component mounted at /portfolio/skills"
+                            `node: cannot find '${targetFile}'`,
+                            `You are in: ${newPath}`,
+                            `Expected: ${expectedPath}`
                         ];
-                    } else {
-                        output = [`node: cannot find 'skills.jsx'`, `Expected: ${expectedPath}/skills.jsx or absolute path`];
                     }
-                } else if (targetFile.includes("education.jsx")) {
-                    const expectedPath = "~/portfolio/education";
-                    if (currentPath === expectedPath || cleanPath.includes("portfolio/education/education.jsx")) {
-                        output = [
-                            "Initializing component...",
-                            "✓ Education.jsx rendered successfully",
-                            "Component mounted at /portfolio/education"
-                        ];
-                    } else {
-                        output = [`node: cannot find 'education.jsx'`, `Expected: ${expectedPath}/education.jsx or absolute path`];
-                    }
-                } else if (targetFile.includes("projects.jsx")) {
-                    const expectedPath = "~/portfolio/projects";
-                    if (currentPath === expectedPath || cleanPath.includes("portfolio/projects/projects.jsx")) {
-                        output = [
-                            "Initializing component...",
-                            "✓ Projects.jsx rendered successfully",
-                            "Component mounted at /portfolio/projects"
-                        ];
-                    } else {
-                        output = [`node: cannot find 'projects.jsx'`, `Expected: ${expectedPath}/projects.jsx or absolute path`];
-                    }
-                } else if (targetFile.includes("contact.jsx")) {
-                    const expectedPath = "~/portfolio/contact";
-                    if (currentPath === expectedPath || cleanPath.includes("portfolio/contact/contact.jsx")) {
-                        output = [
-                            "Initializing component...",
-                            "✓ Contact.jsx rendered successfully",
-                            "Component mounted at /portfolio/contact"
-                        ];
-                    } else {
-                        output = [`node: cannot find 'contact.jsx'`, `Expected: ${expectedPath}/contact.jsx or absolute path`];
-                    }
-                } else if (targetFile.includes("resume.jsx")) {
-                    const expectedPath = "~/portfolio/resume";
-                    if (currentPath === expectedPath || cleanPath.includes("portfolio/resume/resume.jsx")) {
-                        output = [
-                            "Initializing component...",
-                            "✓ Resume.jsx rendered successfully",
-                            "Component mounted at /portfolio/resume"
-                        ];
-                    } else {
-                        output = [`node: cannot find 'resume.jsx'`, `Expected: ${expectedPath}/resume.jsx or absolute path`];
-                    }
+                } else if (Object.values(validNodeFiles).includes(targetFile)) {
+                    output = [
+                        `node: cannot find '${targetFile}'`,
+                        `Hint: Navigate to ~/portfolio/<section> first`
+                    ];
                 } else {
                     output = [
                         `node: ${fileName}: No such file or directory`,
@@ -625,53 +655,43 @@ export default function Terminal({
                     ];
                 }
             }
-            // eslint-disable-next-line no-dupe-else-if
-        } else if (cmd.startsWith("bash")) {
+        }
+        else if (cmd.startsWith("bash")) {
             const fileName = cmd.split(" ").slice(1).join(" ").trim();
 
             if (!fileName) {
                 output = ["bash: missing file operand", "Usage: bash <filename.sh>"];
             } else {
-                // Remove leading ./, ~/, or /
-                let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
-                const pathParts = cleanPath.split("/").filter(Boolean);
-
-                // Define valid sections and script file names
-                const validSections = {
-                    info: "info.sh",
-                    skills: "skills.sh",
-                    education: "education.sh",
+                // Define valid bash scripts
+                const validBashScripts = {
+                    skills: "skills-manager.sh",
+                    journey: "career-journey.sh",
                     projects: "projects.sh",
-                    contact: "contact.sh",
-                    resume: "resume.sh",
+                    contact: "get-in-touch.sh"
                 };
 
+                // Clean path
+                let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
+                const pathParts = cleanPath.split("/").filter(Boolean);
                 let targetSection = null;
-                let targetFile = pathParts[pathParts.length - 1]; // last part is file
+                let targetFile = pathParts[pathParts.length - 1];
 
-                // Determine target section from path or current directory
+                // Determine target section
                 if (pathParts[0] === "portfolio" && pathParts.length > 1) {
-                    // Path like: portfolio/projects/projects.sh
                     targetSection = pathParts[1];
-                } else if (Object.prototype.hasOwnProperty.call(validSections, pathParts[0])) {
-                    // Path like: projects/projects.sh
+                } else if (Object.prototype.hasOwnProperty.call(validBashScripts, pathParts[0])) {
                     targetSection = pathParts[0];
-                } else if (pathParts.length === 1 && Object.values(validSections).includes(targetFile)) {
-                    // Just filename like: projects.sh
-                    // Infer section from current path
+                } else if (pathParts.length === 1 && Object.values(validBashScripts).includes(targetFile)) {
+                    // Infer from current path
                     const currentPathParts = newPath.replace(/^~\//, "").split("/").filter(Boolean);
                     if (currentPathParts[0] === "portfolio" && currentPathParts.length > 1) {
-                        targetSection = currentPathParts[1]; // Extract section from current path
+                        targetSection = currentPathParts[1];
                     }
                 }
 
                 if (!targetFile) {
                     output = [`bash: ${fileName}: Invalid path`];
-                } else if (
-                    targetSection &&
-                    validSections[targetSection] === targetFile
-                ) {
-                    // Verify we're in the correct directory
+                } else if (targetSection && validBashScripts[targetSection] === targetFile) {
                     const expectedPath = `~/portfolio/${targetSection}`;
                     const normalizedCurrentPath = newPath.replace(/^~\//, "");
                     const expectedNormalized = expectedPath.replace(/^~\//, "");
@@ -680,35 +700,94 @@ export default function Terminal({
                         output = [
                             "Running script...",
                             `✓ ${targetFile} executed successfully`,
-                            `Script location: /portfolio/${targetSection}`,
+                            `Script location: /portfolio/${targetSection}`
                         ];
+
+                        // Trigger section callbacks
                         if (targetFile === "projects.sh") {
                             onProjectsCommand?.();
+                            // Auto-scroll to section in auto mode
+                            if (isAuto && scrollToProgress && targetSection) {
+                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                if (targetProgress !== undefined) {
+                                    setTimeout(() => {
+                                        scrollToProgress(targetProgress);
+                                    }, 300); // Small delay to ensure section is activated first
+                                }
+                            }
+                        } else if (targetFile === "skills-manager.sh") {
+                            onSkillsCommand?.();
+                            if (isAuto && scrollToProgress && targetSection) {
+                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                if (targetProgress !== undefined) {
+                                    setTimeout(() => {
+                                        scrollToProgress(targetProgress);
+                                    }, 300);
+                                }
+                            }
+                        } else if (targetFile === "career-journey.sh") {
+                            onCareerJourneyCommand?.();
+                            if (isAuto && scrollToProgress && targetSection) {
+                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                if (targetProgress !== undefined) {
+                                    setTimeout(() => {
+                                        scrollToProgress(targetProgress);
+                                    }, 300);
+                                }
+                            }
+                        } else if (targetFile === "get-in-touch.sh") {
+                            onContactCommand?.();
+                            if (isAuto && scrollToProgress && targetSection) {
+                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                if (targetProgress !== undefined) {
+                                    setTimeout(() => {
+                                        scrollToProgress(targetProgress);
+                                    }, 300);
+                                }
+                            }
                         }
                     } else {
                         output = [
                             `bash: cannot find '${targetFile}'`,
                             `You are in: ${newPath}`,
-                            `Expected: ${expectedPath}`,
+                            `Expected: ${expectedPath}`
                         ];
                     }
-                } else if (Object.values(validSections).includes(targetFile)) {
+                } else if (Object.values(validBashScripts).includes(targetFile)) {
                     output = [
                         `bash: cannot find '${targetFile}'`,
-                        `Hint: Navigate to ~/portfolio/<section> first`,
+                        `Hint: Navigate to ~/portfolio/<section> first`
                     ];
                 } else {
                     output = [
                         `bash: ${fileName}: No such file or directory`,
-                        "Usage: bash <filename.sh>",
+                        "Usage: bash <filename.sh>"
                     ];
                 }
             }
         }
-
+        else if (cmd === "firefox https://portfoliobudra.com/info") {
+            if (newPath === "~/portfolio/info") {
+                output = ["[1]+  Done                    firefox https://portfoliobudra.com/info\n"];
+                onInfoCommand?.();
+                // Auto-scroll to info section in auto mode
+                if (isAuto && scrollToProgress) {
+                    const targetProgress = SECTION_SCROLL_TARGETS["info"];
+                    if (targetProgress !== undefined) {
+                        setTimeout(() => {
+                            scrollToProgress(targetProgress);
+                        }, 300);
+                    }
+                }
+            } else {
+                output = ["Command restricted to ~/portfolio/info directory"];
+            }
+        }
         else {
             output = [`bash: ${cmd}: command not found`];
         }
+
+
 
         setCurrentPath(newPath);
         currentPathRef.current = newPath;
@@ -716,98 +795,166 @@ export default function Terminal({
         setHistory((prev) => [...prev, { command: input, output, path: newPath }]);
     };
 
-// Auto Mode: handle bidirectional section-based command execution
+    // Execute a single auto command with typing animation
+    const executeAutoCommand = useCallback((command) => {
+        return new Promise((resolve) => {
+            // Set current command for typing animation
+            setCurrentAutoCommand(command);
+
+            // Calculate typing duration (50ms per character)
+            const typingDuration = command.length * 50;
+
+            // Wait for typing to complete, then pause 300ms before executing
+            setTimeout(() => {
+                // Execute the command using handleManualCommand (called only once)
+                handleManualCommand(command);
+
+                // Wait 300ms for output to render, then clear and resolve
+                setTimeout(() => {
+                    setCurrentAutoCommand(null);
+                    resolve();
+                }, 300);
+            }, typingDuration);
+        });
+    }, []);
+
+    // Process the auto command queue
+    const processAutoCommandQueue = useCallback(async () => {
+        if (isProcessingAuto) {
+            return;
+        }
+
+        setIsProcessingAuto(true);
+
+        const processNext = async () => {
+            setAutoCommandQueue((prev) => {
+                if (prev.length === 0) {
+                    setIsProcessingAuto(false);
+                    return prev;
+                }
+
+                const [command, ...rest] = prev;
+
+                // Process the command asynchronously
+                executeAutoCommand(command).then(() => {
+                    // Small delay between commands
+                    setTimeout(() => {
+                        processNext();
+                    }, 100);
+                });
+
+                return rest;
+            });
+        };
+
+        processNext();
+    }, [isProcessingAuto, executeAutoCommand]);
+
+    // Process queue when it changes
+    useEffect(() => {
+        if (isAuto && autoCommandQueue.length > 0 && !isProcessingAuto) {
+            processAutoCommandQueue();
+        }
+    }, [isAuto, autoCommandQueue.length, isProcessingAuto, processAutoCommandQueue]);
+
+// Auto Mode: handle scroll-based command queueing
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
 
-        const unsubscribe = scrollProgress.on("change", (latest) => {
+        let rafId = null;
+        let lastProcessedProgress = -1;
+        const SCROLL_THRESHOLD = 0.001; // Minimum change to process
+
+        const processScroll = (latest) => {
+            // Skip if change is too small (throttling)
+            if (Math.abs(latest - lastProcessedProgress) < SCROLL_THRESHOLD) {
+                return;
+            }
+
+            lastProcessedProgress = latest;
             const direction = latest > lastScrollProgress ? "down" : latest < lastScrollProgress ? "up" : scrollDirection;
             setScrollDirection(direction);
             setLastScrollProgress(latest);
 
-            const commandMap = direction === "down" ? SCROLL_DOWN_MAP : SCROLL_UP_MAP;
-
+            const commandMap = SCROLL_DOWN_MAP;
             const currentSection = commandMap.find(({ scrollRange }) => {
                 const [start, end] = scrollRange;
-                return latest >= start && latest < end;
+                return latest >= start && latest <= end;
             });
 
             const sectionKey = currentSection ? `${currentSection.section}-${direction}` : null;
 
-            if (currentSection && sectionKey && !executedSections.has(sectionKey) && !isTyping) {
-                setIsTyping(true);
-
-                const executeSection = async () => {
-                    for (const { command, key } of currentSection.commands) {
-                        setCurrentTypingCommand(command);
-                        setCurrentTypingProgress(0);
-
-                        const typingDuration = command.length * 50;
-                        const totalDelay = typingDuration + 500;
-
-                        const typingInterval = setInterval(() => {
-                            setCurrentTypingProgress((prev) => {
-                                const next = prev + 1;
-                                if (next >= command.length) {
-                                    clearInterval(typingInterval);
-                                    return command.length;
-                                }
-                                return next;
-                            });
-                        }, 50);
-
-                        await new Promise((resolve) => {
-                            setTimeout(() => {
-                                handleManualCommand(command);
-                                clearInterval(typingInterval);
-                                setPriorInstructionsComplete(true);
-                                resolve();
-                            }, totalDelay);
-                        });
-
-                        await new Promise((resolve) => setTimeout(resolve, 100));
-                    }
-
-                    setExecutedSections((prev) => new Set(prev).add(sectionKey));
-                    setIsTyping(false);
-                    setCurrentTypingCommand("");
-                    setCurrentTypingProgress(0);
-                };
-
-                executeSection();
+            // Add commands to queue when section threshold is crossed
+            if (currentSection && sectionKey && !executedSections.has(sectionKey) && !isProcessingAuto) {
+                // Add all commands from this section to the queue
+                const commandsToAdd = currentSection.commands.map(({ command }) => command);
+                setAutoCommandQueue((prev) => [...prev, ...commandsToAdd]);
+                setExecutedSections((prev) => new Set(prev).add(sectionKey));
+                setPriorInstructionsComplete(true);
             }
+        };
+
+        const unsubscribe = scrollProgress.on("change", (latest) => {
+            // Use requestAnimationFrame for smoother updates
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
+            rafId = requestAnimationFrame(() => processScroll(latest));
         });
 
-        return () => unsubscribe();
-    }, [scrollProgress, isAuto, executedSections, isTyping, lastScrollProgress, scrollDirection]);
+        return () => {
+            unsubscribe();
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
+        };
+    }, [scrollProgress, isAuto, executedSections, isProcessingAuto, lastScrollProgress, scrollDirection]);
 
 // Reset executed sections when scrolling past boundaries
+    // Only clear sections that are no longer in range to prevent premature clearing
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
 
-        const unsubscribe = scrollProgress.on("change", (latest) => {
+        let rafId = null;
+
+        const processReset = (latest) => {
             setExecutedSections((prev) => {
                 const newSet = new Set();
-
                 const direction = latest > lastScrollProgress ? "down" : "up";
-                const commandMap = direction === "down" ? SCROLL_DOWN_MAP : SCROLL_UP_MAP;
 
-                commandMap.forEach(({ section, scrollRange }) => {
-                    const [start] = scrollRange;
-                    const sectionKeyDown = `${section}-down`;
-                    const sectionKeyUp = `${section}-up`;
+                // Check both directions to maintain state when scrolling back
+                [SCROLL_DOWN_MAP, SCROLL_UP_MAP].forEach((commandMap) => {
+                    commandMap.forEach(({ section, scrollRange }) => {
+                        const [start, end] = scrollRange;
+                        const sectionKeyDown = `${section}-down`;
+                        const sectionKeyUp = `${section}-up`;
 
-                    if (latest >= start) {
-                        if (prev.has(sectionKeyDown)) newSet.add(sectionKeyDown);
-                        if (prev.has(sectionKeyUp)) newSet.add(sectionKeyUp);
-                    }
+                        // Keep section if it's in range or was recently visited
+                        // Use a buffer zone (0.05) to prevent premature clearing
+                        if (latest >= start - 0.05 && latest <= end + 0.05) {
+                            if (prev.has(sectionKeyDown)) newSet.add(sectionKeyDown);
+                            if (prev.has(sectionKeyUp)) newSet.add(sectionKeyUp);
+                        }
+                    });
                 });
 
                 return newSet;
             });
+        };
+
+        const unsubscribe = scrollProgress.on("change", (latest) => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
+            rafId = requestAnimationFrame(() => processReset(latest));
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribe();
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+            }
+        };
     }, [scrollProgress, isAuto, lastScrollProgress]);
 
 
@@ -920,44 +1067,57 @@ export default function Terminal({
                     setTimeout(() => inputRef?.current?.focus(), 0);
                 }
             }}
-            className="relative w-[60rem] max-w-3xl h-[30rem] rounded-2xl overflow-hidden font-mono text-white
-      bg-[radial-gradient(circle_at_50%_20%,rgba(0,255,255,0.08)_0%,rgba(0,0,0,0.9)_100%)]
-      backdrop-blur-[24px] backdrop-brightness-75 border border-cyan-500/20
-      shadow-[0_0_60px_rgba(0,255,255,0.15),inset_0_0_20px_rgba(0,255,255,0.05)]
-      transition-transform duration-500"
+            className="relative
+                w-[calc(100%-1rem)]
+                sm:w-[32rem] md:w-[48rem] lg:w-[60rem]
+                max-w-full md:max-w-3xl
+                h-[20rem] sm:h-[28rem] md:h-[25rem]
+                rounded-lg sm:rounded-xl md:rounded-2xl
+                overflow-hidden font-mono text-white
+                backdrop-blur-[24px] backdrop-brightness-75 border border-cyan-500/20
+                shadow-[0_0_10px_rgba(0,255,255,0.15),inset_0_0_20px_rgba(0,255,255,0.05)]
+                transition-transform duration-500
+                mx-auto"
         >
             {/* Header */}
             <div className="flex flex-row justify-between items-center bg-gradient-to-r from-[#0f0f0f]/90 to-[#1a1a1a]/90 border-b border-cyan-500/20">
-                <div className="flex items-center gap-2 px-4 py-3">
-                    <span className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)]" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]" />
-                    <span className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
-                    <span className="ml-3 text-sm text-cyan-400/70 select-none tracking-wide">
-            {user_name}: {currentPath}$
-          </span>
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 flex-1 min-w-0">
+                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)] flex-shrink-0" />
+                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)] flex-shrink-0" />
+                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)] flex-shrink-0" />
+                    <span className="ml-1.5 sm:ml-2 md:ml-3 text-[10px] sm:text-xs md:text-sm text-cyan-400/70 select-none tracking-wide truncate">
+                        {user_name}: {currentPath}$
+                    </span>
                 </div>
-                <div className="flex flex-row text-sm gap-2 justify-center items-center h-full px-5 py-2 mt-1">
-                    <button
-                        className={`${isAuto ? "text-cyan-400" : "text-white"} hover:opacity-80 transition cursor-pointer`}
-                        onClick={handleClickAuto}
-                        type="button"
-                    >
-                        <code>Auto</code>
-                    </button>
-                    <code className="text-white/20">|</code>
-                    <button
-                        className={`${isAuto ? "text-white" : "text-cyan-400"} hover:opacity-80 transition cursor-pointer`}
-                        onClick={handleClickManual}
-                        type="button"
-                    >
-                        <code>Manual</code>
-                    </button>
-                </div>
+                {!isMobile && (
+                    <div className="flex flex-row text-[10px] sm:text-xs md:text-sm gap-1 sm:gap-1.5 md:gap-2 justify-center items-center h-full px-2 sm:px-3 md:px-5 py-1.5 sm:py-2 flex-shrink-0">
+                        <button
+                            className={`${isAuto ? "text-cyan-400" : "text-white"} hover:opacity-80 transition cursor-pointer whitespace-nowrap`}
+                            onClick={handleClickAuto}
+                            type="button"
+                        >
+                            <code>Auto</code>
+                        </button>
+                        <code className="text-white/20">|</code>
+                        <button
+                            className={`${isAuto ? "text-white" : "text-cyan-400"} hover:opacity-80 transition cursor-pointer whitespace-nowrap`}
+                            onClick={handleClickManual}
+                            type="button"
+                        >
+                            <code>Manual</code>
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Terminal content */}
             <div
-                className="relative z-10 px-5 py-4 text-sm leading-relaxed text-gray-200 space-y-2 overflow-y-auto max-h-[calc(100%-4rem)]"
+                className="relative z-10
+                    px-2 xs:px-3 sm:px-4 md:px-5
+                    py-2 xs:py-3 sm:py-4 md:py-5
+                    text-[10px] xs:text-xs sm:text-sm
+                    leading-relaxed text-gray-200 space-y-1 xs:space-y-1.5 sm:space-y-2
+                    overflow-y-auto max-h-[22rem] "
                 onClick={(e) => {
                     if (e.target === e.currentTarget || !e.target.closest("input")) {
                         setTimeout(() => inputRef?.current?.focus(), 0);
@@ -969,34 +1129,50 @@ export default function Terminal({
                     }
                 }}
             >
-                {/* Command history */}
+                {/* Command history - historical prompts never show cursors */}
                 {history.map(({ command, output, path }, idx) => (
-                    <div key={idx}>
+                    <div key={idx} className="break-words">
                         {(command !== "cls" && command !== "clear") && (
-                            <p>
-                                <span className="text-cyan-400">{user_name}</span>
-                                <span className="text-white">:{path}$</span>
-                                <span className="text-cyan-300 ml-2">{command}</span>
+                            <p className="break-words">
+                                <span className="text-cyan-400 text-[10px] xs:text-xs sm:text-sm">{user_name}</span>
+                                <span className="text-white text-[10px] xs:text-xs sm:text-sm">:{path}$</span>
+                                <span className="text-cyan-300 ml-1 xs:ml-2 break-all text-[10px] xs:text-xs sm:text-sm">{command}</span>
                             </p>
                         )}
                         {output?.map((line, i) => (
-                            <p key={i} className="text-cyan-100/75 whitespace-pre-wrap">
+                            <p key={i} className="text-cyan-100/75 whitespace-pre-wrap break-words text-[10px] xs:text-xs sm:text-sm">
                                 {line}
                             </p>
                         ))}
                     </div>
                 ))}
 
-                {/* Auto mode typing */}
-                {isAuto && currentTypingCommand && (
-                    <div>
-                        <p>
-                            <span className="text-cyan-400">{user_name}</span>
-                            <span className="text-white">:{currentPath}$</span>
-                            <span className="text-cyan-300 ml-2">{currentTypingCommand.slice(0, currentTypingProgress)}</span>
-                            <span className="absolute p-1 w-[1ch] h-[1.2rem] bg-cyan-300 animate-pulse pointer-events-none">&nbsp;</span>
-                        </p>
-                    </div>
+                {/* Auto mode: show AutoCommand when typing, or idle prompt with blinking cursor when queue is empty */}
+                {isAuto && (
+                    currentAutoCommand ? (
+                        <AutoCommand
+                            username={user_name}
+                            currentPath={currentPath}
+                            command={currentAutoCommand}
+                            // onComplete={() => {}}
+                            isTyping={true}
+                        />
+                    ) : (
+                        <div className="break-words">
+                            <p className="break-words">
+                                <span className="text-cyan-400 text-[10px] xs:text-xs sm:text-sm">{user_name}</span>
+                                <span className="text-white text-[10px] xs:text-xs sm:text-sm">:{currentPath}$</span>
+                                <span className="text-cyan-300 ml-1 xs:ml-2 break-all text-[10px] xs:text-xs sm:text-sm">
+                                    <span
+                                        className={`inline-block w-2 xs:w-2.5 h-4 bg-cyan-500 animate-pulse`}
+                                        style={{ verticalAlign: 'text-bottom' }}
+                                    >
+                        &nbsp;
+                    </span>
+                                </span>
+                            </p>
+                        </div>
+                    )
                 )}
 
 
@@ -1019,10 +1195,10 @@ export default function Terminal({
             </div>
 
             {/* Visual overlays */}
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%)] pointer-events-none" />
-            <div className="absolute inset-0 rounded-2xl ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)] pointer-events-none" />
-            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)] mix-blend-overlay opacity-30 pointer-events-none" />
-            <div className="absolute -inset-1 rounded-2xl bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%)] pointer-events-none rounded-lg xs:rounded-xl md:rounded-2xl" />
+            <div className="absolute inset-0 rounded-lg xs:rounded-xl md:rounded-2xl ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)] mix-blend-overlay opacity-30 pointer-events-none rounded-lg xs:rounded-xl md:rounded-2xl" />
+            <div className="absolute inset-0 rounded-lg xs:rounded-xl md:rounded-2xl bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none" />
         </div>
     );
 }

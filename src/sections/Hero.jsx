@@ -10,7 +10,7 @@ export default function Hero() {
     const handleSecondTypedComplete = () => setShowThirdTyped(true);
 
     return (
-        <section className="relative w-screen h-screen p-16">
+        <section className="relative h-full p-16">
             {/* Background Overlay */}
 
             {/* Main box */}
