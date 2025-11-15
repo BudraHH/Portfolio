@@ -41,14 +41,36 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const [isAuto, setIsAuto] = useState(true);
     const [manualX, setManualX] = useState(800);
     const [useManualPosition, setUseManualPosition] = useState(false);
-    const [activeSections, setActiveSections] = useState({
-        info: false,
-        skills: false,
-        journey: false,
-        projects: false,
-        contact: false,
-        closing: false
-    });
+    
+    // Track executed sections with execution order for z-index stacking
+    const [executedSections, setExecutedSections] = useState([]); // Array of section names in execution order
+    
+    // Derived state: active sections based on execution state
+    const activeSections = useMemo(() => {
+        const sections = {
+            info: false,
+            skills: false,
+            journey: false,
+            projects: false,
+            contact: false,
+            closing: false
+        };
+        
+        if (isAuto) {
+            // Auto mode: only show the most recently executed section
+            if (executedSections.length > 0) {
+                const lastSection = executedSections[executedSections.length - 1];
+                sections[lastSection] = true;
+            }
+        } else {
+            // Manual mode: show all executed sections
+            executedSections.forEach(section => {
+                sections[section] = true;
+            });
+        }
+        
+        return sections;
+    }, [executedSections, isAuto]);
 
     // Memoized transform configurations
     const transforms = useMemo(() => ({
@@ -120,11 +142,11 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const contactDisplay = useTransform(scrollProgress, transforms.contact.display, transforms.contact.displayValues);
 
     const [startDisplaySkills, setStartDisplaySkills] = useState(false);
-    // Track scroll and manual mode, manage section visibility
+    
+    // Track scroll for manual position mode only (not for section visibility)
     useEffect(() => {
         if (!scrollProgress) return;
 
-        let scrollEndTimer;
         let rafId = null;
 
         const handleScroll = (latest) => {
@@ -134,61 +156,6 @@ export function Rest({ scrollProgress, scrollToProgress }) {
             } else if (!isAuto && latest < 0.26) {
                 setUseManualPosition(false);
             }
-
-            // Manage section visibility based on scroll progress
-            // Sections are shown/hidden based on their display ranges
-            setActiveSections((prev) => {
-                const newState = { ...prev };
-
-                // Info section: display [0.36, 0.37, 0.57, 0.58]
-                if (latest >= 0.18 && latest <= 0.26) {
-                    if (!prev.info) newState.info = true;
-                } else if (latest < 0.18 || latest > 0.26) {
-                    if (prev.info) newState.info = false;
-                }
-
-                // Skills section: display [0.52, 0.53, 0.76, 0.77]
-                if (latest >= 0.27 && latest <= 0.37) {
-                    if (!prev.skills) newState.skills = true;
-                    if (latest >= 0.29) setStartDisplaySkills(true);
-                } else if (latest < 0.27 || latest > 0.37) {
-                    if (prev.skills) newState.skills = false;
-                    setStartDisplaySkills(false);
-                }
-
-                // Journey section: display [0.68, 0.69, 0.87, 0.88]
-                if (latest >= 0.68 && latest <= 0.88) {
-                    if (!prev.journey) newState.journey = true;
-                } else if (latest < 0.68 || latest > 0.88) {
-                    if (prev.journey) newState.journey = false;
-                }
-
-                // Projects section: display [0.87, 0.88, 0.98, 0.99]
-                if (latest >= 0.87 && latest <= 0.99) {
-                    if (!prev.projects) newState.projects = true;
-                } else if (latest < 0.87 || latest > 0.99) {
-                    if (prev.projects) newState.projects = false;
-                }
-
-                // Contact section: display [0.98, 0.99]
-                if (latest >= 0.98) {
-                    if (!prev.contact) newState.contact = true;
-                } else if (latest < 0.98) {
-                    if (prev.contact) newState.contact = false;
-                }
-
-                // Show closing when scrolled to the fullest (>= 99%)
-                if (latest >= 0.99 && !prev.closing) {
-                    if (scrollEndTimer) clearTimeout(scrollEndTimer);
-                    scrollEndTimer = setTimeout(() => {
-                        setActiveSections((p) => ({ ...p, closing: true }));
-                    }, 300);
-                } else if (latest < 0.99 && prev.closing) {
-                    newState.closing = false;
-                }
-
-                return newState;
-            });
         };
 
         const unsubscribe = scrollProgress.on("change", (latest) => {
@@ -201,7 +168,6 @@ export function Rest({ scrollProgress, scrollToProgress }) {
 
         return () => {
             unsubscribe();
-            if (scrollEndTimer) clearTimeout(scrollEndTimer);
             if (rafId !== null) {
                 cancelAnimationFrame(rafId);
             }
@@ -222,27 +188,113 @@ export function Rest({ scrollProgress, scrollToProgress }) {
         return terminalXManual;
     }, [isAuto, useManualPosition, manualX, terminalXAuto, terminalXManual]);
 
-    // Memoized callbacks
+    // Memoized callbacks to track section execution
     const handleShowSection = useMemo(() => ({
-        info: () => setActiveSections(prev => ({ ...prev, info: true })),
-        skills: () => setActiveSections(prev => ({ ...prev, skills: true })),
-        journey: () => setActiveSections(prev => ({ ...prev, journey: true })),
-        projects: () => setActiveSections(prev => ({ ...prev, projects: true })),
-        contact: () => setActiveSections(prev => ({ ...prev, contact: true }))
-    }), []);
+        info: () => {
+            setExecutedSections(prev => {
+                if (isAuto) {
+                    // Auto mode: replace previous section (only one visible at a time)
+                    return ['info'];
+                } else {
+                    // Manual mode: add to executed sections if not already present
+                    if (!prev.includes('info')) {
+                        return [...prev, 'info'];
+                    }
+                    return prev;
+                }
+            });
+        },
+        skills: () => {
+            setExecutedSections(prev => {
+                if (isAuto) {
+                    // Auto mode: replace previous section
+                    return ['skills'];
+                } else {
+                    // Manual mode: add to executed sections if not already present
+                    if (!prev.includes('skills')) {
+                        return [...prev, 'skills'];
+                    }
+                    return prev;
+                }
+            });
+        },
+        journey: () => {
+            setExecutedSections(prev => {
+                if (isAuto) {
+                    // Auto mode: replace previous section
+                    return ['journey'];
+                } else {
+                    // Manual mode: add to executed sections if not already present
+                    if (!prev.includes('journey')) {
+                        return [...prev, 'journey'];
+                    }
+                    return prev;
+                }
+            });
+        },
+        projects: () => {
+            setExecutedSections(prev => {
+                if (isAuto) {
+                    // Auto mode: replace previous section
+                    return ['projects'];
+                } else {
+                    // Manual mode: add to executed sections if not already present
+                    if (!prev.includes('projects')) {
+                        return [...prev, 'projects'];
+                    }
+                    return prev;
+                }
+            });
+        },
+        contact: () => {
+            setExecutedSections(prev => {
+                if (isAuto) {
+                    // Auto mode: replace previous section
+                    return ['contact'];
+                } else {
+                    // Manual mode: add to executed sections if not already present
+                    if (!prev.includes('contact')) {
+                        return [...prev, 'contact'];
+                    }
+                    return prev;
+                }
+            });
+        }
+    }), [isAuto]);
 
+
+    // Calculate z-index for manual mode (most recent on top)
+    const getSectionZIndex = useMemo(() => {
+        return (sectionName) => {
+            if (!activeSections[sectionName]) return 1;
+            if (isAuto) {
+                // Auto mode: all visible sections have same z-index (only one visible)
+                return 2;
+            } else {
+                // Manual mode: z-index based on execution order (most recent highest)
+                const index = executedSections.indexOf(sectionName);
+                if (index >= 0) {
+                    // Most recent (last in array) has highest z-index
+                    // If executedSections = ['info', 'skills', 'projects']:
+                    // 'info' (index 0) gets z-index 10, 'skills' (index 1) gets 11, 'projects' (index 2) gets 12 (highest)
+                    return 10 + index;
+                }
+                return 1;
+            }
+        };
+    }, [activeSections, isAuto, executedSections]);
 
     return (
         <section className="fixed inset-0 w-full h-full flex justify-center items-center overflow-hidden">
             {/* Info Section */}
             <Section
                 show={activeSections.info}
-                scale={infoScale}
-                opacity={infoOpacity}
-                pointerEvents={infoPointerEvents}
-                display={infoDisplay}
-                zIndex={2}
-                xPosition={infoX}
+                scale={activeSections.info ? 1 : infoScale}
+                opacity={activeSections.info ? 1 : infoOpacity}
+                pointerEvents={activeSections.info ? 'auto' : infoPointerEvents}
+                display={activeSections.info ? 'flex' : infoDisplay}
+                zIndex={getSectionZIndex('info')}
+                xPosition={activeSections.info ? 0 : infoX}
             >
                 <Info scrollProgress={scrollProgress} sectionScrollRange={[0.20,0.24]} />
             </Section>
@@ -250,70 +302,58 @@ export function Rest({ scrollProgress, scrollToProgress }) {
             {/* Skills Section */}
             <Section
                 show={activeSections.skills}
-                scale={skillsScale}
-                opacity={skillsOpacity}
-                pointerEvents={skillsPointerEvents}
-                display={skillsDisplay}
-                zIndex={3}
-                xPosition={skillsX}
+                scale={activeSections.skills ? 1 : skillsScale}
+                opacity={activeSections.skills ? 1 : skillsOpacity}
+                pointerEvents={activeSections.skills ? 'auto' : skillsPointerEvents}
+                display={activeSections.skills ? 'flex' : skillsDisplay}
+                zIndex={getSectionZIndex('skills')}
+                xPosition={activeSections.skills ? 0 : skillsX}
             >
                 <Skills scrollProgress={scrollProgress} sectionScrollRange={[0.30, 0.34]} startDisplay={startDisplaySkills} />
             </Section>
 
-            {/*/!* Projects Section *!/*/}
-            {/*<Section*/}
-            {/*    show={activeSections.projects}*/}
-            {/*    scale={projectsScale}*/}
-            {/*    opacity={projectsOpacity}*/}
-            {/*    pointerEvents={projectsPointerEvents}*/}
-            {/*    display={projectsDisplay}*/}
-            {/*    zIndex={4}*/}
-            {/*>*/}
-            {/*    <Projects scrollProgress={scrollProgress} sectionScrollRange={[0.87, 0.99]} />*/}
-            {/*</Section>*/}
+            {/* Journey Section */}
+            <Section
+                show={activeSections.journey}
+                scale={activeSections.journey ? 1 : journeyScale}
+                opacity={activeSections.journey ? 1 : journeyOpacity}
+                pointerEvents={activeSections.journey ? 'auto' : journeyPointerEvents}
+                display={activeSections.journey ? 'flex' : journeyDisplay}
+                zIndex={getSectionZIndex('journey')}
+                xPosition={activeSections.journey ? 0 : 0}
+            >
+                <CareerJourney 
+                    scrollProgress={scrollProgress} 
+                    sectionScrollRange={[0.68, 0.88]}
+                    onScrollProgressChange={scrollToProgress}
+                />
+            </Section>
 
-            {/*/!* Journey Section *!/*/}
-            {/*<Section*/}
-            {/*    show={activeSections.journey}*/}
-            {/*    scale={journeyScale}*/}
-            {/*    opacity={journeyOpacity}*/}
-            {/*    pointerEvents={journeyPointerEvents}*/}
-            {/*    display={journeyDisplay}*/}
-            {/*    zIndex={5}*/}
-            {/*>*/}
-            {/*    <CareerJourney */}
-            {/*        scrollProgress={scrollProgress} */}
-            {/*        sectionScrollRange={[0.68, 0.88]}*/}
-            {/*        onScrollProgressChange={scrollToProgress}*/}
-            {/*    />*/}
-            {/*</Section>*/}
+            {/* Projects Section */}
+            <Section
+                show={activeSections.projects}
+                scale={activeSections.projects ? 1 : projectsScale}
+                opacity={activeSections.projects ? 1 : projectsOpacity}
+                pointerEvents={activeSections.projects ? 'auto' : projectsPointerEvents}
+                display={activeSections.projects ? 'flex' : projectsDisplay}
+                zIndex={getSectionZIndex('projects')}
+                xPosition={activeSections.projects ? 0 : 0}
+            >
+                <Projects scrollProgress={scrollProgress} sectionScrollRange={[0.87, 0.99]} />
+            </Section>
 
-
-
-            {/*/!* Contact Section *!/*/}
-            {/*<Section*/}
-            {/*    show={activeSections.contact}*/}
-            {/*    scale={contactScale}*/}
-            {/*    opacity={contactOpacity}*/}
-            {/*    pointerEvents={contactPointerEvents}*/}
-            {/*    display={contactDisplay}*/}
-            {/*    zIndex={6}*/}
-            {/*>*/}
-            {/*    <Contact />*/}
-            {/*</Section>*/}
-
-            {/*/!* Closing Section *!/*/}
-            {/*{activeSections.closing && (*/}
-            {/*    <motion.div*/}
-            {/*        className="fixed inset-0 z-50 overflow-hidden"*/}
-            {/*        initial={{ opacity: 0 }}*/}
-            {/*        animate={{ opacity: 1 }}*/}
-            {/*        transition={{ duration: 0.5 }}*/}
-            {/*        zIndex={7}*/}
-            {/*    >*/}
-            {/*        <Closing scrollProgress={scrollProgress} />*/}
-            {/*    </motion.div>*/}
-            {/*)}*/}
+            {/* Contact Section */}
+            <Section
+                show={activeSections.contact}
+                scale={activeSections.contact ? 1 : contactScale}
+                opacity={activeSections.contact ? 1 : contactOpacity}
+                pointerEvents={activeSections.contact ? 'auto' : contactPointerEvents}
+                display={activeSections.contact ? 'flex' : contactDisplay}
+                zIndex={getSectionZIndex('contact')}
+                xPosition={activeSections.contact ? 0 : 0}
+            >
+                <Contact />
+            </Section>
 
             {/* Terminal */}
             <motion.div
