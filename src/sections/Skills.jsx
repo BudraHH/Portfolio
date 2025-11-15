@@ -154,7 +154,7 @@ const SkillCategory = memo(({ category, isLast }) => (
 
 SkillCategory.displayName = 'SkillCategory';
 
-export default function Skills({ scrollProgress, sectionScrollRange, startDisplay }) {
+export default function Skills({ scrollProgress, sectionScrollRange, startDisplay, pid }) {
     const [output, setOutput] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [spinnerStep, setSpinnerStep] = useState(0);
@@ -170,7 +170,7 @@ export default function Skills({ scrollProgress, sectionScrollRange, startDispla
     const terminalLines = useMemo(() => [
         "$ bash skills-manager.sh --fork",
         "Loading skill packages...",
-        "PID: 2847",
+        `PID: ${pid}`,
         "[1/4] Scanning installed packages...",
         "[2/4] Checking dependencies...",
         "[3/4] Verifying versions...",
@@ -258,7 +258,7 @@ export default function Skills({ scrollProgress, sectionScrollRange, startDispla
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]" />
                     <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
                     <span className="ml-2 xs:ml-3 text-[10px] xs:text-xs sm:text-sm text-cyan-400/70 select-none tracking-wide truncate">
-                        skills-manager.sh - package manager [PID: 2847]
+                        skills-manager.sh - package manager [PID: {pid}]
                     </span>
                 </div>
 

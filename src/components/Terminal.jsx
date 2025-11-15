@@ -183,6 +183,7 @@ export default function Terminal({
                                      scrollToProgress,
                                      onSkillsCommand, onInfoCommand, onCareerJourneyCommand, onContactCommand,
                                      onProjectsCommand,
+    infoPid,setInfoPid,skillsPid,setSkillsPid,journeyPid,setJourneyPid,projectsPid,setProjectsPid,contactPid,setContactPid
 
                                  }) {
     const inputRef = useRef(null);
@@ -255,13 +256,22 @@ export default function Terminal({
             ]
         },
         {
+            section: "info",
+            scrollRange: [0.21, 0.24], // Section appears at 0.36-0.37, disappears at 0.57-0.58
+            commands: [
+                { command: `kill ${infoPid}`, key: "kill-portfolio-info" },
+
+            ]
+        },
+        {
             section: "skills",
-            scrollRange: [0.27, 0.31], // Section appears at 0.52-0.53, disappears at 0.76-0.77
+            scrollRange: [0.25, 0.31], // Section appears at 0.52-0.53, disappears at 0.76-0.77
             commands: [
                 { command: "cd ~/portfolio/skills", key: "cd-portfolio-skills" },
                 { command: "bash skills-manager.sh", key: "bash-skills" }
             ]
         },
+
         {
             section: "journey",
             scrollRange: [0.67, 0.87], // Section appears at 0.68-0.69, disappears at 0.87-0.88
@@ -699,14 +709,9 @@ export default function Terminal({
                     const expectedNormalized = expectedPath.replace(/^~\//, "");
 
                     if (normalizedCurrentPath === expectedNormalized) {
-                        output = [
-                            "Running script...",
-                            `✓ ${targetFile} executed successfully`,
-                            `Script location: /portfolio/${targetSection}`
-                        ];
-
                         // Trigger section callbacks
                         if (targetFile === "projects.sh") {
+                            setProjectsPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
                             onProjectsCommand?.();
                             // Auto-scroll to section in auto mode
                             if (isAuto && scrollToProgress && targetSection) {
@@ -718,6 +723,7 @@ export default function Terminal({
                                 }
                             }
                         } else if (targetFile === "skills-manager.sh") {
+                            setSkillsPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
                             onSkillsCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
@@ -728,6 +734,7 @@ export default function Terminal({
                                 }
                             }
                         } else if (targetFile === "career-journey.sh") {
+                            setJourneyPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
                             onCareerJourneyCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
@@ -738,6 +745,7 @@ export default function Terminal({
                                 }
                             }
                         } else if (targetFile === "get-in-touch.sh") {
+                            setContactPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000);
                             onContactCommand?.();
                             if (isAuto && scrollToProgress && targetSection) {
                                 const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
@@ -755,6 +763,12 @@ export default function Terminal({
                             `Expected: ${expectedPath}`
                         ];
                     }
+                    output = [
+                        "Running script...",
+                        `✓ ${targetFile} executed successfully`,
+                        `Script location: /portfolio/${targetSection}`,
+                        `PID: ${infoPid||skillsPid||projectsPid||journeyPid||contactPid}`
+                    ];
                 } else if (Object.values(validBashScripts).includes(targetFile)) {
                     output = [
                         `bash: cannot find '${targetFile}'`,
@@ -771,6 +785,7 @@ export default function Terminal({
         else if (cmd === "firefox https://portfoliobudra.com/info") {
             if (newPath === "~/portfolio/info") {
                 output = ["[1]+  Done                    firefox https://portfoliobudra.com/info\n"];
+                setInfoPid(Math.floor(Math.random() * (30000 - 1000 + 1)) + 1000)
                 onInfoCommand?.();
                 // Auto-scroll to info section in auto mode
                 if (isAuto && scrollToProgress) {

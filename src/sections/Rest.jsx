@@ -142,6 +142,12 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const contactDisplay = useTransform(scrollProgress, transforms.contact.display, transforms.contact.displayValues);
 
     const [startDisplaySkills, setStartDisplaySkills] = useState(false);
+
+    const [infoPid, setInfoPid] = useState(0);
+    const [skillsPid, setSkillsPid] = useState(0);
+    const [journeyPid, setJourneyPid] = useState(0);
+    const [projectsPid, setProjectsPid] = useState(0);
+    const [contactPid, setContactPid] = useState(0);
     
     // Track scroll for manual position mode only (not for section visibility)
     useEffect(() => {
@@ -309,7 +315,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('skills')}
                 xPosition={activeSections.skills ? 0 : skillsX}
             >
-                <Skills scrollProgress={scrollProgress} sectionScrollRange={[0.30, 0.34]} startDisplay={startDisplaySkills} />
+                <Skills scrollProgress={scrollProgress} sectionScrollRange={[0.30, 0.34]} startDisplay={startDisplaySkills} pid={skillsPid} />
             </Section>
 
             {/* Journey Section */}
@@ -380,6 +386,16 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                         onCareerJourneyCommand={handleShowSection.journey}
                         onProjectsCommand={handleShowSection.projects}
                         onContactCommand={handleShowSection.contact}
+                        skillsPid={skillsPid}
+                        setSkillsPid={setSkillsPid}
+                        infoPid={infoPid}
+                        setInfoPid={setInfoPid}
+                        journeyPid={journeyPid}
+                        setJourneyPid={setJourneyPid}
+                        contactPid={contactPid}
+                        setContactPid={setContactPid}
+                        projectsPid={projectsPid}
+                        setProjectsPid={setProjectsPid}
                     />
                 </div>
             </motion.div>
