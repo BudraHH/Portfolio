@@ -74,12 +74,12 @@ export function Rest({ scrollProgress, scrollToProgress }) {
 
     // Memoized transform configurations
     const transforms = useMemo(() => ({
-        terminalXAuto:       [0.10,0.115,0.15, 0.16, 0.17, 0.20, 0.21, 0.25, 0.26, 0.30, 0.31, 0.35, 0.36, 0.40, 0.41, 0.45, 0.46, 0.50, 0.51, 0.55, 0.56, 0.60, 0.61],
-        terminalXAutoValues: [0,   50,   400,  400,   800, 800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400],
+        terminalXAuto:       [0.10,0.115,0.15, 0.16, 0.17, 0.20, 0.21, 0.25, 0.26, 0.30, 0.31, 0.35, 0.36, 0.40, 0.41, 0.45, 0.46, 0.50, 0.51, 0.55, 0.56, 0.60, 0.61,0.62],
+        terminalXAutoValues: [0,   50,   400,  400,   800, 800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400, 0],
         terminalXManual: [0.26, 0.30, 0.36],
         terminalXManualValues: [0, 50, 650],
-        terminalScale: [0.10,0.115,0.15],
-        terminalScaleValues: [1.5,1.2,1],
+        terminalScale: [0.10,0.115,0.15,0.61,0.62],
+        terminalScaleValues: [1.5,1.2,1,1,1.5],
 
         info: {
             scale: [0.18, 0.20, 0.24,0.26], values: [0, 1, 1, 1.5],
@@ -348,9 +348,6 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 <Contact pid={contactPid} />
             </Section>
 
-            {displayEnd && (
-                <Closing/>
-            )}
             {/* Terminal */}
             <motion.div
                 className="absolute flex justify-center items-center touch-none"

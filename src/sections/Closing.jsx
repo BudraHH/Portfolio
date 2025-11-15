@@ -171,43 +171,8 @@ export default function Closing({ onSessionEnd }) {
     }), [isKilling]);
 
     return (
-        <AnimatePresence>
-            {showComponent && (
-                <motion.section
-                    variants={containerVariants}
-                    initial="initial"
-                    exit="exit"
-                    className="w-full h-full flex flex-col justify-center items-center
-                        relative "
-                >
-                    <motion.div
-                        variants={terminalVariants}
-                        animate="animate"
-                        className="relative w-full
-                            max-w-xs xs:max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-[70rem]
-                            rounded-lg xs:rounded-xl sm:rounded-2xl
-                            overflow-hidden font-mono text-white
-                            bg-[radial-gradient(circle_at_10%_20%,rgba(0,255,255,0.08)_0%,rgba(0,0,0,0.91)_100%)]
-                            backdrop-blur-[24px] backdrop-brightness-75
-                            border border-cyan-500/20
-                            shadow-[0_0_40px_rgba(0,255,255,0.15)]"
-                    >
-                        {/* Terminal Header */}
-                        <div className="flex items-center gap-1.5 xs:gap-2
-                            px-2 xs:px-3 sm:px-4
-                            py-1.5 xs:py-2 sm:py-3
-                            bg-gradient-to-r from-[#0f0f0fE6] to-[#1a1a1aE6]
-                            border-b border-cyan-500/20">
-                            <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)]" />
-                            <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)]" />
-                            <span className="w-2 h-2 xs:w-2.5 xs:h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)]" />
-                            <span className="ml-1.5 xs:ml-2 sm:ml-3 text-[10px] xs:text-xs sm:text-sm text-cyan-400/70 select-none tracking-wide truncate">
-                                portfolio-session.sh - closing [PID: 9999]
-                            </span>
-                        </div>
 
-                        {/* Content */}
-                        <div className="p-3 xs:p-4 sm:p-5 md:p-6 lg:p-8">
+                        <div className="">
                             {/* Terminal Output */}
                             <div className="mb-3 xs:mb-4 sm:mb-6 text-[10px] xs:text-xs sm:text-sm leading-relaxed text-cyan-100/75">
                                 {output.map((line, idx) => (
@@ -271,41 +236,6 @@ export default function Closing({ onSessionEnd }) {
                                         ))}
                                     </div>
 
-                                    {/* Terminal Command Prompt */}
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: 1.0 }}
-                                        className="pt-3 xs:pt-4 sm:pt-6 border-t border-cyan-500/20"
-                                    >
-                                        <div className="flex items-center gap-1.5 xs:gap-2 text-[10px] xs:text-xs sm:text-sm font-mono">
-                                            <span className="text-cyan-400 flex-shrink-0">visitor@portfolio:~$</span>
-                                            <div className="flex items-center text-cyan-300 min-w-0">
-                                                <span className="truncate">{typedCommand}</span>
-                                                {isTyping && !isKilling && (
-                                                    <motion.span
-                                                        animate={{ opacity: [1, 0, 1] }}
-                                                        transition={{ duration: 1, repeat: Infinity }}
-                                                        className="inline-block w-1.5 xs:w-2 sm:w-2.5
-                                                            h-3 xs:h-3.5 sm:h-4
-                                                            bg-cyan-400 ml-0.5 xs:ml-1
-                                                            shadow-[0_0_8px_rgba(34,211,238,0.6)] flex-shrink-0"
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {isKilling && (
-                                            <motion.div
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                className="mt-1.5 xs:mt-2 text-red-400 text-[9px] xs:text-[10px] sm:text-xs"
-                                            >
-                                                [1]  + 9999 terminated  portfolio-session.sh
-                                            </motion.div>
-                                        )}
-                                    </motion.div>
-
                                     {/* Copyright */}
                                     <motion.div
                                         initial={{ opacity: 0 }}
@@ -320,16 +250,6 @@ export default function Closing({ onSessionEnd }) {
                             )}
                         </div>
 
-                        {/* Visual overlays - Combined */}
-                        <div className="absolute inset-0 pointer-events-none
-                            bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%),repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)]
-                            ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)]
-                            rounded-lg xs:rounded-xl sm:rounded-2xl mix-blend-overlay opacity-30"
-                        />
-                        <div className="absolute -inset-1 rounded-lg xs:rounded-xl sm:rounded-2xl bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none" />
-                    </motion.div>
-                </motion.section>
-            )}
-        </AnimatePresence>
+
     );
 }

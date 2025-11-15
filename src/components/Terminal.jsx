@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useRef, useState, useMemo, useCallback } 
 import { user_name, sections } from "../utils/constants.js";
 import TypedText from "./TypedText.jsx";
 import AutoCommand from "./AutoCommand.jsx";
+import Closing from "../sections/Closing.jsx";
 
 const NewCommand = forwardRef(({ user_name, currentPath, onSubmit, history, onFocusChange }, ref) => {
     const [inputValue, setInputValue] = useState("");
@@ -326,6 +327,21 @@ export default function Terminal({
             scrollRange: [0.61, 0.64],
             commands: [
                 { command: `kill ${contactPid}`, key: "kill-contact" },
+            ]
+        },
+        {
+            section: "closing",
+            scrollRange: [0.65, 0.70],
+            commands: [
+                { command: "cd ~/portfolio/closing", key: "closing" },
+                { command: "bash closing.sh", key: "closing" },
+            ]
+        },
+        {
+            section: "exit",
+            scrollRange: [0.71, 0.74],
+            commands: [
+                { command: "exit", key: "exit" },
             ]
         }
     ];
@@ -1454,7 +1470,7 @@ export default function Terminal({
                 )}
 
 
-
+{/*<Closing />*/}
 
 
                 {/* Manual mode input */}
