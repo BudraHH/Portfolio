@@ -196,6 +196,7 @@ export default function Terminal({
     const isProcessingRef = useRef(false);
     const lastCommandRef = useRef({ command: null, timestamp: 0 });
     const pidCacheRef = useRef({});
+    const [isExiting, setIsExiting] = useState(false);
     // ========================================
     // CONSTANTS
     // ========================================
@@ -233,8 +234,8 @@ export default function Terminal({
         "    │   └── projects.sh",
         "    ├── contact/",
         "    │   └── get-in-touch.sh",
-        "    └── resume/",
-        "        └── resume.jsx",
+        "    └── closing/",
+        "        └── closing-greet.sh",
         "",
         "7 directories, 7 files",
     ];
@@ -334,7 +335,7 @@ export default function Terminal({
             scrollRange: [0.65, 0.70],
             commands: [
                 { command: "cd ~/portfolio/closing", key: "closing" },
-                { command: "bash closing.sh", key: "closing" },
+                { command: "source closing-greet.sh", key: "closing" },
             ]
         },
         {
@@ -434,7 +435,8 @@ export default function Terminal({
         "skills": 0.645,
         "journey": 0.805,
         "projects": 0.94,
-        "contact": 0.995
+        "contact": 0.995,
+        "closing" : 1
     }), []);
 
     // ========================================
@@ -583,8 +585,8 @@ export default function Terminal({
                     "│   └── projects.sh",
                     "├── contact/",
                     "│   └── get-in-touch.sh",
-                    "└── resume/",
-                    "    └── resume.jsx",
+                    "└── closing/",
+                    "    └── closing-greet.sh",
                     "",
                     "7 directories, 7 files",
                 ];
@@ -596,7 +598,9 @@ export default function Terminal({
                     : ["(empty directory)"];
             }
         }
-        else if (cmd === "pwd") output = [newPath];
+        else if (cmd === "pwd") {
+            output = [newPath];
+        }
         else if (cmd === "cls" || cmd === "clear") {
             setHistory([]);
             output = null;
@@ -635,6 +639,7 @@ export default function Terminal({
             else if (cmd.includes("career-journey.sh")) output = ["Career Journey Timeline Script"];
             else if (cmd.includes("projects.sh")) output = ["Projects Collection Script"];
             else if (cmd.includes("get-in-touch.sh")) output = ["Contact & Communication Script"];
+            else if (cmd.includes("closing-greet.sh")) output = ["Closing Greeting Script"];
             else if (cmd.includes("resume.jsx")) output = ["Resume File"];
             else if (cmd.includes("instructions.txt")) output = priorInstructions;
             else output = [`bash: cat: ${cmd.split(" ")[1]}: No such file or directory`];
@@ -700,7 +705,6 @@ export default function Terminal({
             }
         }
         else if (cmd.startsWith("bash")) {
-            // Strip & and get clean filename
             const fileName = cmd.split(" ").slice(1).join(" ").trim().replace(/\s*&\s*$/, '');
 
             if (!fileName) {
@@ -710,7 +714,8 @@ export default function Terminal({
                     skills: "skills-manager.sh",
                     journey: "career-journey.sh",
                     projects: "projects.sh",
-                    contact: "get-in-touch.sh"
+                    contact: "get-in-touch.sh",
+                    closing: "closing-greet.sh"
                 };
 
                 let cleanPath = fileName.replace(/^\.\/|^~\/|^\//, "");
@@ -737,70 +742,79 @@ export default function Terminal({
                     const expectedNormalized = expectedPath.replace(/^~\//, "");
 
                     if (normalizedCurrentPath === expectedNormalized) {
-                        // ✅ Check if PID already exists for this section, if not generate new one
-                        const cacheKey = `${targetSection}-${targetFile}`;
-                        if (!pidCacheRef.current[cacheKey]) {
-                            pidCacheRef.current[cacheKey] = Math.floor(Math.random() * 29001) + 1000;
-                        }
-                        const newPid = pidCacheRef.current[cacheKey];
-
-                        const timestamp = new Date().toLocaleTimeString('en-US', {
-                            hour12: false,
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            second: '2-digit'
-                        });
-
-                        output = [
-                            `[${timestamp}] bash ${targetFile}`,
-                            `[1] ${newPid}`,
-                            `Executing: /portfolio/${targetSection}/${targetFile}`,
-                            ``,
-                            `Process running in background...`,
-                            `Use 'kill ${newPid}' to terminate`,
-                            ``,
-                            `[1]+ ${newPid} Running                bash ${targetFile} &`
-                        ];
-
-                        // Only set state once per section
-                        if (targetFile === "projects.sh") {
-                            setProjectsPid(newPid);
-                            console.log("projects.sh : ", newPid);
-                            onProjectsCommand?.();
-                            if (isAuto && scrollToProgress && targetSection) {
-                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
-                                if (targetProgress !== undefined) {
-                                    setTimeout(() => scrollToProgress(targetProgress), 300);
-                                }
+                        if (targetFile === "closing-greet.sh") {
+                            output = [
+                                "╔════════════════════════════════════════════════════════╗",
+                                "║           THANK YOU FOR VISITING MY PORTFOLIO          ║",
+                                "╚════════════════════════════════════════════════════════╝",
+                                "",
+                                "It was great having you explore my work!",
+                                "Feel free to reach out anytime.",
+                                "",
+                                "- Budra",
+                                "",
+                                <Closing key="closing-component" />
+                            ];
+                        } else {
+                            const cacheKey = `${targetSection}-${targetFile}`;
+                            if (!pidCacheRef.current[cacheKey]) {
+                                pidCacheRef.current[cacheKey] = Math.floor(Math.random() * 29001) + 1000;
                             }
-                        } else if (targetFile === "skills-manager.sh") {
-                            setSkillsPid(newPid);
-                            console.log("skills.sh : ", newPid)
-                            onSkillsCommand?.(); // Call without argument (defaults to true)
-                            if (isAuto && scrollToProgress && targetSection) {
-                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
-                                if (targetProgress !== undefined) {
-                                    setTimeout(() => scrollToProgress(targetProgress), 300);
+                            const newPid = pidCacheRef.current[cacheKey];
+
+                            const timestamp = new Date().toLocaleTimeString('en-US', {
+                                hour12: false,
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+
+                            output = [
+                                `[${timestamp}] bash ${targetFile}`,
+                                `[1] ${newPid}`,
+                                `Executing: /portfolio/${targetSection}/${targetFile}`,
+                                ``,
+                                `Process running in background...`,
+                                `Use 'kill ${newPid}' to terminate`,
+                                ``,
+                                `[1]+ ${newPid} Running                bash ${targetFile} &`
+                            ];
+
+                            if (targetFile === "projects.sh") {
+                                setProjectsPid(newPid);
+                                onProjectsCommand?.();
+                                if (isAuto && scrollToProgress && targetSection) {
+                                    const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                    if (targetProgress !== undefined) {
+                                        setTimeout(() => scrollToProgress(targetProgress), 300);
+                                    }
                                 }
-                            }
-                        } else if (targetFile === "career-journey.sh") {
-                            setJourneyPid(newPid);
-                            console.log("Career journey.sh : ", newPid );
-                            onCareerJourneyCommand?.();
-                            if (isAuto && scrollToProgress && targetSection) {
-                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
-                                if (targetProgress !== undefined) {
-                                    setTimeout(() => scrollToProgress(targetProgress), 300);
+                            } else if (targetFile === "skills-manager.sh") {
+                                setSkillsPid(newPid);
+                                onSkillsCommand?.();
+                                if (isAuto && scrollToProgress && targetSection) {
+                                    const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                    if (targetProgress !== undefined) {
+                                        setTimeout(() => scrollToProgress(targetProgress), 300);
+                                    }
                                 }
-                            }
-                        } else if (targetFile === "get-in-touch.sh") {
-                            setContactPid(newPid);
-                            console.log("contact pid in bash : ", contactPid)
-                            onContactCommand?.();
-                            if (isAuto && scrollToProgress && targetSection) {
-                                const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
-                                if (targetProgress !== undefined) {
-                                    setTimeout(() => scrollToProgress(targetProgress), 300);
+                            } else if (targetFile === "career-journey.sh") {
+                                setJourneyPid(newPid);
+                                onCareerJourneyCommand?.();
+                                if (isAuto && scrollToProgress && targetSection) {
+                                    const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                    if (targetProgress !== undefined) {
+                                        setTimeout(() => scrollToProgress(targetProgress), 300);
+                                    }
+                                }
+                            } else if (targetFile === "get-in-touch.sh") {
+                                setContactPid(newPid);
+                                onContactCommand?.();
+                                if (isAuto && scrollToProgress && targetSection) {
+                                    const targetProgress = SECTION_SCROLL_TARGETS[targetSection];
+                                    if (targetProgress !== undefined) {
+                                        setTimeout(() => scrollToProgress(targetProgress), 300);
+                                    }
                                 }
                             }
                         }
@@ -825,14 +839,12 @@ export default function Terminal({
             }
         }
         else if (cmd.startsWith("firefox")) {
-            // Extract URL and strip & if present
             const urlMatch = input.match(/firefox\s+(https?:\/\/[^\s&]+)/i);
 
             if (!urlMatch) {
                 output = ["firefox: missing URL", "Usage: firefox <url>"];
             } else if (urlMatch[1] === "https://portfoliobudra.com/info") {
                 if (newPath === "~/portfolio/info") {
-                    // ✅ Use PID cache to ensure same PID on re-execution
                     const cacheKey = "info-firefox";
                     if (!pidCacheRef.current[cacheKey]) {
                         pidCacheRef.current[cacheKey] = Math.floor(Math.random() * 29001) + 1000;
@@ -854,7 +866,6 @@ export default function Terminal({
                     ];
 
                     setInfoPid(newPid);
-                    console.log("info pid : ", newPid);
                     onInfoCommand?.();
 
                     if (isAuto && scrollToProgress) {
@@ -872,39 +883,34 @@ export default function Terminal({
                 output = [`firefox: ${urlMatch[1]}: Unknown URL`];
             }
         }
-
-
         else if (cmd.startsWith("kill")) {
-            const parts = cmd.split(" ");
+            const parts = input.trim().split(" ");
 
             if (parts.length === 1) {
-                // No PID provided
                 output = [
                     "kill: usage: kill [-s sigspec | -n signum | -sigspec] pid | jobspec",
-                    `Try 'kill <pid>' or 'kill -9 <pid>'`
+                    "Try 'kill <pid>' or 'kill -9 <pid>'"
                 ];
             } else if (parts.length === 2) {
-                // Basic kill command: kill <pid>
-                const targetPid = parseInt(parts[1]);
-                console.log("target pid : ",targetPid);
-                console.log("info pid : ", infoPid);
-                console.log("skills pid : ", skillsPid);
-                console.log("journey pid : ", journeyPid);
-                console.log("projects pid : ", projectsPid);
-                console.log("contact pid : ", contactPid);
-                // Validate PID is a number
-                if (isNaN(targetPid)) {
-                    console.log("if");
+                let targetPid = parts[1];
+
+                if (targetPid === "KILL_INFO") {
+                    targetPid = infoPid;
+                } else if (targetPid === "KILL_SKILLS") {
+                    targetPid = skillsPid;
+                } else if (targetPid === "KILL_JOURNEY") {
+                    targetPid = journeyPid;
+                } else if (targetPid === "KILL_PROJECTS") {
+                    targetPid = projectsPid;
+                } else if (targetPid === "KILL_CONTACT") {
+                    targetPid = contactPid;
+                } else {
+                    targetPid = parseInt(targetPid);
+                }
+
+                if (isNaN(targetPid) || targetPid === null || targetPid === 0) {
                     output = [`bash: kill: ${parts[1]}: arguments must be process or job IDs`];
                 } else {
-                    console.log("else");
-                    // console.log("target pid : ",targetPid);
-                    // console.log("info pid : ", infoPid);
-                    // console.log("skills pid : ", skillsPid);
-                    // console.log("journey pid : ", journeyPid);
-                    // console.log("projects pid : ", projectsPid);
-                    // console.log("contact pid : ", contactPid);
-                    // Check which section this PID belongs to
                     let killedSection = null;
                     let killedFile = null;
                     let wasRunning = false;
@@ -915,38 +921,35 @@ export default function Terminal({
                         wasRunning = true;
                         setInfoPid(null);
                         onInfoCommand?.(false);
-                        delete pidCacheRef.current["info-firefox"]; // ✅ Clear firefox cache too
-
-                } else if (targetPid === skillsPid && skillsPid !== null && skillsPid !== 0) {
+                        delete pidCacheRef.current["info-firefox"];
+                    } else if (targetPid === skillsPid && skillsPid !== null && skillsPid !== 0) {
                         killedSection = "skills";
                         killedFile = "skills-manager.sh";
                         wasRunning = true;
                         setSkillsPid(null);
-                        onSkillsCommand?.(false); // Close the section
-                        // Clear PID cache to allow re-execution
+                        onSkillsCommand?.(false);
                         delete pidCacheRef.current["skills-skills-manager.sh"];
                     } else if (targetPid === journeyPid && journeyPid !== null && journeyPid !== 0) {
                         killedSection = "journey";
                         killedFile = "career-journey.sh";
                         wasRunning = true;
                         setJourneyPid(null);
-                        onCareerJourneyCommand?.(false); // Close the section
+                        onCareerJourneyCommand?.(false);
                         delete pidCacheRef.current["journey-career-journey.sh"];
                     } else if (targetPid === projectsPid && projectsPid !== null && projectsPid !== 0) {
                         killedSection = "projects";
                         killedFile = "projects.sh";
                         wasRunning = true;
                         setProjectsPid(null);
-                        onProjectsCommand?.(false); // Close the section
+                        onProjectsCommand?.(false);
                         delete pidCacheRef.current["projects-projects.sh"];
                     } else if (targetPid === contactPid && contactPid !== null && contactPid !== 0) {
                         killedSection = "contact";
                         killedFile = "get-in-touch.sh";
                         wasRunning = true;
                         setContactPid(null);
-                        onContactCommand?.(false); // Close the section
+                        onContactCommand?.(false);
                         delete pidCacheRef.current["contact-get-in-touch.sh"];
-                        setDisplayEnd(true);
                     }
 
                     if (wasRunning && killedSection) {
@@ -957,16 +960,14 @@ export default function Terminal({
                             second: '2-digit'
                         });
 
-                        // Generate realistic execution time (10-60 seconds)
                         const seconds = Math.floor(Math.random() * 51) + 10;
                         const milliseconds = Math.floor(Math.random() * 900) + 100;
                         const execTime = `${seconds}.${milliseconds}s`;
 
-                        // Format output based on file type (firefox vs bash scripts)
-                        const processName = killedFile.startsWith("firefox") 
-                            ? killedFile 
+                        const processName = killedFile.startsWith("firefox")
+                            ? killedFile
                             : `bash ${killedFile}`;
-                        
+
                         output = [
                             `[${timestamp}] Terminating process ${targetPid}...`,
                             ``,
@@ -978,7 +979,6 @@ export default function Terminal({
                             `[1]+  Terminated              ${processName}`
                         ];
                     } else {
-                        // PID not found or already terminated
                         output = [
                             `bash: kill: (${targetPid}) - No such process`,
                             `Hint: Use 'ps' to list running processes`
@@ -986,7 +986,6 @@ export default function Terminal({
                     }
                 }
             } else if (parts.length === 3 && (parts[1] === "-9" || parts[1] === "-KILL")) {
-                // Force kill: kill -9 <pid>
                 const targetPid = parseInt(parts[2]);
 
                 if (isNaN(targetPid)) {
@@ -996,7 +995,6 @@ export default function Terminal({
                     let killedFile = null;
                     let wasRunning = false;
 
-                    // Same PID matching logic as above
                     if (targetPid === infoPid && infoPid !== null && infoPid !== 0) {
                         killedSection = "info";
                         killedFile = "firefox https://portfoliobudra.com/info";
@@ -1045,11 +1043,10 @@ export default function Terminal({
                         const milliseconds = Math.floor(Math.random() * 900) + 100;
                         const execTime = `${seconds}.${milliseconds}s`;
 
-                        // Format output based on file type (firefox vs bash scripts)
-                        const processName = killedFile.startsWith("firefox") 
-                            ? killedFile 
+                        const processName = killedFile.startsWith("firefox")
+                            ? killedFile
                             : `bash ${killedFile}`;
-                        
+
                         output = [
                             `[${timestamp}] Force killing process ${targetPid}...`,
                             ``,
@@ -1068,7 +1065,6 @@ export default function Terminal({
                     }
                 }
             } else {
-                // Too many arguments
                 output = [
                     "bash: kill: too many arguments",
                     "Usage: kill [-s sigspec | -signum] pid",
@@ -1076,11 +1072,34 @@ export default function Terminal({
                 ];
             }
         }
+        else if (cmd.startsWith("source") || cmd.startsWith(".")) {
+            const fileName = cmd.replace(/^(source|\.)\s+/, "").trim();
 
-
+            if (fileName === "closing-greet.sh") {
+                if (newPath === "~/portfolio/closing") {
+                    output = [
+                        "╔════════════════════════════════════════════════════════╗",
+                        "║           THANK YOU FOR VISITING MY PORTFOLIO          ║",
+                        "╚════════════════════════════════════════════════════════╝",
+                        "",
+                        "It was great having you explore my work!",
+                        "Feel free to reach out anytime.",
+                        "",
+                        "- Budra",
+                        "",
+                        <Closing key="closing-component" />
+                    ];
+                } else {
+                    output = ["Command restricted to ~/portfolio/closing directory"];
+                }
+            } else {
+                output = [`bash: source: ${fileName}: No such file or directory`];
+            }
+        }
         else {
             output = [`bash: ${cmd}: command not found`];
         }
+
 
         setCurrentPath(newPath);
         currentPathRef.current = newPath;
@@ -1433,11 +1452,36 @@ export default function Terminal({
                                 <span className="text-cyan-300 ml-1 xs:ml-2 break-all text-[10px] xs:text-xs sm:text-sm">{command}</span>
                             </p>
                         )}
-                        {output?.map((line, i) => (
-                            <p key={i} className="text-cyan-100/75 whitespace-pre-wrap break-words text-[10px] xs:text-xs sm:text-sm">
-                                {line}
-                            </p>
-                        ))}
+                        {output ? (
+                            Array.isArray(output) ? (
+                                // ✅ Handle array of strings or components
+                                output.map((line, i) => {
+                                    // Check if the line is a React element
+                                    if (React.isValidElement(line)) {
+                                        return <div key={i} className="my-2">{line}</div>;
+                                    }
+
+                                    // Otherwise render as text
+                                    return (
+                                        <p
+                                            key={i}
+                                            className="text-cyan-100/75 whitespace-pre-wrap break-words text-[10px] xs:text-xs sm:text-sm"
+                                        >
+                                            {line}
+                                        </p>
+                                    );
+                                })
+                            ) : React.isValidElement(output) ? (
+                                // ✅ Handle single React component
+                                <div className="my-2">{output}</div>
+                            ) : (
+                                // ✅ Handle single string (edge case)
+                                <p className="text-cyan-100/75 whitespace-pre-wrap break-words text-[10px] xs:text-xs sm:text-sm">
+                                    {output}
+                                </p>
+                            )
+                        ) : null}
+
                     </div>
                 ))}
 

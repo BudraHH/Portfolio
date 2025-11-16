@@ -79,7 +79,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
         terminalXManual: [0.26, 0.30, 0.36],
         terminalXManualValues: [0, 50, 650],
         terminalScale: [0.10,0.115,0.15,0.61,0.62],
-        terminalScaleValues: [1.5,1.2,1,1,1.5],
+        terminalScaleValues: [1.35,1.2,1,1,1.1],
 
         info: {
             scale: [0.18, 0.20, 0.24,0.26], values: [0, 1, 1, 1.5],

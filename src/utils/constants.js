@@ -4,14 +4,16 @@ import { FaGithub, FaLinkedin, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa
 export const user_name = "dev@budraPortfolio";
 
 // Portfolio sections info
+// In constants.js
 export const sections = [
-    { name: "info", file: "info.jsx", size: "4096", date: "Jan 01 12:34" },
-    { name: "skills", file: "skills.jsx", size: "3072", date: "Feb 14 08:22" },
+    { name: "info", file: "info.sh", size: "2048", date: "Jan 15 14:30" },
+    { name: "skills", file: "skills-manager.sh", size: "4096", date: "Jan 15 14:31" },
     { name: "journey", file: "career-journey.sh", size: "3072", date: "Jan 15 14:32" },
-    { name: "projects", file: "projects.jsx", size: "8192", date: "Apr 18 14:20" },
-    { name: "contact", file: "contact.jsx", size: "1024", date: "May 03 10:10" },
-    { name: "resume", file: "resume.jsx", size: "5120", date: "Jun 05 09:00" },
+    { name: "projects", file: "projects.sh", size: "5120", date: "Jan 15 14:33" },
+    { name: "contact", file: "get-in-touch.sh", size: "1024", date: "Jan 15 14:34" },
+    { name: "closing", file: "closing-greet.sh", size: "1536", date: "Jan 15 14:35" } // ✅ Add this
 ];
+
 
 // Projects list
 export const projects = [
