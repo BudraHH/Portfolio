@@ -185,7 +185,8 @@ export default function Terminal({
                                      onSkillsCommand, onInfoCommand, onCareerJourneyCommand, onContactCommand,
                                      onProjectsCommand,
                                      infoPid,setInfoPid,skillsPid,setSkillsPid,journeyPid,setJourneyPid,projectsPid,setProjectsPid,contactPid,setContactPid,
-                                 setDisplayEnd}) {
+                                 setDisplayEnd,
+                                 onExit}) {
     // ========================================
     // REFS
     // ========================================
@@ -425,6 +426,13 @@ export default function Terminal({
     const isAuto = isMobile ? true : (propSetIsAuto ? propIsAuto : localIsAuto);
     const setIsAuto = propSetIsAuto || setLocalIsAuto;
 
+    // Add this useEffect after your other useEffects
+    useEffect(() => {
+        if (isExiting && onExit) {
+            onExit();
+        }
+    }, [isExiting, onExit]);
+
     // ========================================
     // COMPUTED VALUES
     // ========================================
@@ -460,6 +468,73 @@ export default function Terminal({
     };
 
     const handleInputFocusChange = (focused) => setInputFocused(focused);
+
+    const [shouldScrollToClosing, setShouldScrollToClosing] = useState(false);
+
+    // Move this function definition BEFORE the useEffect (around line 187)
+    const smoothScrollToBottom = (duration = 2000) => {
+        const container = terminalRef.current;
+        if (!container) {
+            console.log("No container ref");
+            return;
+        }
+
+        const startPos = container.scrollTop;
+        const scrollHeight = container.scrollHeight;
+        const clientHeight = container.clientHeight;
+        const targetPos = scrollHeight - clientHeight;
+        const distance = targetPos - startPos;
+
+        console.log("Scroll Debug:", {
+            startPos,
+            scrollHeight,
+            clientHeight,
+            targetPos,
+            distance,
+            "Will scroll?": distance > 0
+        });
+
+        if (distance <= 0) {
+            console.log("Already at bottom or no scroll needed");
+            return;
+        }
+
+        let startTime = null;
+
+        function animate(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const easeProgress = progress < 0.5
+                ? 2 * progress * progress
+                : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
+            container.scrollTop = startPos + distance * easeProgress;
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                console.log("Scroll animation complete");
+            }
+        }
+
+        requestAnimationFrame(animate);
+    };
+
+
+// Then AFTER this, add your useEffect
+    useEffect(() => {
+        console.log("shouldScrollToClosing:", shouldScrollToClosing);
+
+        if (shouldScrollToClosing && terminalRef.current) {
+            setTimeout(() => {
+                smoothScrollToBottom(3000);
+                setShouldScrollToClosing(false);
+            }, 300);
+        }
+    }, [shouldScrollToClosing]);
+
 
     const handleManualCommand = useCallback((input) => {
         let output = null;
@@ -744,17 +819,9 @@ export default function Terminal({
                     if (normalizedCurrentPath === expectedNormalized) {
                         if (targetFile === "closing-greet.sh") {
                             output = [
-                                "╔════════════════════════════════════════════════════════╗",
-                                "║           THANK YOU FOR VISITING MY PORTFOLIO          ║",
-                                "╚════════════════════════════════════════════════════════╝",
-                                "",
-                                "It was great having you explore my work!",
-                                "Feel free to reach out anytime.",
-                                "",
-                                "- Budra",
-                                "",
                                 <Closing key="closing-component" />
                             ];
+                            setShouldScrollToClosing(true);
                         } else {
                             const cacheKey = `${targetSection}-${targetFile}`;
                             if (!pidCacheRef.current[cacheKey]) {
@@ -1078,16 +1145,17 @@ export default function Terminal({
             if (fileName === "closing-greet.sh") {
                 if (newPath === "~/portfolio/closing") {
                     output = [
-                        "╔════════════════════════════════════════════════════════╗",
-                        "║           THANK YOU FOR VISITING MY PORTFOLIO          ║",
-                        "╚════════════════════════════════════════════════════════╝",
-                        "",
-                        "It was great having you explore my work!",
-                        "Feel free to reach out anytime.",
-                        "",
-                        "- Budra",
-                        "",
-                        <Closing key="closing-component" />
+                        <Closing
+                            key="closing-component"
+                            onAnimationComplete={() => {
+                                setTimeout(() => {
+                                    if (terminalRef.current) {
+                                        smoothScrollToBottom(3000);
+                                    }
+                                }, 500);  // ✅ Increase to 500ms or more
+                            }}
+                        />
+
                     ];
                 } else {
                     output = ["Command restricted to ~/portfolio/closing directory"];
@@ -1095,6 +1163,26 @@ export default function Terminal({
             } else {
                 output = [`bash: source: ${fileName}: No such file or directory`];
             }
+        }
+        else if (cmd === "exit" || cmd === "logout") {
+            output = [
+                "═══════════════════════════════════════",
+                "  Closing terminal session...",
+                "═══════════════════════════════════════",
+                "",
+                "✓ All processes terminated",
+                "✓ Session saved",
+                "",
+                "Thank you for visiting my portfolio!",
+                "Hope to see you again soon! 👋",
+                "",
+                "~ Budra"
+            ];
+
+            // Trigger exit after showing message
+            setTimeout(() => {
+                setIsExiting(true);
+            }, 2000); // Wait 2 seconds to read the message
         }
         else {
             output = [`bash: ${cmd}: command not found`];
@@ -1175,6 +1263,8 @@ export default function Terminal({
             processAutoCommandQueue();
         }
     }, [isAuto, autoCommandQueue.length, isProcessingAuto, processAutoCommandQueue]);
+
+
 
     useEffect(() => {
         if (!scrollProgress || !isAuto) return;
@@ -1373,6 +1463,7 @@ export default function Terminal({
     return (
         <div
             ref={terminalRef}
+            style={{scrollBehavior: "smooth"}}
             tabIndex={-1}
             onFocus={(e) => e.target === e.currentTarget && inputRef?.current?.focus()}
             onClick={(e) => {
@@ -1380,7 +1471,7 @@ export default function Terminal({
                     setTimeout(() => inputRef?.current?.focus(), 0);
                 }
             }}
-            className="relative
+            className={`${isExiting ? "hidden" : "block" }relative
                 w-[calc(100%-1rem)]
                 sm:w-[32rem] md:w-[48rem] lg:w-[60rem]
                 max-w-full md:max-w-3xl
@@ -1390,7 +1481,7 @@ export default function Terminal({
                 backdrop-blur-[24px] backdrop-brightness-75 border border-cyan-500/20
                 shadow-[0_0_10px_rgba(0,255,255,0.15),inset_0_0_20px_rgba(0,255,255,0.05)]
                 transition-transform duration-500
-                mx-auto"
+                mx-auto`}
         >
             {/* Header */}
             <div className="flex flex-row justify-between items-center bg-gradient-to-r from-[#0f0f0f]/90 to-[#1a1a1a]/90 border-b border-cyan-500/20">
@@ -1514,7 +1605,6 @@ export default function Terminal({
                 )}
 
 
-{/*<Closing />*/}
 
 
                 {/* Manual mode input */}

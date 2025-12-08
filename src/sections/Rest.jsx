@@ -6,7 +6,6 @@ import Projects from "./Projects.jsx";
 import Skills from "./Skills.jsx";
 import CareerJourney from "./CareerJourney.jsx";
 import Contact from "./Contact.jsx";
-import Closing from "./Closing.jsx";
 
 // Memoized section wrapper to prevent unnecessary re-renders
 const Section = memo(({
@@ -16,7 +15,7 @@ const Section = memo(({
                           pointerEvents,
                           display,
                           zIndex,
-                            xPosition,
+                          xPosition,
                           children
                       }) => {
     if (!show) return null;
@@ -24,9 +23,7 @@ const Section = memo(({
     return (
         <motion.div
             className="fixed inset-0 w-full h-full md:p-16 flex items-center justify-center overflow-hidden"
-            style={{ scale, opacity, zIndex, pointerEvents, display,
-                        x: xPosition}}
-
+            style={{ scale, opacity, zIndex, pointerEvents, display, x: xPosition }}
             transition={{ duration: 0.25 }}
         >
             {children}
@@ -41,10 +38,22 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const [isAuto, setIsAuto] = useState(true);
     const [manualX, setManualX] = useState(800);
     const [useManualPosition, setUseManualPosition] = useState(false);
-    
+
     // Track executed sections with execution order for z-index stacking
-    const [executedSections, setExecutedSections] = useState([]); // Array of section names in execution order
-    
+    const [executedSections, setExecutedSections] = useState([]);
+
+    // Exit handling
+    const [showTerminal, setShowTerminal] = useState(true);
+    const [terminalOpacity, setTerminalOpacity] = useState(1);
+
+    // PIDs
+    const [infoPid, setInfoPid] = useState(0);
+    const [skillsPid, setSkillsPid] = useState(0);
+    const [journeyPid, setJourneyPid] = useState(0);
+    const [projectsPid, setProjectsPid] = useState(0);
+    const [contactPid, setContactPid] = useState(0);
+    const [displayEnd, setDisplayEnd] = useState(false);
+
     // Derived state: active sections based on execution state
     const activeSections = useMemo(() => {
         const sections = {
@@ -55,61 +64,66 @@ export function Rest({ scrollProgress, scrollToProgress }) {
             contact: false,
             closing: false
         };
-        
+
         if (isAuto) {
-            // Auto mode: only show the most recently executed section
             if (executedSections.length > 0) {
                 const lastSection = executedSections[executedSections.length - 1];
                 sections[lastSection] = true;
             }
         } else {
-            // Manual mode: show all executed sections
             executedSections.forEach(section => {
                 sections[section] = true;
             });
         }
-        
+
         return sections;
     }, [executedSections, isAuto]);
 
     // Memoized transform configurations
     const transforms = useMemo(() => ({
-        terminalXAuto:       [0.10,0.115,0.15, 0.16, 0.17, 0.20, 0.21, 0.25, 0.26, 0.30, 0.31, 0.35, 0.36, 0.40, 0.41, 0.45, 0.46, 0.50, 0.51, 0.55, 0.56, 0.60, 0.61,0.62],
-        terminalXAutoValues: [0,   50,   400,  400,   800, 800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400,  400,  800,  800,  400, 0],
+        terminalXAuto: [0.10, 0.115, 0.15, 0.16, 0.17, 0.20, 0.21, 0.25, 0.26, 0.30, 0.31, 0.35, 0.36, 0.40, 0.41, 0.45, 0.46, 0.50, 0.51, 0.55, 0.56, 0.60, 0.61, 0.62],
+        terminalXAutoValues: [0, 50, 400, 400, 800, 800, 400, 400, 800, 800, 400, 400, 800, 800, 400, 400, 800, 800, 400, 400, 800, 800, 400, 0],
         terminalXManual: [0.26, 0.30, 0.36],
         terminalXManualValues: [0, 50, 650],
-        terminalScale: [0.10,0.115,0.15,0.61,0.62],
-        terminalScaleValues: [1.35,1.2,1,1,1.1],
+        terminalScale: [0.10, 0.115, 0.15, 0.61, 0.62],
+        terminalScaleValues: [1.35, 1.2, 1, 1, 1.1],
 
         info: {
-            scale: [0.18, 0.20, 0.24,0.26], values: [0, 1, 1, 1.5],
-            opacity: [0.18, 0.20, 0.24,0.26], opacityValues: [0, 1, 1, 0],
-            pointerEvents: [0.18, 0.20, 0.24,0.26], pointerValues: ['none', 'auto', 'auto', 'none'],
-            display: [0.18, 0.20, 0.24,0.26], displayValues: ['none', 'flex', 'flex', 'none'] ,
-            infoX: [0.18, 0.20, 0.24,0.26],infoXValues: [400,0,0,800], },
+            scale: [0.18, 0.20, 0.24, 0.26], values: [0, 1, 1, 1.5],
+            opacity: [0.18, 0.20, 0.24, 0.26], opacityValues: [0, 1, 1, 0],
+            pointerEvents: [0.18, 0.20, 0.24, 0.26], pointerValues: ['none', 'auto', 'auto', 'none'],
+            display: [0.18, 0.20, 0.24, 0.26], displayValues: ['none', 'flex', 'flex', 'none'],
+            infoX: [0.18, 0.20, 0.24, 0.26], infoXValues: [400, 0, 0, 800]
+        },
 
         skills: {
             scale: [0.27, 0.29, 0.35, 0.37], values: [0, 1, 1, 1.5],
             opacity: [0.27, 0.29, 0.35, 0.37], opacityValues: [0, 1, 1, 0],
             pointerEvents: [0.27, 0.29, 0.35, 0.37], pointerValues: ['none', 'auto', 'auto', 'none'],
-            display: [0.27, 0.29, 0.35, 0.37], displayValues: ['none', 'flex', 'flex', 'none'] },
-            skillsX: [0.27, 0.29, 0.35, 0.37], skillsXValues: [400,0,0,800],
+            display: [0.27, 0.29, 0.35, 0.37], displayValues: ['none', 'flex', 'flex', 'none'],
+            skillsX: [0.27, 0.29, 0.35, 0.37], skillsXValues: [400, 0, 0, 800]
+        },
 
         journey: {
             scale: [0.37, 0.79, 0.82, 0.87], values: [0, 1, 1, 1.5],
             opacity: [0.69, 0.79, 0.82, 0.87], opacityValues: [0, 1, 1, 0],
             pointerEvents: [0.68, 0.79, 0.82, 0.88], pointerValues: ['none', 'auto', 'auto', 'none'],
-            display: [0.68, 0.69, 0.87, 0.88], displayValues: ['none', 'flex', 'flex', 'none'] },
+            display: [0.68, 0.69, 0.87, 0.88], displayValues: ['none', 'flex', 'flex', 'none']
+        },
 
-        projects: { scale: [0.87, 0.93, 0.95, 0.99], values: [0, 1, 1, 1.5],
+        projects: {
+            scale: [0.87, 0.93, 0.95, 0.99], values: [0, 1, 1, 1.5],
             opacity: [0.87, 0.93, 0.95, 0.99], opacityValues: [0, 1, 1, 0],
             pointerEvents: [0.87, 0.93, 0.95, 0.99], pointerValues: ['none', 'auto', 'auto', 'none'],
-            display: [0.86, 0.87, 0.99, 1.0], displayValues: ['none', 'flex', 'flex', 'none'] },
+            display: [0.86, 0.87, 0.99, 1.0], displayValues: ['none', 'flex', 'flex', 'none']
+        },
 
-        contact: { scale: [0.98, 1.0], values: [0, 1],
+        contact: {
+            scale: [0.98, 1.0], values: [0, 1],
             opacity: [0.98, 1.0], opacityValues: [0, 1],
             pointerEvents: [0.98, 1.0], pointerValues: ['none', 'auto'],
-            display: [0.97, 0.98, 1.0, 1.01], displayValues: ['none', 'flex', 'flex', 'flex'] }
+            display: [0.97, 0.98, 1.0, 1.01], displayValues: ['none', 'flex', 'flex', 'flex']
+        }
     }), []);
 
     // Create transforms
@@ -127,7 +141,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const skillsOpacity = useTransform(scrollProgress, transforms.skills.opacity, transforms.skills.opacityValues);
     const skillsPointerEvents = useTransform(scrollProgress, transforms.skills.pointerEvents, transforms.skills.pointerValues);
     const skillsDisplay = useTransform(scrollProgress, transforms.skills.display, transforms.skills.displayValues);
-    const skillsX = useTransform(scrollProgress, transforms.skillsX, transforms.skillsXValues);
+    const skillsX = useTransform(scrollProgress, transforms.skills.skillsX, transforms.skills.skillsXValues);
 
     const journeyScale = useTransform(scrollProgress, transforms.journey.scale, transforms.journey.values);
     const journeyOpacity = useTransform(scrollProgress, transforms.journey.opacity, transforms.journey.opacityValues);
@@ -144,20 +158,13 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const contactPointerEvents = useTransform(scrollProgress, transforms.contact.pointerEvents, transforms.contact.pointerValues);
     const contactDisplay = useTransform(scrollProgress, transforms.contact.display, transforms.contact.displayValues);
 
-    const [infoPid, setInfoPid] = useState(0);
-    const [skillsPid, setSkillsPid] = useState(0);
-    const [journeyPid, setJourneyPid] = useState(0);
-    const [projectsPid, setProjectsPid] = useState(0);
-    const [contactPid, setContactPid] = useState(0);
-    const [displayEnd, setDisplayEnd] = useState(false);
-    // Track scroll for manual position mode only (not for section visibility)
+    // Track scroll for manual position mode only
     useEffect(() => {
         if (!scrollProgress) return;
 
         let rafId = null;
 
         const handleScroll = (latest) => {
-            // Update manual position mode
             if (!isAuto && latest >= 0.26) {
                 setUseManualPosition(true);
             } else if (!isAuto && latest < 0.26) {
@@ -166,7 +173,6 @@ export function Rest({ scrollProgress, scrollToProgress }) {
         };
 
         const unsubscribe = scrollProgress.on("change", (latest) => {
-            // Use requestAnimationFrame for smoother updates
             if (rafId !== null) {
                 cancelAnimationFrame(rafId);
             }
@@ -188,6 +194,20 @@ export function Rest({ scrollProgress, scrollToProgress }) {
         }
     }, [isAuto]);
 
+    // Re-show terminal if scrolled back
+    useEffect(() => {
+        if (!scrollProgress) return;
+
+        const unsubscribe = scrollProgress.on("change", (latest) => {
+            if (latest <= 0.70 && !showTerminal) {
+                setShowTerminal(true);
+                setTerminalOpacity(1);
+            }
+        });
+
+        return () => unsubscribe();
+    }, [scrollProgress, showTerminal]);
+
     // Calculate terminal X position
     const terminalX = useMemo(() => {
         if (isAuto) return terminalXAuto;
@@ -199,10 +219,7 @@ export function Rest({ scrollProgress, scrollToProgress }) {
     const handleShowSection = useMemo(() => ({
         info: (shouldShow = true) => {
             setExecutedSections(prev => {
-                if (!shouldShow) {
-                    // Close section
-                    return prev.filter(s => s !== 'info');
-                }
+                if (!shouldShow) return prev.filter(s => s !== 'info');
                 if (isAuto) return ['info'];
                 if (!prev.includes('info')) return [...prev, 'info'];
                 return prev;
@@ -242,32 +259,26 @@ export function Rest({ scrollProgress, scrollToProgress }) {
         }
     }), [isAuto]);
 
-
-
-    // Calculate z-index for manual mode (most recent on top)
+    // Calculate z-index for manual mode
     const getSectionZIndex = useMemo(() => {
         return (sectionName) => {
             if (!activeSections[sectionName]) return 1;
-            if (isAuto) {
-                // Auto mode: all visible sections have same z-index (only one visible)
-                return 2;
-            } else {
-                // Manual mode: z-index based on execution order (most recent highest)
-                const index = executedSections.indexOf(sectionName);
-                if (index >= 0) {
-                    // Most recent (last in array) has highest z-index
-                    // If executedSections = ['info', 'skills', 'projects']:
-                    // 'info' (index 0) gets z-index 10, 'skills' (index 1) gets 11, 'projects' (index 2) gets 12 (highest)
-                    return 10 + index;
-                }
-                return 1;
-            }
+            if (isAuto) return 2;
+            const index = executedSections.indexOf(sectionName);
+            return index >= 0 ? 10 + index : 1;
         };
     }, [activeSections, isAuto, executedSections]);
 
+    // Exit handler
+    const handleExit = () => {
+        setTerminalOpacity(0);
+        setTimeout(() => {
+            setShowTerminal(false);
+        }, 1000);
+    };
+
     return (
         <section className="fixed inset-0 w-full h-full flex justify-center items-center overflow-hidden">
-            {/* Info Section */}
             <Section
                 show={activeSections.info}
                 scale={activeSections.info ? 1 : infoScale}
@@ -277,14 +288,9 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('info')}
                 xPosition={activeSections.info ? 0 : infoX}
             >
-                <Info
-                    // scrollProgress={scrollProgress}
-                    // sectionScrollRange={[0.20,0.24]}
-                    pid={infoPid}
-                />
+                <Info pid={infoPid} />
             </Section>
 
-            {/* Skills Section */}
             <Section
                 show={activeSections.skills}
                 scale={activeSections.skills ? 1 : skillsScale}
@@ -294,14 +300,9 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 zIndex={getSectionZIndex('skills')}
                 xPosition={activeSections.skills ? 0 : skillsX}
             >
-                <Skills
-                    // scrollProgress={scrollProgress}
-                    // sectionScrollRange={[0.30, 0.34]}
-                    pid={skillsPid}
-                />
+                <Skills pid={skillsPid} />
             </Section>
 
-            {/* Journey Section */}
             <Section
                 show={activeSections.journey}
                 scale={activeSections.journey ? 1 : journeyScale}
@@ -309,16 +310,11 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 pointerEvents={activeSections.journey ? 'auto' : journeyPointerEvents}
                 display={activeSections.journey ? 'flex' : journeyDisplay}
                 zIndex={getSectionZIndex('journey')}
-                xPosition={activeSections.journey ? 0 : 0}
+                xPosition={0}
             >
-                <CareerJourney 
-                    // scrollProgress={scrollProgress}
-                    // sectionScrollRange={[0.68, 0.88]}
-                    pid={journeyPid}
-                />
+                <CareerJourney pid={journeyPid} />
             </Section>
 
-            {/* Projects Section */}
             <Section
                 show={activeSections.projects}
                 scale={activeSections.projects ? 1 : projectsScale}
@@ -326,16 +322,11 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 pointerEvents={activeSections.projects ? 'auto' : projectsPointerEvents}
                 display={activeSections.projects ? 'flex' : projectsDisplay}
                 zIndex={getSectionZIndex('projects')}
-                xPosition={activeSections.projects ? 0 : 0}
+                xPosition={0}
             >
-                <Projects
-                    // scrollProgress={scrollProgress}
-                    // sectionScrollRange={[0.87, 0.99]}
-                    pid={projectsPid}
-                />
+                <Projects pid={projectsPid} />
             </Section>
 
-            {/* Contact Section */}
             <Section
                 show={activeSections.contact}
                 scale={activeSections.contact ? 1 : contactScale}
@@ -343,50 +334,54 @@ export function Rest({ scrollProgress, scrollToProgress }) {
                 pointerEvents={activeSections.contact ? 'auto' : contactPointerEvents}
                 display={activeSections.contact ? 'flex' : contactDisplay}
                 zIndex={getSectionZIndex('contact')}
-                xPosition={activeSections.contact ? 0 : 0}
+                xPosition={0}
             >
                 <Contact pid={contactPid} />
             </Section>
 
-            {/* Terminal */}
-            <motion.div
-                className="absolute flex justify-center items-center touch-none"
-                style={{
-                    x: terminalX,
-                    scale: terminalScale,
-                    pointerEvents: "auto",
-                    zIndex: 10
-                }}
-                transition={{
-                    x: { type: "spring", stiffness: 100, damping: 15 },
-                    scale: { duration: 0.8, ease: "easeInOut" }
-                }}
-            >
-                <div className="w-full max-w-[95vw] h-full p-16 sm:max-w-none flex justify-center items-center">
-                    <Terminal
-                        scrollProgress={scrollProgress}
-                        isAuto={isAuto}
-                        setIsAuto={setIsAuto}
-                        setManualX={setManualX}
-                        onInfoCommand={handleShowSection.info}
-                        onSkillsCommand={handleShowSection.skills}
-                        onCareerJourneyCommand={handleShowSection.journey}
-                        onProjectsCommand={handleShowSection.projects}
-                        onContactCommand={handleShowSection.contact}
-                        skillsPid={skillsPid}
-                        setSkillsPid={setSkillsPid}
-                        infoPid={infoPid}
-                        setInfoPid={setInfoPid}
-                        journeyPid={journeyPid}
-                        setJourneyPid={setJourneyPid}
-                        contactPid={contactPid}
-                        setContactPid={setContactPid}
-                        projectsPid={projectsPid}
-                        setProjectsPid={setProjectsPid}
-                        setDisplayEnd={setDisplayEnd}
-                    />
-                </div>
-            </motion.div>
+            {showTerminal && (
+                <motion.div
+                    className="absolute flex justify-center items-center touch-none"
+                    style={{
+                        x: terminalX,
+                        scale: terminalScale,
+                        opacity: terminalOpacity,
+                        pointerEvents: "auto",
+                        zIndex: 10
+                    }}
+                    transition={{
+                        x: { type: "spring", stiffness: 100, damping: 15 },
+                        scale: { duration: 0.8, ease: "easeInOut" },
+                        opacity: { duration: 1, ease: "easeOut" }
+                    }}
+                >
+                    <div className="w-full max-w-[95vw] h-full p-16 sm:max-w-none flex justify-center items-center">
+                        <Terminal
+                            scrollProgress={scrollProgress}
+                            onExit={handleExit}
+                            isAuto={isAuto}
+                            setIsAuto={setIsAuto}
+                            setManualX={setManualX}
+                            onInfoCommand={handleShowSection.info}
+                            onSkillsCommand={handleShowSection.skills}
+                            onCareerJourneyCommand={handleShowSection.journey}
+                            onProjectsCommand={handleShowSection.projects}
+                            onContactCommand={handleShowSection.contact}
+                            skillsPid={skillsPid}
+                            setSkillsPid={setSkillsPid}
+                            infoPid={infoPid}
+                            setInfoPid={setInfoPid}
+                            journeyPid={journeyPid}
+                            setJourneyPid={setJourneyPid}
+                            contactPid={contactPid}
+                            setContactPid={setContactPid}
+                            projectsPid={projectsPid}
+                            setProjectsPid={setProjectsPid}
+                            setDisplayEnd={setDisplayEnd}
+                        />
+                    </div>
+                </motion.div>
+            )}
         </section>
     );
 }

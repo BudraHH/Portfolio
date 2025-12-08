@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 import { CONTACTS, ABOUT_ME_HEADER } from '../utils/constants.js';
+import image_2 from '../assets/image_2.jpg';
 
 export default function PortfolioAbout() {
     const { title, subtitle, bioParagraphs, footerQuote } = ABOUT_ME_HEADER;
@@ -142,41 +143,25 @@ export default function PortfolioAbout() {
                         </div>
                     </div>
 
+
                     {/* Right: Animated Visual Accent - Hidden on mobile */}
-                    <div className="hidden lg:flex lg:w-72 xl:w-80 flex-shrink-0 relative items-center justify-center p-6">
-                        <div className="absolute inset-4 rounded-2xl bg-gradient-to-br from-cyan-400/5 via-cyan-700/10 to-cyan-600/5 animate-pulse" />
+                    <div className="hidden lg:flex lg:w-80 xl:w-96 flex-shrink-0 relative items-center justify-center p-6">
+                        {/*<div className="absolute inset-4 rounded-2xl bg-gradient-to-br from-cyan-400/5 via-cyan-700/10 to-cyan-600/5 animate-pulse" />*/}
 
-                        {/* Decorative Frame */}
-                        <div className="absolute inset-4 rounded-2xl border-2 border-cyan-400/20 overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-400/10 to-transparent" />
-                            <div className="absolute inset-0 bg-gradient-to-tl from-cyan-200/5 to-transparent" />
-
-                            {/* Subtle Grid */}
-                            <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 100 100" fill="none">
-                                <defs>
-                                    <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-                                    </pattern>
-                                </defs>
-                                <rect width="100" height="100" fill="url(#grid)"/>
-                                <circle cx="50" cy="50" r="35" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.3"/>
-                                <circle cx="50" cy="50" r="25" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.4"/>
-                                <circle cx="50" cy="50" r="15" stroke="currentColor" strokeWidth="0.5" fill="none" opacity="0.5"/>
-                                <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.5" opacity="0.2"/>
-                                <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.5" opacity="0.2"/>
-                            </svg>
+                        {/* Image fills the parent */}
+                        <div className="relative w-full h-full">
+                            <img
+                                src={image_2}
+                                alt="image_2.jpg"
+                                className="w-full h-full object-cover rounded-2xl scale-x-[-1]"
+                            />
+                            {/* Cyan overlay with blend mode */}
+                            <div className="absolute inset-0 bg-cyan-900/80 rounded-2xl mix-blend-multiply" />
                         </div>
 
-                        {/* Floating Code Brackets */}
-                        <div className="relative z-10 text-cyan-300/30 text-7xl xl:text-8xl font-mono select-none">
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                            >
-                                {'{ }'}
-                            </motion.div>
-                        </div>
+
                     </div>
+
                 </motion.div>
             </div>
         </div>
