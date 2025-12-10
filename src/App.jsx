@@ -1,48 +1,47 @@
-import { useState, useCallback, lazy, Suspense } from 'react';
-import Skills from './sections/Skills.jsx';
-import Terminal from "./components/Terminal.jsx";
-import Projects from "./sections/Projects.jsx";
-import Info from "./sections/Info.jsx";
-import CareerJourney from "./sections/CareerJourney.jsx";
-import Contact from "./sections/Contact.jsx";
-import Closing from "./sections/Closing.jsx";
-import Hero from "./sections/Hero.jsx";
+import GlobalWelcome from "./pages/Welcome.jsx";
+import InternalWelcome from "./dev-theme/pages/DevWelcome.jsx";
+import GUI from "./dev-theme/pages/GUI.jsx";
+import {useState} from "react";
 
-const Welcome = lazy(() => import('./sections/Welcome'));
-const ScrollSection = lazy(() => import('./sections/ScrollSection.jsx'));
+// Wrapper for the Dev Theme Flow (Boot -> GUI)
+const DevThemeRoot = () => {
+    const [showGUI, setShowGUI] = useState(false);
+    return !showGUI ? (
+        <InternalWelcome setShowGUI={setShowGUI} />
+    ) : (
+        <GUI />
+    );
+};
 
 function App() {
-    const [showHero, setShowHero] = useState(true);
+    const [activeTheme, setActiveTheme] = useState(null); // null (Welcome), 'dev', 'normal'
 
-    const handleWelcomeComplete = useCallback(() => {
-        setShowHero(true);
-    }, []);
+    const handleThemeSelect = (theme) => {
+        setActiveTheme(theme);
+    };
 
     return (
-        <div className="relative bg-black overflow-x-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-600/5 via-black to-black pointer-events-none" />
-
-            {/*<Suspense fallback={null}>*/}
-            {/*    /!* Welcome Screen *!/*/}
-            {/*    {!showHero && (*/}
-            {/*        <Welcome onComplete={handleWelcomeComplete}/>*/}
-            {/*    )}*/}
-
-            {/*    /!* Hero & Rest Sections - only render when ready *!/*/}
-            {/*    {showHero && <ScrollSection/>}*/}
-            {/*</Suspense>*/}
-            {/*<Welcome />*/}
-            <Hero/>
-            {/*<Info />*/}
-            {/*<Terminal />*/}
-            {/*<Skills />*/}
-            {/*<CareerJourney/>*/}
-            {/*<Projects />*/}
-            {/*<Contact/>*/}
-            {/*<Closing/>*/}
-            {/*<BrowserWindowPc/>*/}
+        <div className="App overflow-hidden h-screen w-screen bg-black">
+            {!activeTheme ? (
+                <GlobalWelcome onSelectTheme={handleThemeSelect} />
+            ) : activeTheme === 'dev' ? (
+                <DevThemeRoot />
+            ) : (
+                <div className="flex items-center justify-center h-full text-white">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold mb-4">Standard Portfolio</h1>
+                        <p className="text-gray-400">Coming Soon...</p>
+                        <button
+                            onClick={() => setActiveTheme(null)}
+                            className="mt-6 px-4 py-2 bg-blue-600 rounded hover:bg-blue-500 transition"
+                        >
+                            Back to Home
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-    );
+    )
 }
 
 export default App;
