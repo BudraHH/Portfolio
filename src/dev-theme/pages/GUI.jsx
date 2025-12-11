@@ -8,13 +8,14 @@ import { FaFileCircleQuestion } from "react-icons/fa6";
 export default function GUI() {
     // Define available apps here to be shared between Dock and other functionality
     const availableApps = [
-        { icon: FaUserAstronaut, label: 'About', href: '#about', color: 'text-purple-400' },
+        { icon: FaUserAstronaut, label: 'Info', href: '#about', color: 'text-purple-400' },
         { icon: FaFirefox, label: 'Firefox', href: '#home', color: 'text-orange-500' },
         { icon: SiThunderbird, label: 'Thunderbird', href: '#contact', color: 'text-blue-500' },
         { icon: FaFolder, label: 'Files', href: '#files', color: 'text-yellow-400' },
         { icon: FaTerminal, label: 'Terminal', href: '#terminal', color: 'text-cyan-500' },
         { icon: FaFileCircleQuestion, label: 'Help', href: '#help', color: 'text-rose-400' },
         { icon: FaCogs, label: 'Installer', href: '#installer', color: 'text-gray-400' }, // Hidden/System app
+        { icon: FaUserAstronaut, label: 'CareerJourney', href: '#career', color: 'text-emerald-400' }, // Career timeline app
     ];
 
     const [activeTabs, setActiveTabs] = useState([

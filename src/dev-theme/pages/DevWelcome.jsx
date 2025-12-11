@@ -87,7 +87,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
 
     return (
         <div
-            className={`fixed inset-0 bg-black font-mono overflow-hidden z-[9999] transition-opacity duration-1000 ${fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+            className={`fixed inset-0 bg-[#050a0f] font-mono overflow-hidden z-[9999] transition-opacity duration-1000 selection:bg-cyan-500/30 ${fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
                 }`}
         >
             {/* Optimized background - reduced particle count and removed expensive effects on mobile */}
@@ -142,7 +142,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
             {/* Vignette effect */}
             <div className="absolute inset-0 pointer-events-none opacity-50"
                 style={{
-                    background: 'radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%)'
+                    background: 'radial-gradient(circle at center, transparent 0%, rgba(5,10,15,0.8) 100%)'
                 }}
             />
 
@@ -150,7 +150,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
             <div className="relative flex items-center justify-center min-h-screen p-4 sm:p-8">
                 <div className="w-full max-w-4xl">
                     {/* Enhanced acrylic card */}
-                    <div className="backdrop-blur-2xl bg-black/40 rounded-3xl border border-cyan-500/30 shadow-[0_0_60px_rgba(6,182,212,0.2)] p-6 sm:p-10 transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_80px_rgba(6,182,212,0.3)] min-h-[500px] flex flex-col">
+                    <div className="backdrop-blur-2xl bg-[#0a1520]/40 rounded-3xl border border-cyan-500/30 shadow-[0_0_60px_rgba(6,182,212,0.2)] p-4 sm:p-8 md:p-10 transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_80px_rgba(6,182,212,0.3)] min-h-[400px] sm:min-h-[500px] flex flex-col">
                         {/* Logo or header animation */}
                         <div className="flex justify-center mb-6 shrink-0">
                             <div className="relative">
@@ -226,7 +226,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                                     </span>
                                     <span className="tabular-nums">{Math.floor(progress)}%</span>
                                 </div>
-                                <div className="relative h-2 bg-black/60 rounded-full overflow-hidden backdrop-blur-sm border border-cyan-900/40 shadow-inner">
+                                <div className="relative h-2 bg-[#0a1520]/60 rounded-full overflow-hidden backdrop-blur-sm border border-cyan-900/40 shadow-inner">
                                     <div
                                         className="absolute inset-0 h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_20px_rgba(6,182,212,0.6)]"
                                         style={{ width: `${progress}%` }}
@@ -251,8 +251,8 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
             </div>
 
             {/* Enhanced corner HUD elements */}
-            <div className="absolute top-4 sm:top-6 left-4 sm:left-6 space-y-2 animate-slideInLeft">
-                <div className="backdrop-blur-xl bg-black/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+            <div className="absolute top-2 sm:top-6 left-2 sm:left-6 space-y-2 animate-slideInLeft scale-75 sm:scale-100 origin-top-left">
+                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
                     <div className="text-cyan-400 text-xs sm:text-sm font-bold tracking-wider flex items-center gap-2">
                         <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
                         PORTFOLIO
@@ -261,8 +261,8 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                 </div>
             </div>
 
-            <div className="absolute top-4 sm:top-6 right-4 sm:right-6 animate-slideInRight">
-                <div className="backdrop-blur-xl bg-black/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)] flex items-center gap-2">
+            <div className="absolute top-2 sm:top-6 right-2 sm:right-6 animate-slideInRight scale-75 sm:scale-100 origin-top-right">
+                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)] flex items-center gap-2">
                     <div className="relative">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,1)]"></div>
                         <div className="absolute inset-0 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
@@ -271,8 +271,8 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                 </div>
             </div>
 
-            <div className="absolute bottom-4 sm:bottom-6 left-4 sm:left-6 animate-slideInLeft" style={{ animationDelay: '0.3s' }}>
-                <div className="backdrop-blur-xl bg-black/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+            <div className="absolute bottom-2 sm:bottom-6 left-2 sm:left-6 animate-slideInLeft scale-75 sm:scale-100 origin-bottom-left" style={{ animationDelay: '0.3s' }}>
+                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
                     <div className="text-cyan-400 text-[10px] sm:text-xs space-y-1">
                         <div className="flex items-center gap-2">
                             <span className="text-cyan-500">▸</span>
@@ -282,8 +282,8 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                 </div>
             </div>
 
-            <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 animate-slideInRight" style={{ animationDelay: '0.3s' }}>
-                <div className="backdrop-blur-xl bg-black/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+            <div className="absolute bottom-2 sm:bottom-6 right-2 sm:right-6 animate-slideInRight scale-75 sm:scale-100 origin-bottom-right" style={{ animationDelay: '0.3s' }}>
+                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
                     <div className="flex items-center gap-2 text-cyan-400 text-xs">
                         <span className="font-semibold">CONNECTION</span>
                         <div className="flex gap-0.5">

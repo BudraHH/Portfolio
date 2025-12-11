@@ -160,10 +160,10 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
         const displayPath = formatPath(pathArray);
         return (
             <div className="flex shrink-0 pt-[2px]">
-                <span className="text-emerald-400 font-bold">dev@portfolio</span>
-                <span className="text-gray-400">:</span>
-                <span className="text-blue-400">{displayPath}</span>
-                <span className="text-gray-400">$</span>
+                <span className="text-cyan-400 font-bold">dev@portfolio</span>
+                <span className="text-cyan-500/60">:</span>
+                <span className="text-cyan-300">{displayPath}</span>
+                <span className="text-cyan-400">$</span>
             </div>
         );
     };
@@ -236,6 +236,42 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
                     });
                 }, 500);
                 return;
+            } else if (filename === 'resume-download.sh') {
+                // GENERATE RANDOM PID
+                const randomPid = Math.floor(Math.random() * 9000) + 1000;
+
+                setHistory(prev => [...prev, {
+                    type: 'output',
+                    content: `[INIT] Initializing resume download utility...`
+                }]);
+
+                setTimeout(() => {
+                    setHistory(prev => [...prev,
+                    { type: 'output', content: `[INFO] Target file: Resume.pdf` },
+                    { type: 'output', content: `[INFO] Spawning download manager...` }
+                    ]);
+                }, 200);
+
+                setTimeout(() => {
+                    setHistory(prev => [...prev, {
+                        type: 'output',
+                        content: `[SUCCESS] Download manager spawned (PID: ${randomPid}).`
+                    }]);
+                    setHistory(prev => [...prev, {
+                        type: 'output',
+                        content: `Monitor the new window for download progress.`
+                    }]);
+
+                    // USE INTERNAL SCRIPT IF AVAILABLE, OTHERWISE CONTENT
+                    const scriptToRun = childNode.internalScript || childNode.content;
+
+                    onOpenApp('Installer', {
+                        script: scriptToRun,
+                        pid: randomPid,
+                        title: 'Resume Download'
+                    });
+                }, 700);
+                return;
             } else if (filename === 'projects-list.sh') {
                 setHistory(prev => [...prev,
                 { type: 'output', content: "[INIT] Connecting to GitHub API..." },
@@ -258,6 +294,29 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
 
                     onOpenApp('Firefox', { url: "https://portfolio.com/projects", pid: 1337 });
                 }, 1500);
+                return;
+
+            } else if (filename === 'career-journey.sh') {
+                // Generate random PID for the app
+                const randomPid = Math.floor(Math.random() * 9000) + 1000;
+
+                setHistory(prev => [...prev, {
+                    type: 'output',
+                    content: `[INIT] Loading career timeline data...`
+                }]);
+
+                setTimeout(() => {
+                    setHistory(prev => [...prev, { type: 'output', content: `[INFO] Spawning timeline viewer...` }]);
+                }, 300);
+
+                setTimeout(() => {
+                    setHistory(prev => [...prev, { type: 'output', content: `[SUCCESS] Timeline viewer active (PID: ${randomPid}).` }]);
+
+                    // Launch CareerJourney as a visual app (like Hero)
+                    onOpenApp('CareerJourney', {
+                        pid: randomPid
+                    });
+                }, 600);
                 return;
 
             } else if (filename === 'info-run.sh') {
@@ -334,9 +393,9 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
                         const appName = appMatch ? appMatch[1] : null;
 
                         if (appName) {
-                            // Map simplified names if needed, or pass directly (Hero -> About mapping if specific logic needed?)
-                            // Assuming onOpenApp handles 'Hero' mapping to 'About' or handled in GUI
-                            const validApp = appName === 'Hero' ? 'About' : appName;
+                            // Map simplified names if needed, or pass directly (Hero -> Info mapping if specific logic needed?)
+                            // Assuming onOpenApp handles 'Hero' mapping to 'Info' or handled in GUI
+                            const validApp = appName === 'Hero' ? 'Info' : appName;
 
                             setTimeout(() => {
                                 onOpenApp(validApp, { pid: executionPid });
@@ -409,6 +468,31 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
                 const treeOutput = generateTree(currentNode);
                 setHistory(prev => [...prev, { type: 'output', content: treeOutput.join('\n') }]);
             }
+            return;
+        }
+
+        // --- DOWNLOAD COMMAND ---
+        if (cmd === "download") {
+            const url = args[0];
+            const filename = args[1] || url.split('/').pop();
+
+            if (!url) {
+                setHistory(prev => [...prev, { type: 'error', content: 'download: missing file URL' }]);
+                return;
+            }
+
+            // Trigger actual browser download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setHistory(prev => [...prev, {
+                type: 'output',
+                content: `[SUCCESS] Downloading ${filename}...`
+            }]);
             return;
         }
 
@@ -525,36 +609,40 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
         }
     };
 
-    // Theme colors
-    const borderColor = "border-cyan-500/20";
-    const headerFrom = "from-[#0a1520]";
-    const headerTo = "to-[#0f1c29]";
-    const iconColor = "text-gray-500";
-    const textColor = "text-gray-400";
 
     return (
         <div
-            className={`w-full h-full flex flex-col font-mono text-sm bg-[#050a0f] rounded-lg overflow-hidden border ${borderColor} shadow-[0_0_20px_rgba(0,0,0,0.5)] relative transition-colors duration-300`}
+            className={`w-full h-full flex flex-col font-mono text-sm 
+                bg-[radial-gradient(circle_at_10%_20%,rgba(0,255,255,0.08)_0%,rgba(0,0,0,0.91)_100%)]
+                backdrop-blur-[24px] backdrop-brightness-75
+                rounded-lg overflow-hidden border border-cyan-500/20 
+                shadow-[0_0_20px_rgba(0,0,0,0.5)] relative transition-colors duration-300`}
             onClick={handleContainerClick}
         >
-            {/* CRT/Scanline Overlay */}
-            <div className="absolute inset-0 pointer-events-none z-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] opacity-20" />
+            {/* Visual overlays */}
+            <div className="absolute inset-0 pointer-events-none
+                bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%),repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)]
+                ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)]
+                rounded-lg mix-blend-overlay opacity-30 z-0" />
+            <div className="absolute -inset-1 rounded-lg bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none z-0" />
 
             {/* Header / Title Bar */}
-            <div className={`window-drag-handle h-12 flex items-center px-4 bg-gradient-to-r ${headerFrom} ${headerTo} border-b ${borderColor} select-none shrink-0 z-30`}>
+            <div className={`window-drag-handle h-12 flex items-center px-4 
+                bg-gradient-to-r from-[#0f0f0fE6] to-[#1a1a1aE6]
+                border-b border-cyan-500/20 select-none shrink-0 z-30 cursor-grab active:cursor-grabbing`}>
                 <div className="flex gap-2 group/controls" onMouseDown={(e) => e.stopPropagation()}>
-                    <button onClick={onClose} className="w-3 h-3 rounded-full bg-[#ff5f56] hover:bg-[#ff5f56]/80 flex items-center justify-center">
-                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-black/50">×</span>
+                    <button onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)] hover:bg-red-600 flex items-center justify-center transition-colors">
+                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-red-900">×</span>
                     </button>
-                    <button onClick={onMinimize} className="w-3 h-3 rounded-full bg-[#ffbd2e] hover:bg-[#ffbd2e]/80 flex items-center justify-center">
-                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-black/50">−</span>
+                    <button onClick={onMinimize} className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)] hover:bg-yellow-500 flex items-center justify-center transition-colors">
+                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-yellow-900">−</span>
                     </button>
-                    <button onClick={onMaximize} className="w-3 h-3 rounded-full bg-[#27c93f] hover:bg-[#27c93f]/80 flex items-center justify-center">
-                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-black/50">+</span>
+                    <button onClick={onMaximize} className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)] hover:bg-green-600 flex items-center justify-center transition-colors">
+                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-green-900">+</span>
                     </button>
                 </div>
-                <div className={`flex-1 text-center text-xs ${textColor} font-medium flex items-center justify-center gap-2`}>
-                    <FaTerminal className={iconColor} />
+                <div className={`flex-1 text-center text-xs text-cyan-400/70 font-medium flex items-center justify-center gap-2`}>
+                    <FaTerminal className="text-cyan-400" />
                     <span>{'dev — -zsh — 80×24'}</span>
                 </div>
                 <div className="w-12" /> {/* Spacer for centering */}
@@ -579,7 +667,7 @@ export default function Terminal({ pid = 1337, onClose, onMinimize, onMaximize, 
 
                         <div className="relative flex-1 justify-center items-center min-w-0 break-all font-mono">
                             {/* Visual Render of Input + Cursor */}
-                            <div className="relative z-10 whitespace-pre-wrap break-all pointer-events-none text-gray-200">
+                            <div className="relative z-10 whitespace-pre-wrap break-all pointer-events-none text-cyan-100/90">
                                 <span>{currentInput.slice(0, cursorPos)}</span>
                                 <span className="relative inline-block">
                                     <span className="absolute -left-[0.1em] -top-[0.05em] text-cyan-400 animate-pulse select-none">▉</span>

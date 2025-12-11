@@ -3,7 +3,7 @@ import { FaLightbulb } from 'react-icons/fa';
 
 const contentData = {
     welcome: {
-        title: "Welcome to BudraOS",
+        title: "Welcome to OS_Simulation",
         content: (
             <div className="space-y-6">
                 <p className="text-cyan-100/90 leading-relaxed">
@@ -67,7 +67,7 @@ const contentData = {
         )
     },
     about: {
-        title: "About This Project",
+        title: "Info This Project",
         content: (
             <div className="space-y-4">
                 <p className="text-cyan-100/80">

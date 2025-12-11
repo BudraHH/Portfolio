@@ -35,6 +35,29 @@ export default function ChildProcessTerminal({ pid, launchParams, onClose, onMin
                     return;
                 }
 
+                // Handle download command
+                if (line.startsWith('download ')) {
+                    const stepDelay = 150;
+                    delay += stepDelay;
+
+                    setTimeout(() => {
+                        const parts = line.split(' ');
+                        const url = parts[1];
+                        const filename = parts[2] || url.split('/').pop();
+
+                        // Trigger actual browser download
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        // Don't add to history, just trigger download silently
+                    }, delay);
+                    return;
+                }
+
                 // Heuristic for delay
                 const stepDelay = line.startsWith("echo") || line.startsWith("#") ? 150 : 600;
                 delay += stepDelay;
@@ -110,6 +133,15 @@ export default function ChildProcessTerminal({ pid, launchParams, onClose, onMin
                     if (rawOutput.includes("System ready")) {
                         setIsComplete(true);
                         setProgress(100);
+                        // Don't auto-close for skills installer
+                    } else if (rawOutput.includes("Check your browser's Downloads folder")) {
+                        setIsComplete(true);
+                        setProgress(100);
+
+                        // Auto-close only for resume download after 2 seconds
+                        setTimeout(() => {
+                            onClose();
+                        }, 2000);
                     }
 
                 }, delay);
@@ -118,7 +150,7 @@ export default function ChildProcessTerminal({ pid, launchParams, onClose, onMin
             // Initial message
             setHistory([{ type: 'output', content: "Initializing automated task..." }]);
         }
-    }, [launchParams]);
+    }, [launchParams, onClose]);
 
     // Spinner animation
     useEffect(() => {
@@ -136,59 +168,74 @@ export default function ChildProcessTerminal({ pid, launchParams, onClose, onMin
         }
     }, [history]);
 
-    // Theme consts (CYAN)
-    const borderColor = "border-cyan-500/30";
-    const headerFrom = "from-[#0a1520]";
-    const headerTo = "to-[#0f1c29]";
-    const iconColor = "text-cyan-500";
-    const textColor = "text-cyan-400";
-
     return (
         <div
-            className={`w-full h-full flex flex-col font-mono text-sm bg-[#050a0f] rounded-lg overflow-hidden border ${borderColor} shadow-[0_0_20px_rgba(34,211,238,0.1)] relative transition-colors duration-300`}
+            className={`w-full h-full flex flex-col font-mono text-sm 
+                bg-[radial-gradient(circle_at_10%_20%,rgba(0,255,255,0.08)_0%,rgba(0,0,0,0.91)_100%)]
+                backdrop-blur-[24px] backdrop-brightness-75
+                rounded-lg overflow-hidden border border-cyan-500/20 
+                shadow-[0_0_20px_rgba(0,0,0,0.5)] relative transition-colors duration-300`}
         >
-            {/* CRT/Scanline Overlay (Cyan tint) */}
-            <div className="absolute inset-0 pointer-events-none z-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(34,211,238,0.03),rgba(0,0,0,0.02),rgba(34,211,238,0.03))] bg-[length:100%_2px,3px_100%] opacity-20" />
+            {/* Visual overlays */}
+            <div className="absolute inset-0 pointer-events-none
+                bg-[linear-gradient(135deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0)_60%),repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_1px,transparent_1px,transparent_2px)]
+                ring-1 ring-cyan-400/10 shadow-[inset_0_0_60px_rgba(34,211,238,0.1)]
+                rounded-lg mix-blend-overlay opacity-30 z-0" />
+            <div className="absolute -inset-1 rounded-lg bg-cyan-400/10 blur-2xl animate-pulse-slow pointer-events-none z-0" />
 
             {/* Header / Title Bar */}
-            <div className={`window-drag-handle h-10 flex items-center px-3 bg-gradient-to-r ${headerFrom} ${headerTo} border-b ${borderColor} select-none shrink-0 z-30 justify-between`}>
+            <div className={`window-drag-handle h-10 flex items-center px-3 
+                bg-gradient-to-r from-[#0f0f0fE6] to-[#1a1a1aE6]
+                border-b border-cyan-500/20 select-none shrink-0 z-30 cursor-grab active:cursor-grabbing justify-between`}>
                 <div className="flex gap-2 group/controls" onMouseDown={(e) => e.stopPropagation()}>
-                    <button onClick={onClose} className="w-3 h-3 rounded-full bg-[#ff5f56] hover:bg-[#ff5f56]/80 flex items-center justify-center">
-                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-black/50">×</span>
+                    <button onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_rgba(255,0,0,0.8)] hover:bg-red-600 flex items-center justify-center transition-colors">
+                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-red-900">×</span>
                     </button>
-                    <button onClick={onMinimize} className="w-3 h-3 rounded-full bg-[#ffbd2e] hover:bg-[#ffbd2e]/80 flex items-center justify-center">
-                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-black/50">−</span>
+                    <button onClick={onMinimize} className="w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(255,255,0,0.8)] hover:bg-yellow-500 flex items-center justify-center transition-colors">
+                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-yellow-900">−</span>
                     </button>
-                    <button onClick={onMaximize} className="w-3 h-3 rounded-full bg-[#27c93f] hover:bg-[#27c93f]/80 flex items-center justify-center">
-                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-black/50">+</span>
+                    <button onClick={onMaximize} className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(0,255,0,0.8)] hover:bg-green-600 flex items-center justify-center transition-colors">
+                        <span className="opacity-0 group-hover/controls:opacity-100 text-[8px] font-bold text-green-900">+</span>
                     </button>
                 </div>
 
                 {/* Center Title with Spinner/Check */}
-                <div className={`flex items-center gap-2 ${textColor} text-xs font-bold tracking-wide opacity-90`}>
+                <div className={`flex items-center gap-2 text-cyan-400/70 text-xs font-bold tracking-wide`}>
                     {!isComplete ? (
                         <span className="text-cyan-400 animate-pulse">{spinnerFrames[spinnerStep]}</span>
                     ) : (
                         <FaCheckCircle className="text-cyan-400" />
                     )}
-                    <span>PACKAGE MANAGED</span>
+                    <span>{launchParams?.title || 'PROCESS MANAGER'}</span>
                 </div>
 
                 {/* PID */}
-                <div className="text-[10px] text-cyan-600 font-mono">
+                <div className="text-[10px] text-cyan-400/60 font-mono">
                     PID:{launchParams?.pid || pid || '0000'}
                 </div>
             </div>
 
             {/* Progress Bar (Cyan) */}
             {!isComplete && (
-                <div className="h-[2px] w-full bg-cyan-900/30">
+                <div className="h-[2px] w-full bg-cyan-900/30 relative z-10">
                     <div
-                        className="h-full bg-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all duration-300 ease-out"
-                        style={{ width: `${progress}%` }}
+                        className="h-full bg-gradient-to-r from-cyan-500 via-emerald-400 to-cyan-500 shadow-[0_0_10px_rgba(34,211,238,0.5)] transition-all duration-300 ease-out"
+                        style={{
+                            width: `${progress}%`,
+                            backgroundSize: '200% 100%',
+                            animation: 'shimmer 2s infinite linear'
+                        }}
                     />
                 </div>
             )}
+
+            {/* Shimmer animation */}
+            <style jsx>{`
+                @keyframes shimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+            `}</style>
 
             {/* Terminal Body */}
             <div

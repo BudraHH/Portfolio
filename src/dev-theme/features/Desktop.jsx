@@ -6,6 +6,7 @@ import FilesExplorer from "../components/applications/desktop-applications/files
 import HelpCenter from "../components/applications/desktop-applications/help-center/HelpCenter.jsx";
 import Thunderbird from "../components/applications/desktop-applications/thunder-bird/Thunderbird.jsx";
 import Hero from "../sections/Hero.jsx";
+import CareerJourney from "../sections/career/CareerJourney.jsx";
 import React, { useState, useCallback, useRef, useEffect } from "react";
 
 const Window = ({ id, title, children, initialPosition, initialSize, onClose, onFocus, isActive, zIndex, isMinimized, onToggleMinimize }) => {
@@ -226,7 +227,8 @@ const getWindowContent = (tab, onOpenApp) => {
         'Thunderbird': <Thunderbird {...commonProps} />,
         'Files': <FilesExplorer {...commonProps} />,
         'Help': <HelpCenter {...commonProps} />,
-        'About': <Hero {...commonProps} />
+        'About': <Hero {...commonProps} />,
+        'CareerJourney': <CareerJourney {...commonProps} />
     };
 
     return contentMap[label] || <div className="p-4 text-cyan-400">Content not found</div>;
@@ -234,7 +236,7 @@ const getWindowContent = (tab, onOpenApp) => {
 
 const getInitialWindowProps = (label, index) => {
     const isTerminal = label === 'Terminal' || label === 'Installer';
-    const isHero = label === 'About';
+    const isHero = label === 'Info' || label === 'CareerJourney';
 
     const size = isTerminal
         ? { width: 650, height: 450 }

@@ -17,7 +17,7 @@ const Welcome = ({ onSelectTheme }) => {
     }, []);
 
     return (
-        <div className="relative min-h-screen w-full bg-[#050a0f] overflow-hidden flex flex-col items-center justify-center font-sans antialiased selection:bg-cyan-500/30">
+        <div className="relative min-h-screen w-full bg-[#050a0f] overflow-hidden flex flex-col items-center justify-center font-sans antialiased selection:bg-cyan-500/30 py-8 sm:py-0">
             {/* Dynamic Background */}
             <div
                 className="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-1000"
@@ -38,31 +38,31 @@ const Welcome = ({ onSelectTheme }) => {
             />
 
             {/* Content Container */}
-            <div className="relative z-10 w-full max-w-6xl px-6 flex flex-col items-center">
+            <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col items-center">
 
                 {/* Header / Greeting */}
-                <div className="text-center mb-16 space-y-4 animate-fadeInUp">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium tracking-wider uppercase mb-4">
+                <div className="text-center mb-10 md:mb-16 space-y-4 animate-fadeInUp w-full px-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] sm:text-xs font-medium tracking-wider uppercase mb-2 sm:mb-4">
                         <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                         System Ready
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-200 tracking-tight">
+                    <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-100 to-cyan-200 tracking-tight leading-tight">
                         Hello, I'm <span className="text-cyan-400">Budra</span>
                     </h1>
-                    <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-zinc-400 text-sm sm:text-base md:text-xl max-w-xl md:max-w-2xl mx-auto leading-relaxed px-2">
                         I craft digital experiences. Choose your preferred interface to explore my portfolio.
                     </p>
                 </div>
 
                 {/* Theme Selection Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8 w-full max-w-sm sm:max-w-xl md:max-w-4xl mx-auto">
 
                     {/* Developer OS Card */}
                     <button
                         onClick={() => onSelectTheme('dev')}
                         onMouseEnter={() => setIsHovered('dev')}
                         onMouseLeave={() => setIsHovered(null)}
-                        className={`group relative p-8 rounded-3xl text-left transition-all duration-500 border
+                        className={`group relative p-6 sm:p-8 rounded-2xl sm:rounded-3xl text-left transition-all duration-500 border
                             ${isHovered === 'dev'
                                 ? 'bg-[#0a1520] border-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.15)] scale-[1.02]'
                                 : 'bg-[#0a1520]/60 border-white/5 hover:border-white/10'
@@ -71,12 +71,12 @@ const Welcome = ({ onSelectTheme }) => {
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" />
 
                         <div className="relative z-10 flex flex-col h-full">
-                            <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center mb-6 group-hover:bg-cyan-500/20 transition-colors">
-                                <FaTerminal className="text-2xl text-cyan-400" />
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-cyan-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-cyan-500/20 transition-colors">
+                                <FaTerminal className="text-xl sm:text-2xl text-cyan-400" />
                             </div>
 
-                            <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-cyan-200 transition-colors">Developer OS</h3>
-                            <p className="text-zinc-400 text-sm leading-relaxed mb-8 flex-1">
+                            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-cyan-200 transition-colors">Developer OS</h3>
+                            <p className="text-zinc-400 text-sm leading-relaxed mb-6 sm:mb-8 flex-1">
                                 An immersive, terminal-inspired desktop environment. Experience my work through key commands, file systems, and window management.
                             </p>
 
@@ -91,7 +91,7 @@ const Welcome = ({ onSelectTheme }) => {
                         onClick={() => onSelectTheme('normal')}
                         onMouseEnter={() => setIsHovered('normal')}
                         onMouseLeave={() => setIsHovered(null)}
-                        className={`group relative p-8 rounded-3xl text-left transition-all duration-500 border
+                        className={`group relative p-6 sm:p-8 rounded-2xl sm:rounded-3xl text-left transition-all duration-500 border
                             ${isHovered === 'normal'
                                 ? 'bg-[#0a1520] border-blue-500/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] scale-[1.02]'
                                 : 'bg-[#0a1520]/60 border-white/5 hover:border-white/10'
@@ -100,12 +100,12 @@ const Welcome = ({ onSelectTheme }) => {
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl" />
 
                         <div className="relative z-10 flex flex-col h-full">
-                            <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
-                                <FaLaptopCode className="text-2xl text-blue-400" />
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4 sm:mb-6 group-hover:bg-blue-500/20 transition-colors">
+                                <FaLaptopCode className="text-xl sm:text-2xl text-blue-400" />
                             </div>
 
-                            <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-blue-200 transition-colors">Standard View</h3>
-                            <p className="text-zinc-400 text-sm leading-relaxed mb-8 flex-1">
+                            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-blue-200 transition-colors">Standard View</h3>
+                            <p className="text-zinc-400 text-sm leading-relaxed mb-6 sm:mb-8 flex-1">
                                 A clean, modern single-page portfolio layout. Straightforward and content-focused for a classic browsing experience.
                             </p>
 

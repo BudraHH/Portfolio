@@ -67,7 +67,7 @@ export default function FirefoxApp({ onClose, onMinimize, onMaximize, isMaximize
     const [nextTabId, setNextTabId] = useState(2);
     const [isLoading, setIsLoading] = useState(false); // Default to false for new tab
     const [bookmarks, setBookmarks] = useState([
-        { title: "About Me", url: "https://portfolio.com/info" },
+        { title: "Info Me", url: "https://portfolio.com/info" },
         { title: "Projects", url: "https://portfolio.com/projects" },
         { title: "Resume", url: "/public/budra-resume" }
     ]);

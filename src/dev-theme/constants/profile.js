@@ -1,6 +1,6 @@
-import { FaBuilding, FaMapMarkerAlt, FaLink, FaTwitter } from "react-icons/fa";
+import {FaBuilding, FaMapMarkerAlt, FaLink, FaTwitter, FaInstagram} from "react-icons/fa";
 
-// Profile/About Me Header Information
+// Profile/Info Me Header Information
 export const ABOUT_ME_HEADER = {
     title: "Hari Hara Budra",
     subtitle: "BudraHH",
@@ -17,7 +17,7 @@ export const CONTACTS = [
     { icon: FaBuilding, text: 'Movate Technologies' },
     { icon: FaMapMarkerAlt, text: 'Chennai, India' },
     { icon: FaLink, text: 'portfolio.com' },
-    { icon: FaTwitter, text: '@budrahh' },
+    { icon: FaInstagram, text: '@budrahh' },
 ];
 
 // Navigation Tabs

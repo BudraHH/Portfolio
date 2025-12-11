@@ -1,7 +1,7 @@
 import {FaEnvelope, FaGithub, FaLinkedin, FaMapMarkerAlt} from "react-icons/fa";
 
 export const ABOUT_ME_HEADER = {
-    title: "About Me",
+    title: "Info Me",
     subtitle: "Full-Stack Developer · Problem Solver",
     bioParagraphs: [
         `I am a passionate software developer dedicated to building scalable and elegant web applications.

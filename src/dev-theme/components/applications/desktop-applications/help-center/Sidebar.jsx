@@ -5,7 +5,7 @@ const categories = [
     { id: 'welcome', label: 'Welcome', icon: FaRocket },
     { id: 'desktop', label: 'Desktop', icon: FaDesktop },
     { id: 'apps', label: 'Applications', icon: FaBook },
-    { id: 'about', label: 'About', icon: FaInfoCircle },
+    { id: 'about', label: 'Info', icon: FaInfoCircle },
 ];
 
 const Sidebar = ({ activeCategory, onSelectCategory }) => {

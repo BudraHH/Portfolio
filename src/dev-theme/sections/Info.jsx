@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { FaEnvelope, FaMapMarkerAlt, FaLink, FaTwitter, FaBuilding, FaStar, FaCodeBranch } from "react-icons/fa";
+import { FaEnvelope, FaMapMarkerAlt, FaLink, FaInstagram, FaBuilding, FaStar, FaCodeBranch } from "react-icons/fa";
 import { RiGitRepositoryLine } from "react-icons/ri";
 import image_2 from '../../assets/image_2.jpg';
 import yes from '../../assets/yes.png';

@@ -122,7 +122,88 @@ export const fileSystemTree = {
                                             name: "CareerJourney",
                                             type: "folder",
                                             children: {
-                                                "career-journey.sh": { name: "career-journey.sh", type: "shell", size: "4 KB" }
+                                                "career-journey.sh": {
+                                                    name: "career-journey.sh",
+                                                    type: "shell",
+                                                    size: "4 KB",
+                                                    content: `#!/bin/bash
+# career-journey.sh - Professional Timeline Viewer
+# --------------------------------------------------
+# Displays career milestones and achievements in
+# an interactive terminal timeline format.
+
+TARGET_SCRIPT=".internal/career_data.sh"
+VIEWER="timeline-renderer"
+
+echo "[INIT] Loading career timeline data..."
+echo "[INFO] Spawning timeline viewer..."
+
+# Launch child terminal with career data renderer
+gnome-terminal --title="Career Journey" -- bash -c "source $TARGET_SCRIPT" &
+
+echo "[SUCCESS] Timeline viewer active (PID: __PID__)."
+echo "Monitor the new window for your professional journey."
+`,
+                                                    internalScript: `#
+# ==========================================
+#      CAREER JOURNEY TIMELINE v1.0
+# ==========================================
+#
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║         PROFESSIONAL CAREER TIMELINE                       ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+sleep 300
+
+echo "┌─────────────────────────────────────────────────────────────┐"
+echo "│ 💼 Movate Technologies                                      │"
+echo "│    Software Engineer                                        │"
+echo "│    Jan 2023 - Present (2 years)                            │"
+echo "├─────────────────────────────────────────────────────────────┤"
+sleep 200
+echo "│ 🎯 Key Achievements:                                        │"
+sleep 200
+echo "│    • Architected scalable microservices (1M+ req/day)      │"
+sleep 200
+echo "│    • Reduced deployment time by 60% via CI/CD              │"
+sleep 200
+echo "│    • Mentored 3 junior developers on React practices       │"
+sleep 200
+echo "│    • Improved system performance by 40%                    │"
+sleep 200
+echo "│                                                             │"
+echo "│ 🛠️  Tech Stack:                                             │"
+sleep 200
+echo "│    React • Node.js • AWS • Docker • PostgreSQL • Redis     │"
+sleep 200
+echo "│                                                             │"
+echo "│ 📍 Chennai, India | Full-time                              │"
+echo "└─────────────────────────────────────────────────────────────┘"
+echo ""
+sleep 400
+
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+sleep 300
+
+echo "📊 Career Statistics:"
+sleep 200
+echo "   • Total Experience: 2+ years"
+sleep 200
+echo "   • Companies: 1"
+sleep 200
+echo "   • Major Projects: 5+"
+sleep 200
+echo "   • Technologies Mastered: 15+"
+sleep 200
+echo ""
+
+echo "════════════════════════════════════════════════════════════════"
+echo ""
+echo "✅ Timeline loaded successfully."
+echo "💡 Tip: Add more career milestones by updating career data."
+`
+                                                }
                                             }
                                         },
                                         "Contact": {
@@ -239,7 +320,73 @@ echo "[SUCCESS] Viewer active (PID: __PID__)."
                                             name: "Resume",
                                             type: "folder",
                                             children: {
-                                                "resume-download.sh": { name: "resume-download.sh", type: "shell", size: "12 KB" }
+                                                "resume-download.sh": {
+                                                    name: "resume-download.sh",
+                                                    type: "shell",
+                                                    size: "3 KB",
+                                                    content: `#!/bin/bash
+# resume-download.sh - Resume Download Utility
+# ---------------------------------------------
+# Spawns a child terminal to download and verify
+# the latest resume PDF with progress tracking.
+
+TARGET_SCRIPT=".internal/resume_downloader.sh"
+RESUME_FILE="Resume.pdf"
+
+echo "[INIT] Initializing resume download utility..."
+echo "[INFO] Target file: $RESUME_FILE"
+echo "[INFO] Spawning download manager..."
+
+# Launch child terminal with download process
+gnome-terminal --title="Resume Download" -- bash -c "source $TARGET_SCRIPT" &
+
+echo "[SUCCESS] Download manager spawned (PID: __PID__)."
+echo "Monitor the new window for download progress."
+`,
+                                                    internalScript: `#!/bin/bash
+# Internal Resume Download Manager
+# =================================
+
+RESUME_FILE="Resume.pdf"
+RESUME_URL="/resume.pdf"
+DEFAULT_DOWNLOAD_PATH="~/Downloads/Resume.pdf"
+FILE_SIZE="2.4 MB"
+
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║           RESUME DOWNLOAD MANAGER v1.0                     ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+echo "[INFO] Initializing download session..."
+echo "[INFO] Target: $RESUME_FILE"
+echo "[INFO] Destination: $DOWNLOAD_PATH"
+echo "[INFO] Source: portfolio.dev/resume"
+echo ""
+echo "[INFO] Initiating browser download..."
+download /resume.pdf Resume.pdf
+sleep 3000
+echo "[SAVE] Writing file to disk..."
+
+echo "[PROGRESS] ▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 10%"
+echo "[PROGRESS] ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 30%"
+echo "[PROGRESS] ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░ 50%"
+echo "[PROGRESS] ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░ 70%"
+echo "[PROGRESS] ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░ 90%"
+echo "[PROGRESS] ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%"
+echo ""
+echo "[SUCCESS] Download complete!"
+echo "[INFO] Downloaded: $FILE_SIZE"
+echo "[SUCCESS] Resume downloaded to your system!"
+echo "[INFO] Transfer rate: 1.2 MB/s"
+echo ""
+sleep 400
+echo ""
+echo "💡 Tip: Check your browser's Downloads folder"
+echo "💡 You can also access it from ~/Documents/Resume.pdf"
+echo ""
+sleep 100
+echo "Exiting..."
+`
+                                                }
                                             }
                                         },
                                         "Skills": {
