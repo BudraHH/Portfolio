@@ -1,13 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { FaGraduationCap, FaBriefcase, FaCode } from 'react-icons/fa';
+import { EXPERIENCE_DATA } from '../../constants/experience';
 
 /**
  * 3D Tilt Card Component for extra interactivity
  */
 const TiltCard = ({ children, className }) => {
     const ref = useRef(null);
-    const [hover, setHover] = useState(false);
 
     const x = useSpring(0, { stiffness: 150, damping: 15 });
     const y = useSpring(0, { stiffness: 150, damping: 15 });
@@ -28,7 +28,6 @@ const TiltCard = ({ children, className }) => {
     };
 
     const handleMouseLeave = () => {
-        setHover(false);
         x.set(0);
         y.set(0);
     };
@@ -37,7 +36,6 @@ const TiltCard = ({ children, className }) => {
         <motion.div
             ref={ref}
             onMouseMove={handleMouseMove}
-            onMouseEnter={() => setHover(true)}
             onMouseLeave={handleMouseLeave}
             style={{ transformStyle: "preserve-3d", transform }}
             className={className}
@@ -85,6 +83,7 @@ const TimelineCard = ({ data, index }) => {
                         <motion.div
                             initial={{ opacity: 0, x: isEven ? -20 : 20 }}
                             whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true, amount: 0.25 }}
                             transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
                             className={`flex items-center gap-3 text-3xl font-bold text-white ${isEven ? 'flex-row' : 'flex-row-reverse'}`}
                         >
@@ -94,6 +93,7 @@ const TimelineCard = ({ data, index }) => {
                         <motion.span
                             initial={{ opacity: 0 }}
                             whileInView={{ opacity: 1 }}
+                            viewport={{ once: true, amount: 0.25 }}
                             transition={{ duration: 0.6, delay: 0.3 }}
                             className={`text-sm text-cyan-400 font-mono tracking-[0.3em] uppercase ${isEven ? 'text-left' : 'text-right'}`}
                         >
@@ -110,7 +110,7 @@ const TimelineCard = ({ data, index }) => {
                 {/* Ripple Effect */}
                 <motion.div
                     initial={{ scale: 0, opacity: 0 }}
-                    style={{ scale: scaleDot, opacity: (opacityYear/4) * 3 }}
+                    style={{ scale: scaleDot, opacity: (opacityYear / 4) * 3 }}
                     className="absolute w-24 h-24 rounded-full border border-cyan-500/30"
                 />
                 <motion.div
@@ -193,38 +193,30 @@ const Career = () => {
     // Laser Line Animation
     const LineHeight = useTransform(scrollYProgress, [0.2, 0.6], ["0%", "100%"]);
 
-    const timelineData = [
-        {
-            type: 'work',
-            year: "2023",
-            role: "Senior Full Stack Dev",
-            company: "Tech Solutions Inc.",
-            location: "Remote",
-            period: "2023 - Present",
-            description: "Architecting scale-ready enterprise dashboards using React 18 concurrencies. Orchestrating microservices with Node.js and Docker for high-availability systems.",
-            tech: ["REACT", "NEXT.JS", "NODE", "AWS", "DOCKER"]
-        },
-        {
-            type: 'work',
-            year: "2021",
-            role: "Web Developer",
-            company: "Digital Agency",
-            location: "Los Angeles",
-            period: "2021 - 2023",
-            description: "Led the frontend migration of legacy sites to modern Jamstack architectures. Achieved a consistent 40% reduction in TTI (Time to Interactive).",
-            tech: ["VUE", "JS", "SCSS", "FIREBASE"]
-        },
-        {
-            type: 'education',
-            year: "2017",
-            role: "B.Tech Comp. Science",
-            company: "University of Technology",
-            location: "India",
-            period: "2017 - 2021",
-            description: "Specialized in High-Performance Computing and Web Technologies. Captained the University Code Warriors team to nationals.",
-            tech: ["DSA", "ALGORITHMS", "JAVA", "PYTHON"]
+
+
+    // Standard Animation Variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2
+            }
         }
-    ];
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: "easeOut" }
+        }
+    };
+
+    const timelineData = EXPERIENCE_DATA;
 
     return (
         <section
@@ -232,37 +224,80 @@ const Career = () => {
             ref={sectionRef}
             className="relative py-48 bg-[#050a0f] overflow-hidden"
         >
+            {/* === Background Ambient Layers === */}
+            <div className="absolute inset-0 pointer-events-none">
+                {/* Cinematic Noise Overlay */}
+                <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
+                    style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`
+                    }}
+                />
+
+                {/* Multi-Layer Breathing Ambient Glow */}
+                <motion.div
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.1, 0.2, 0.1]
+                    }}
+                    transition={{
+                        duration: 12,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-1/4 left-0 w-[800px] h-[800px] bg-cyan-500/5 rounded-full blur-[150px] mix-blend-screen"
+                />
+
+
+            </div>
+
             <div className="max-w-7xl mx-auto px-6 relative z-10">
 
-                {/* Section Header with Reveal */}
-                <div className="flex flex-col items-center mb-10">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="relative text-center group"
-                    >
-                        <h2 className="text-6xl md:text-8xl font-bold text-white mb-6 tracking-tight relative z-10 mix-blend-overlay">
-                            Career <span className="text-cyan-500">&</span> Education
-                        </h2>
 
-                        {/* Glowing Underline */}
-                        <motion.div
-                            initial={{ width: 0 }}
-                            whileInView={{ width: 100 }}
-                            transition={{ duration: 1, delay: 0.5 }}
-                            className="h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent mx-auto rounded-full shadow-[0_0_20px_rgba(6,182,212,0.8)]"
-                        />
-
-                        {/* Huge Background Text - Fixed Position style */}
-                        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[8rem] md:text-[14rem] font-bold text-transparent stroke-cyan-500/10 whitespace-nowrap -z-10 select-none opacity-20 blur-sm">
-                            JOURNEY
-                        </span>
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.25 }}
+                    className="mb-20 "
+                >
+                    {/* Decorative Tag */}
+                    <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/30 border border-cyan-500/20 backdrop-blur-sm mb-6">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <span className="text-cyan-400 text-[10px] font-bold tracking-widest uppercase">My Journey</span>
                     </motion.div>
-                </div>
 
-                <div className="relative">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                        <motion.h2 variants={itemVariants} className="text-5xl lg:text-7xl font-bold text-white mb-6 tracking-tighter leading-[0.9]">
+                            Forging {" "}
+                            <span className="relative inline-block mt-2">
+                                <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-100 to-cyan-400">
+                                    Paths.
+                                </span>
+                                {/* Underline Accent */}
+                                <motion.div
+                                    initial={{ scaleX: 0 }}
+                                    whileInView={{ scaleX: 1 }}
+                                    viewport={{ once: true, amount: 0.25 }}
+                                    transition={{ duration: 0.8, delay: 0.5 }}
+                                    className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 via-cyan-300 to-transparent origin-left"
+                                />
+                            </span>
+                        </motion.h2>
+                        <motion.p variants={itemVariants} className="text-lg text-zinc-400 max-w-xl leading-relaxed font-light">
+                            From university projects to <span className="text-cyan-400 font-medium">production full-stack systems</span> -- a timeline of growing skills, evolving mindset, and delivering real impact.
+                        </motion.p>
+
+                    </div>
+                </motion.div>
+
+
+                <motion.div
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.8, delay: 0.6 }}
+                    className="relative"
+                >
                     {/* Static Guide Line */}
                     <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1px] -translate-x-1/2 bg-white/[0.03]" />
 
@@ -280,7 +315,7 @@ const Career = () => {
                             <TimelineCard key={index} data={item} index={index} />
                         ))}
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );

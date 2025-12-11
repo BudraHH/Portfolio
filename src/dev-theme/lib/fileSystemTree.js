@@ -1,4 +1,4 @@
-import { SKILLS } from "../../constants/skills.js";
+import { SKILL_CATEGORIES } from "../../constants/skills";
 
 // Internal Installation Log (The one that runs in the child terminal)
 const generateInternalInstallerLog = () => {
@@ -12,13 +12,14 @@ echo "[INSTALLER] Loading dependency tree..."
 echo ""
 `;
 
-    Object.entries(SKILLS).forEach(([category, skills]) => {
-        script += `echo "┌── [${category.toUpperCase()}]"\n`;
-        skills.forEach((skill, index) => {
-            const isLast = index === skills.length - 1;
+    SKILL_CATEGORIES.forEach((category) => {
+        if (category.type === 'cover' || category.type === 'back_cover' || category.type === 'synopsis') return;
+        script += `echo "┌── [${category.title.toUpperCase()}]"\n`;
+        category.skills.forEach((skill, index) => {
+            const isLast = index === category.skills.length - 1;
             const prefix = isLast ? '└──' : '├──';
-            script += `echo "│   ${prefix} ${skill.name} ${skill.version ? '@' + skill.version : ''}"\n`;
-            script += `sleep 200\n`; // Artificial delay marker for terminal parser
+            script += `echo "│   ${prefix} ${skill.name}"\n`; // Version removed in new constant, ignoring
+            script += `sleep 200\n`;
         });
         script += `echo "│"\n`;
     });

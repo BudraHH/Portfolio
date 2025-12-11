@@ -1,23 +1,24 @@
-import {FaBuilding, FaMapMarkerAlt, FaLink, FaTwitter, FaInstagram} from "react-icons/fa";
+import { PROFILE } from '../../constants/profile';
 
 // Profile/Info Me Header Information
 export const ABOUT_ME_HEADER = {
-    title: "Hari Hara Budra",
-    subtitle: "BudraHH",
-    bio: "Full Stack Developer | Building digital experiences with code and creativity. Passionate about open source and systems design.",
-    readme: [
-        `Hi there! I am a passionate software developer dedicated to building scalable and elegant web applications.`,
-        `With expertise in React, Node.js, and robust backend systems, I focus on delivering high-quality user experiences and efficient solutions.`,
-        `My journey has also led me to explore machine learning concepts and data visualization projects. I thrive on learning new technologies and solving complex problems.`
-    ]
+    title: PROFILE.NAME,
+    subtitle: PROFILE.TAGLINE, // Or use a dev-specific tagline if desired, sticking to unified for now
+    bio: PROFILE.BIO.short,
+    readme: PROFILE.BIO.paragraphs
 };
 
 // Contact Information
+import { FaBuilding, FaMapMarkerAlt, FaLink, FaInstagram } from "react-icons/fa";
+import { SOCIAL_LINKS } from '../../constants/socials';
+
 export const CONTACTS = [
-    { icon: FaBuilding, text: 'Movate Technologies' },
-    { icon: FaMapMarkerAlt, text: 'Chennai, India' },
+    { icon: FaBuilding, text: 'Movate Technologies' }, // This seems specific to dev-theme working status?
+    { icon: FaMapMarkerAlt, text: PROFILE.CONTACT.location },
     { icon: FaLink, text: 'portfolio.com' },
-    { icon: FaInstagram, text: '@budrahh' },
+    { icon: FaInstagram, text: '@budrahh' }, // Could extract handle from URL if needed, hardcoding for now or separate
+    // Note: Social links are URLs in constants, here it's display text.
+    // Ideally we parse the user from the URL or store handle separately.
 ];
 
 // Navigation Tabs
