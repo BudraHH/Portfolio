@@ -1,4 +1,25 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+
+// Memoized HUD Element Component
+const HUDElement = React.memo(({ position, animation, delay, children, scale = 'scale-75 sm:scale-100' }) => (
+    <div
+        className={`absolute ${position} ${animation} ${scale}`}
+        style={{ animationDelay: delay, willChange: 'transform, opacity' }}
+    >
+        <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+            {children}
+        </div>
+    </div>
+));
+
+HUDElement.displayName = 'HUDElement';
+
+// Move getLineStyle outside component to avoid recreation
+const getLineStyle = (message) => {
+    if (message.includes('✓')) return 'text-emerald-400 font-bold';
+    if (message.includes('>>>')) return 'text-cyan-500';
+    return 'text-cyan-500/80';
+};
 
 const DevWelcome = ({ onComplete, setShowGUI }) => {
     const [visibleLines, setVisibleLines] = useState(0);
@@ -7,8 +28,9 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
     const [showSpinner, setShowSpinner] = useState(true);
     const [isLowPowerMode, setIsLowPowerMode] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
-    const [bootMode, setBootMode] = useState(null); // 'manual' or 'automatic'
+    const [bootMode, setBootMode] = useState(null);
 
+    // Memoized boot messages
     const bootMessages = useMemo(() => [
         '',
         '    >>> Setting things up for you...',
@@ -28,7 +50,33 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
         '',
     ], []);
 
-    const PAUSE_INDEX = 13; // Index of the first Checkmark message (empty line before it is 12)
+    const PAUSE_INDEX = 13;
+
+    // Memoized particles array - generated once
+    const particles = useMemo(() =>
+        Array.from({ length: 12 }, (_, i) => ({
+            id: i,
+            style: {
+                width: '2px',
+                height: '2px',
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                background: '#06b6d4',
+                opacity: 0.6,
+                animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
+                animationDelay: `${Math.random() * 5}s`,
+            }
+        }))
+        , []);
+
+    // Memoized connection bars
+    const connectionBars = useMemo(() =>
+        [1, 2, 3, 4, 5].map(i => ({
+            id: i,
+            height: `${i * 2.5}px`,
+            delay: `${i * 0.1}s`
+        }))
+        , []);
 
     // Detect low-power mode or mobile devices
     useEffect(() => {
@@ -38,7 +86,6 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
     }, []);
 
     useEffect(() => {
-        // Pause before showing the success messages
         if (visibleLines === PAUSE_INDEX && !bootMode && !isPaused) {
             setIsPaused(true);
             return;
@@ -56,7 +103,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
             setShowSpinner(false);
             const fadeTimer = setTimeout(() => {
                 setFadeOut(true);
-                setShowGUI(true)
+                setShowGUI(true);
             }, 1000);
 
             const completeTimer = setTimeout(() => {
@@ -68,64 +115,55 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                 clearTimeout(completeTimer);
             };
         }
-    }, [visibleLines, bootMessages.length, onComplete, isPaused, bootMode]);
+    }, [visibleLines, bootMessages.length, onComplete, setShowGUI, isPaused, bootMode, PAUSE_INDEX]);
 
-    const handleContinue = (mode) => {
-        setBootMode(mode);
+    // Memoized button handlers
+    const handleManualMode = useCallback(() => {
+        setBootMode('manual');
         setIsPaused(false);
-    };
+    }, []);
 
-    const getLineStyle = (message) => {
-        if (message.includes('✓')) {
-            return 'text-emerald-400 font-bold';
-        }
-        if (message.includes('>>>')) {
-            return 'text-cyan-500';
-        }
-        return 'text-cyan-500/80';
-    };
+    const handleAutomaticMode = useCallback(() => {
+        setBootMode('automatic');
+        setIsPaused(false);
+    }, []);
+
+    // Memoized progress bar style
+    const progressBarStyle = useMemo(() => ({
+        width: `${progress}%`,
+        willChange: progress < 100 ? 'width' : 'auto'
+    }), [progress]);
 
     return (
         <div
             className={`fixed inset-0 bg-[#050a0f] font-mono overflow-hidden z-[9999] transition-opacity duration-1000 selection:bg-cyan-500/30 ${fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
                 }`}
         >
-            {/* Optimized background - reduced particle count and removed expensive effects on mobile */}
+            {/* Optimized background effects */}
             {!isLowPowerMode && (
                 <>
                     <div className="absolute inset-0 opacity-20">
-                        {/* Reduced floating particles from 40 to 12 */}
                         <div className="absolute w-full h-full">
-                            {[...Array(12)].map((_, i) => (
+                            {particles.map((particle) => (
                                 <div
-                                    key={i}
+                                    key={particle.id}
                                     className="absolute rounded-full"
-                                    style={{
-                                        width: '2px',
-                                        height: '2px',
-                                        top: `${Math.random() * 100}%`,
-                                        left: `${Math.random() * 100}%`,
-                                        background: '#06b6d4',
-                                        opacity: 0.6,
-                                        animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
-                                        animationDelay: `${Math.random() * 5}s`,
-                                    }}
+                                    style={particle.style}
                                 />
                             ))}
                         </div>
                     </div>
 
-                    {/* Simplified scanline - removed blur for performance */}
                     <div className="absolute inset-0 pointer-events-none opacity-30">
                         <div
                             className="absolute w-full h-1 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent animate-scan"
-                            style={{ animationDuration: '6s' }}
+                            style={{ animationDuration: '6s', willChange: 'transform' }}
                         />
                     </div>
                 </>
             )}
 
-            {/* Static grid pattern - more performant than animated particles */}
+            {/* Static grid pattern */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">
                 <div
                     className="w-full h-full"
@@ -140,7 +178,8 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
             </div>
 
             {/* Vignette effect */}
-            <div className="absolute inset-0 pointer-events-none opacity-50"
+            <div
+                className="absolute inset-0 pointer-events-none opacity-50"
                 style={{
                     background: 'radial-gradient(circle at center, transparent 0%, rgba(5,10,15,0.8) 100%)'
                 }}
@@ -149,9 +188,8 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
             {/* Main content */}
             <div className="relative flex items-center justify-center min-h-screen p-4 sm:p-8">
                 <div className="w-full max-w-4xl">
-                    {/* Enhanced acrylic card */}
                     <div className="backdrop-blur-2xl bg-[#0a1520]/40 rounded-3xl border border-cyan-500/30 shadow-[0_0_60px_rgba(6,182,212,0.2)] p-4 sm:p-8 md:p-10 transition-all duration-500 hover:border-cyan-400/50 hover:shadow-[0_0_80px_rgba(6,182,212,0.3)] min-h-[400px] sm:min-h-[500px] flex flex-col">
-                        {/* Logo or header animation */}
+                        {/* Logo */}
                         <div className="flex justify-center mb-6 shrink-0">
                             <div className="relative">
                                 <div className="w-3 h-3 bg-cyan-400 rounded-full animate-ping absolute"></div>
@@ -179,19 +217,34 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
 
                         {/* User Interaction Breakpoint */}
                         {isPaused && (
-                            <div className="flex flex-col items-center justify-center gap-6 my-8 animate-fadeIn">
-                                <h3 className="text-cyan-300 text-lg font-bold tracking-wide">Select Boot Mode</h3>
-                                <div className="flex gap-4">
+                            <div className="flex flex-col items-center justify-center gap-4 sm:gap-5 md:gap-6 my-6 sm:my-8 animate-fadeIn">
+                                <h3
+                                    className="text-cyan-300 font-bold tracking-wide text-center px-4"
+                                    style={{
+                                        fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+                                    }}
+                                >
+                                    Select Boot Mode
+                                </h3>
+                                <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 w-full max-w-md px-4">
                                     <button
-                                        onClick={() => handleContinue('manual')}
-                                        className="px-6 py-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400 hover:scale-105 transition-all duration-300 font-mono text-sm group"
+                                        onClick={handleManualMode}
+                                        className="flex-1 px-5 sm:px-6 py-3 sm:py-3.5 bg-cyan-500/10 border border-cyan-500/30 rounded-lg sm:rounded-xl text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400 hover:scale-105 transition-all duration-300 font-mono group min-h-[48px] touch-manipulation flex items-center justify-center"
+                                        style={{
+                                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                            willChange: 'transform'
+                                        }}
                                     >
                                         <span className="w-2 h-2 inline-block bg-cyan-400 rounded-full mr-2 group-hover:animate-pulse"></span>
                                         Manual Mode
                                     </button>
                                     <button
-                                        onClick={() => handleContinue('automatic')}
-                                        className="px-6 py-3 bg-transparent border border-cyan-500/30 rounded-xl text-cyan-500/80 hover:bg-cyan-500/5 hover:text-cyan-400 hover:border-cyan-400/50 transition-all duration-300 font-mono text-sm"
+                                        onClick={handleAutomaticMode}
+                                        className="flex-1 px-5 sm:px-6 py-3 sm:py-3.5 bg-transparent border border-cyan-500/30 rounded-lg sm:rounded-xl text-cyan-500/80 hover:bg-cyan-500/5 hover:text-cyan-400 hover:border-cyan-400/50 transition-all duration-300 font-mono min-h-[48px] touch-manipulation flex items-center justify-center"
+                                        style={{
+                                            fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                            willChange: 'transform'
+                                        }}
                                     >
                                         Automatic Mode
                                     </button>
@@ -199,7 +252,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                             </div>
                         )}
 
-                        {/* Enhanced spinning dots loader */}
+                        {/* Spinner */}
                         {showSpinner && !isPaused && visibleLines < bootMessages.length && (
                             <div className="flex justify-center items-center mt-8 mb-4 shrink-0">
                                 <div className="flex space-x-2.5">
@@ -216,7 +269,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                             </div>
                         )}
 
-                        {/* Enhanced progress bar */}
+                        {/* Progress bar */}
                         {visibleLines < bootMessages.length && (
                             <div className="mt-8 space-y-3 shrink-0">
                                 <div className="flex justify-between text-xs sm:text-sm text-cyan-400 font-semibold">
@@ -229,7 +282,7 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                                 <div className="relative h-2 bg-[#0a1520]/60 rounded-full overflow-hidden backdrop-blur-sm border border-cyan-900/40 shadow-inner">
                                     <div
                                         className="absolute inset-0 h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_20px_rgba(6,182,212,0.6)]"
-                                        style={{ width: `${progress}%` }}
+                                        style={progressBarStyle}
                                     >
                                         {!isPaused && <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent animate-shimmer" />}
                                     </div>
@@ -250,57 +303,49 @@ const DevWelcome = ({ onComplete, setShowGUI }) => {
                 </div>
             </div>
 
-            {/* Enhanced corner HUD elements */}
-            <div className="absolute top-2 sm:top-6 left-2 sm:left-6 space-y-2 animate-slideInLeft scale-75 sm:scale-100 origin-top-left">
-                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                    <div className="text-cyan-400 text-xs sm:text-sm font-bold tracking-wider flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
-                        PORTFOLIO
-                    </div>
-                    <div className="text-cyan-600 text-[10px] sm:text-xs mt-0.5">v2.5.0</div>
+            {/* HUD Elements - Memoized */}
+            <HUDElement position="top-2 sm:top-6 left-2 sm:left-6" animation="animate-slideInLeft" scale="scale-75 sm:scale-100 origin-top-left">
+                <div className="text-cyan-400 text-xs sm:text-sm font-bold tracking-wider flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+                    PORTFOLIO
                 </div>
-            </div>
+                <div className="text-cyan-600 text-[10px] sm:text-xs mt-0.5">v2.5.0</div>
+            </HUDElement>
 
-            <div className="absolute top-2 sm:top-6 right-2 sm:right-6 animate-slideInRight scale-75 sm:scale-100 origin-top-right">
-                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)] flex items-center gap-2">
+            <HUDElement position="top-2 sm:top-6 right-2 sm:right-6" animation="animate-slideInRight" scale="scale-75 sm:scale-100 origin-top-right">
+                <div className="flex items-center gap-2">
                     <div className="relative">
                         <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,211,238,1)]"></div>
                         <div className="absolute inset-0 w-2 h-2 bg-cyan-400 rounded-full animate-ping"></div>
                     </div>
                     <span className="text-cyan-400 text-xs sm:text-sm font-semibold">ONLINE</span>
                 </div>
-            </div>
+            </HUDElement>
 
-            <div className="absolute bottom-2 sm:bottom-6 left-2 sm:left-6 animate-slideInLeft scale-75 sm:scale-100 origin-bottom-left" style={{ animationDelay: '0.3s' }}>
-                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                    <div className="text-cyan-400 text-[10px] sm:text-xs space-y-1">
-                        <div className="flex items-center gap-2">
-                            <span className="text-cyan-500">▸</span>
-                            <span>React + Tailwind</span>
-                        </div>
+            <HUDElement position="bottom-2 sm:bottom-6 left-2 sm:left-6" animation="animate-slideInLeft" delay="0.3s" scale="scale-75 sm:scale-100 origin-bottom-left">
+                <div className="text-cyan-400 text-[10px] sm:text-xs flex items-center gap-2">
+                    <span className="text-cyan-500">▸</span>
+                    <span>React + Tailwind</span>
+                </div>
+            </HUDElement>
+
+            <HUDElement position="bottom-2 sm:bottom-6 right-2 sm:right-6" animation="animate-slideInRight" delay="0.3s" scale="scale-75 sm:scale-100 origin-bottom-right">
+                <div className="flex items-center gap-2 text-cyan-400 text-xs">
+                    <span className="font-semibold">CONNECTION</span>
+                    <div className="flex gap-0.5">
+                        {connectionBars.map((bar) => (
+                            <div
+                                key={bar.id}
+                                className="w-0.5 bg-cyan-400 rounded-sm animate-pulse"
+                                style={{
+                                    height: bar.height,
+                                    animationDelay: bar.delay,
+                                }}
+                            />
+                        ))}
                     </div>
                 </div>
-            </div>
-
-            <div className="absolute bottom-2 sm:bottom-6 right-2 sm:right-6 animate-slideInRight scale-75 sm:scale-100 origin-bottom-right" style={{ animationDelay: '0.3s' }}>
-                <div className="backdrop-blur-xl bg-[#0a1520]/60 px-3 sm:px-4 py-2 rounded-xl border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                    <div className="flex items-center gap-2 text-cyan-400 text-xs">
-                        <span className="font-semibold">CONNECTION</span>
-                        <div className="flex gap-0.5">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <div
-                                    key={i}
-                                    className="w-0.5 bg-cyan-400 rounded-sm animate-pulse"
-                                    style={{
-                                        height: `${i * 2.5}px`,
-                                        animationDelay: `${i * 0.1}s`,
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </HUDElement>
         </div>
     );
 };

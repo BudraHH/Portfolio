@@ -1,12 +1,33 @@
-import React, { useRef } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { motion, useScroll, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { FaGraduationCap, FaBriefcase, FaCode } from 'react-icons/fa';
 import { EXPERIENCE_DATA } from '../../constants/experience';
 
+// Move static animation variants outside component
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: "easeOut" }
+    }
+};
+
 /**
- * 3D Tilt Card Component for extra interactivity
+ * Memoized 3D Tilt Card Component
  */
-const TiltCard = ({ children, className }) => {
+const TiltCard = React.memo(({ children, className }) => {
     const ref = useRef(null);
 
     const x = useSpring(0, { stiffness: 150, damping: 15 });
@@ -14,7 +35,7 @@ const TiltCard = ({ children, className }) => {
 
     const transform = useMotionTemplate`rotateX(${x}deg) rotateY(${y}deg)`;
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (!ref.current) return;
         // Only apply tilt on desktop
         if (window.innerWidth < 768) return;
@@ -26,29 +47,59 @@ const TiltCard = ({ children, className }) => {
         const mouseY = e.clientY - rect.top;
         const xPct = mouseX / width - 0.5;
         const yPct = mouseY / height - 0.5;
-        x.set(yPct * -5); // Gentle tilt
+        x.set(yPct * -5);
         y.set(xPct * 5);
-    };
+    }, [x, y]);
 
-    const handleMouseLeave = () => {
+    const handleMouseLeave = useCallback(() => {
         x.set(0);
         y.set(0);
-    };
+    }, [x, y]);
 
     return (
         <motion.div
             ref={ref}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            style={{ transformStyle: "preserve-3d", transform }}
+            style={{ transformStyle: "preserve-3d", transform, willChange: 'transform' }}
             className={className}
         >
             {children}
         </motion.div>
     );
-};
+});
 
-const TimelineCard = ({ data, index }) => {
+TiltCard.displayName = 'TiltCard';
+
+// Memoized TechBadge component
+const TechBadge = React.memo(({ tech }) => (
+    <motion.span
+        whileHover={{ scale: 1.05, backgroundColor: "rgba(6,182,212,0.15)" }}
+        whileTap={{ scale: 0.95 }}
+        className="font-bold font-mono text-cyan-300 
+                   px-2 sm:px-2.5 md:px-3 
+                   py-1 sm:py-1.5 
+                   bg-cyan-950/20 
+                   rounded 
+                   border border-cyan-500/20 
+                   shadow-sm 
+                   transition-all 
+                   flex items-center gap-1
+                   min-h-[32px]
+                   touch-manipulation"
+        style={{
+            fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+            willChange: 'transform'
+        }}
+    >
+        <FaCode size={8} className="opacity-50 flex-shrink-0" />
+        {tech}
+    </motion.span>
+));
+
+TechBadge.displayName = 'TechBadge';
+
+const TimelineCard = React.memo(({ data, index }) => {
     const isEven = index % 2 === 0;
     const cardRef = useRef(null);
     const { scrollYProgress } = useScroll({
@@ -56,7 +107,7 @@ const TimelineCard = ({ data, index }) => {
         offset: ["start end", "end start"]
     });
 
-    // Parallax & Reveal Animations - Reduced on mobile
+    // Parallax & Reveal Animations
     const yYear = useTransform(scrollYProgress, [0, 1], [100, -100]);
     const opacityYear = useTransform(scrollYProgress, [0.1, 0.5, 0.9], [0, 0.8, 0]);
 
@@ -67,6 +118,20 @@ const TimelineCard = ({ data, index }) => {
     const scaleDot = useTransform(scrollYProgress, [0.45, 0.5, 0.55], [1, 2, 1]);
     const glowDot = useTransform(scrollYProgress, [0.45, 0.5, 0.55], [0, 1, 0]);
 
+    // Memoized year parallax style
+    const yearStyle = useMemo(() => ({
+        fontSize: 'clamp(4rem, 15vw, 10rem)',
+    }), []);
+
+    // Memoized icon component
+    const IconComponent = useMemo(() =>
+        data.type === 'education' ? FaGraduationCap : FaBriefcase
+        , [data.type]);
+
+    const iconColor = useMemo(() =>
+        data.type === 'education' ? 'text-cyan-200' : 'text-cyan-400'
+        , [data.type]);
+
     return (
         <div ref={cardRef} className={`relative flex flex-col md:flex-row gap-6 sm:gap-8 md:gap-0 items-center ${isEven ? 'md:flex-row-reverse' : ''} perspective-1000`}>
 
@@ -74,15 +139,15 @@ const TimelineCard = ({ data, index }) => {
             <div className={`w-full md:w-1/2 flex items-center ${isEven ? 'justify-start md:pl-16 lg:pl-20 xl:pl-24' : 'justify-end md:pr-16 lg:pr-20 xl:pr-24'}`}>
                 <div className={`relative flex flex-col ${isEven ? 'items-start' : 'items-end'}`}>
 
-                    {/* Parallax Year - Responsive sizing */}
+                    {/* Parallax Year */}
                     <motion.span
                         style={{
                             y: typeof window !== 'undefined' && window.innerWidth >= 768 ? yYear : 0,
                             opacity: opacityYear,
-                            fontSize: 'clamp(4rem, 15vw, 10rem)',
+                            ...yearStyle,
+                            willChange: 'transform, opacity'
                         }}
                         className="font-bold bg-clip-text text-transparent bg-gradient-to-b from-white/[0.08] to-transparent font-mono select-none absolute top-1/2 -translate-y-1/2 z-0 origin-center pointer-events-none tracking-tighter"
-
                     >
                         {data.year}
                     </motion.span>
@@ -98,10 +163,7 @@ const TimelineCard = ({ data, index }) => {
                                 fontSize: 'clamp(1.25rem, 4vw, 1.875rem)',
                             }}
                         >
-                            {data.type === 'education' ?
-                                <FaGraduationCap className="text-cyan-200 text-xl sm:text-2xl md:text-3xl flex-shrink-0" /> :
-                                <FaBriefcase className="text-cyan-400 text-xl sm:text-2xl md:text-3xl flex-shrink-0" />
-                            }
+                            <IconComponent className={`${iconColor} text-xl sm:text-2xl md:text-3xl flex-shrink-0`} />
                             <span className="tracking-tight drop-shadow-lg">{data.period}</span>
                         </motion.div>
                         <motion.span
@@ -114,7 +176,6 @@ const TimelineCard = ({ data, index }) => {
                                 fontSize: 'clamp(0.625rem, 1.5vw, 0.875rem)',
                             }}
                         >
-                            {/* Animated Type Indicator */}
                             <span className="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 bg-cyan-500 rounded-full mr-1.5 sm:mr-2 animate-pulse" />
                             {data.type}
                         </motion.span>
@@ -122,16 +183,16 @@ const TimelineCard = ({ data, index }) => {
                 </div>
             </div>
 
-            {/* 2. Center Timeline Node - Hidden on mobile */}
+            {/* 2. Center Timeline Node */}
             <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-y-1/2 -translate-x-1/2 items-center justify-center z-20">
                 {/* Ripple Effect */}
                 <motion.div
                     initial={{ scale: 0, opacity: 0 }}
-                    style={{ scale: scaleDot, opacity: (opacityYear / 4) * 3 }}
+                    style={{ scale: scaleDot, opacity: (opacityYear / 4) * 3, willChange: 'transform, opacity' }}
                     className="absolute w-20 lg:w-24 h-20 lg:h-24 rounded-full border border-cyan-500/30"
                 />
                 <motion.div
-                    style={{ opacity: glowDot }}
+                    style={{ opacity: glowDot, willChange: 'opacity' }}
                     className="absolute w-10 lg:w-12 h-10 lg:h-12 rounded-full bg-cyan-400/20 blur-md"
                 />
 
@@ -139,11 +200,11 @@ const TimelineCard = ({ data, index }) => {
 
                 {/* Animated Horizontal Connectors */}
                 <motion.div
-                    style={{ scaleX: lineScale }}
+                    style={{ scaleX: lineScale, willChange: 'transform' }}
                     className="absolute top-1/2 left-3 lg:left-4 w-12 lg:w-14 h-[1px] bg-gradient-to-r from-cyan-500 to-transparent origin-left"
                 />
                 <motion.div
-                    style={{ scaleX: lineScale }}
+                    style={{ scaleX: lineScale, willChange: 'transform' }}
                     className="absolute top-1/2 right-3 lg:right-4 w-12 lg:w-14 h-[1px] bg-gradient-to-l from-cyan-500 to-transparent origin-right"
                 />
             </div>
@@ -202,28 +263,7 @@ const TimelineCard = ({ data, index }) => {
 
                         <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {data.tech.map((t, i) => (
-                                <motion.span
-                                    key={i}
-                                    whileHover={{ scale: 1.05, backgroundColor: "rgba(6,182,212,0.15)" }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="font-bold font-mono text-cyan-300 
-                                               px-2 sm:px-2.5 md:px-3 
-                                               py-1 sm:py-1.5 
-                                               bg-cyan-950/20 
-                                               rounded 
-                                               border border-cyan-500/20 
-                                               shadow-sm 
-                                               transition-all 
-                                               flex items-center gap-1
-                                               min-h-[32px]
-                                               touch-manipulation"
-                                    style={{
-                                        fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                                    }}
-                                >
-                                    <FaCode size={8} className="opacity-50 flex-shrink-0" />
-                                    {t}
-                                </motion.span>
+                                <TechBadge key={i} tech={t} />
                             ))}
                         </div>
                     </div>
@@ -231,7 +271,9 @@ const TimelineCard = ({ data, index }) => {
             </div>
         </div>
     );
-};
+});
+
+TimelineCard.displayName = 'TimelineCard';
 
 const Career = () => {
     const sectionRef = useRef(null);
@@ -243,28 +285,8 @@ const Career = () => {
     // Laser Line Animation
     const LineHeight = useTransform(scrollYProgress, [0.2, 0.6], ["0%", "100%"]);
 
-    // Standard Animation Variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" }
-        }
-    };
-
-    const timelineData = EXPERIENCE_DATA;
+    // Memoized timeline data
+    const timelineData = useMemo(() => EXPERIENCE_DATA, []);
 
     return (
         <section
@@ -275,16 +297,16 @@ const Career = () => {
                        bg-[#050a0f] 
                        overflow-hidden"
         >
-            {/* === Background Ambient Layers === */}
+            {/* Background Ambient Layers */}
             <div className="absolute inset-0 pointer-events-none">
-                {/* Cinematic Noise Overlay - Responsive opacity */}
+                {/* Cinematic Noise Overlay */}
                 <div className="absolute inset-0 opacity-[0.02] sm:opacity-[0.025] md:opacity-[0.03] mix-blend-overlay"
                     style={{
                         backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`
                     }}
                 />
 
-                {/* Multi-Layer Breathing Ambient Glow - Responsive sizing */}
+                {/* Multi-Layer Breathing Ambient Glow */}
                 <motion.div
                     animate={{
                         scale: [1, 1.15, 1],
@@ -305,6 +327,7 @@ const Career = () => {
                                rounded-full 
                                blur-[100px] sm:blur-[120px] md:blur-[140px] lg:blur-[150px] 
                                mix-blend-screen"
+                    style={{ willChange: 'transform, opacity' }}
                 />
             </div>
 
@@ -360,6 +383,7 @@ const Career = () => {
                                                h-[2px] sm:h-0.5 
                                                bg-gradient-to-r from-cyan-400 via-cyan-300 to-transparent 
                                                origin-left"
+                                    style={{ willChange: 'transform' }}
                                 />
                             </span>
                         </motion.h2>
@@ -382,12 +406,12 @@ const Career = () => {
                     transition={{ duration: 0.8, delay: 0.6 }}
                     className="relative"
                 >
-                    {/* Static Guideline - Hidden on mobile */}
+                    {/* Static Guideline */}
                     <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-[1px] -translate-x-1/2 bg-white/[0.03]" />
 
-                    {/* Animated Laser Beam - Hidden on mobile */}
+                    {/* Animated Laser Beam */}
                     <motion.div
-                        style={{ height: LineHeight }}
+                        style={{ height: LineHeight, willChange: 'height' }}
                         className="hidden md:block absolute left-1/2 top-0 w-[2px] -translate-x-1/2 bg-cyan-400 shadow-[0_0_25px_rgba(34,211,238,0.8)] origin-top z-10 rounded-full"
                     >
                         {/* Laser Head */}

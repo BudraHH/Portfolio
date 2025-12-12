@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import {
     FaReact, FaNodeJs, FaPython, FaDocker, FaGitAlt, FaAws, FaFigma,
@@ -8,6 +8,7 @@ import { SiNextdotjs, SiTypescript, SiTailwindcss, SiMongodb, SiPostgresql, SiFi
 
 import { SKILL_CATEGORIES } from '../../constants/skills';
 
+// Move static animation variants outside component
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -28,6 +29,7 @@ const itemVariants = {
     }
 };
 
+// Static skill categories data
 const skillCategories = [
     {
         id: "cover",
@@ -101,7 +103,31 @@ const skillCategories = [
     }
 ];
 
-const BookPage = ({ category, index, totalPages, scrollIndex }) => {
+// Memoized SkillItem component
+const SkillItem = React.memo(({ skill }) => (
+    <div className="flex items-center gap-2 sm:gap-3 
+                    p-2 sm:p-3 
+                    bg-white/5 
+                    rounded-md sm:rounded-lg 
+                    border border-white/5
+                    hover:bg-white/10
+                    transition-colors duration-300">
+        <span className="text-zinc-400 text-base sm:text-lg md:text-xl flex-shrink-0">
+            {skill.icon}
+        </span>
+        <span className="text-zinc-200 font-medium truncate"
+            style={{
+                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+            }}
+        >
+            {skill.name}
+        </span>
+    </div>
+));
+
+SkillItem.displayName = 'SkillItem';
+
+const BookPage = React.memo(({ category, index, totalPages, scrollIndex }) => {
     const flipProgress = useTransform(scrollIndex, [index, index + 1], [0, 1]);
     const rotateY = useTransform(flipProgress, [0, 1], [0, -180]);
     const zIndex = useTransform(flipProgress, [0.49, 0.51], [totalPages - index, index]);
@@ -121,10 +147,11 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                 skewY,
                 transformStyle: "preserve-3d",
                 transformOrigin: "left center",
+                willChange: 'transform'
             }}
             className="absolute top-0 right-0 w-[50%] h-full [perspective:3000px]"
         >
-            {/* === FRONT FACE (Right Side Content) === */}
+            {/* FRONT FACE */}
             <div
                 className="absolute inset-0 [backface-visibility:hidden] 
                            bg-[#0A1016] 
@@ -139,14 +166,10 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                            [&::-webkit-scrollbar-thumb]:rounded-full
                            hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40"
             >
-                {/* Paper Texture/Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${category.bgGradient} opacity-50 pointer-events-none`} />
-                <div className="absolute left-0 top-0 bottom-0 w-[1px] sm:w-[2px] bg-white/5 pointer-events-none" /> {/* Spine crease */}
-
-                {/* Lighting Gradient */}
+                <div className="absolute left-0 top-0 bottom-0 w-[1px] sm:w-[2px] bg-white/5 pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/20 pointer-events-none" />
 
-                {/* Content Container */}
                 <div className="relative z-10 
                                 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 
                                 min-h-full 
@@ -158,7 +181,6 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                                 [&::-webkit-scrollbar-thumb]:rounded-full
                                 hover:[&::-webkit-scrollbar-thumb]:bg-cyan-500/40">
                     <div className="min-h-full flex flex-col justify-center">
-                        {/* Render Content Based on Type */}
                         {category.type === 'cover' ? (
                             <div className="flex flex-col items-center justify-center text-center 
                                             border-2 sm:border-4 border-double border-cyan-900/30 
@@ -248,7 +270,6 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                             </div>
                         ) : (
                             <div className="py-4">
-                                {/* Standard Content Header */}
                                 <div className="mb-6 sm:mb-8">
                                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                                         <span className="font-bold text-white/10"
@@ -283,28 +304,9 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                                     </p>
                                 </div>
 
-                                {/* Standard Content Grid - Responsive */}
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4 pb-4">
                                     {category.skills.map((skill, idx) => (
-                                        <div key={idx}
-                                            className="flex items-center gap-2 sm:gap-3 
-                                                        p-2 sm:p-3 
-                                                        bg-white/5 
-                                                        rounded-md sm:rounded-lg 
-                                                        border border-white/5
-                                                        hover:bg-white/10
-                                                        transition-colors duration-300">
-                                            <span className="text-zinc-400 text-base sm:text-lg md:text-xl flex-shrink-0">
-                                                {skill.icon}
-                                            </span>
-                                            <span className="text-zinc-200 font-medium truncate"
-                                                style={{
-                                                    fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
-                                                }}
-                                            >
-                                                {skill.name}
-                                            </span>
-                                        </div>
+                                        <SkillItem key={idx} skill={skill} />
                                     ))}
                                 </div>
                             </div>
@@ -313,7 +315,7 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                 </div>
             </div>
 
-            {/* === BACK FACE (Left Side - When Flipped) === */}
+            {/* BACK FACE */}
             <div
                 className="absolute inset-0 [backface-visibility:hidden] 
                            bg-[#080c11] 
@@ -325,14 +327,10 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
                     transform: 'rotateY(180deg)'
                 }}
             >
-                {/* Paper Texture */}
                 <div className="absolute inset-0 bg-gradient-to-bl from-cyan-900/5 to-transparent" />
                 <div className="absolute right-0 top-0 bottom-0 w-[1px] sm:w-[2px] bg-white/5" />
-
-                {/* Lighting for Back Face */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/20 pointer-events-none" />
 
-                {/* Decorative Tech Pattern for "Back of Page" */}
                 {category.type === 'back_cover' ? (
                     <div className="relative z-10 w-full h-full 
                                     border-2 sm:border-4 border-double border-cyan-900/30 
@@ -381,7 +379,9 @@ const BookPage = ({ category, index, totalPages, scrollIndex }) => {
             </div>
         </motion.div>
     );
-};
+});
+
+BookPage.displayName = 'BookPage';
 
 const Skills = () => {
     const sectionRef = useRef(null);
@@ -391,10 +391,10 @@ const Skills = () => {
         offset: ["start start", "end end"]
     });
 
-    const totalPages = SKILL_CATEGORIES.length;
+    const totalPages = useMemo(() => SKILL_CATEGORIES.length, []);
     const scrollIndex = useTransform(scrollYProgress, [0.25, 1], [0, totalPages + 0.5]);
 
-    // Book Slide-In Animation - Responsive
+    // Book Slide-In Animation
     const bookX = useTransform(scrollYProgress, [0.05, 0.2], ["-50%", "0%"]);
     const bookOpacity = useTransform(scrollYProgress, [0, 0.1], [0.5, 1]);
     const yBg = useTransform(scrollYProgress, [0, 1], [0, -100]);
@@ -409,16 +409,15 @@ const Skills = () => {
             ref={sectionRef}
             className="h-[400vh] sm:h-[450vh] md:h-[500vh] bg-[#050a0f] relative"
         >
-            {/* Sticky Container for the Content */}
             <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
 
-                {/* === Ambient Background === */}
+                {/* Ambient Background */}
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute inset-0 opacity-[0.02] sm:opacity-[0.03] md:opacity-[0.04] mix-blend-overlay"
                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}
                     />
                     <motion.div
-                        style={{ y: yBg }}
+                        style={{ y: yBg, willChange: 'transform' }}
                         className="absolute top-0 right-[-10%] 
                                    w-[400px] h-[400px] 
                                    sm:w-[600px] sm:h-[600px] 
@@ -483,6 +482,7 @@ const Skills = () => {
                                                    h-[2px] sm:h-0.5 
                                                    bg-gradient-to-r from-cyan-400 via-cyan-300 to-transparent 
                                                    origin-left"
+                                        style={{ willChange: 'transform' }}
                                     />
                                 </span>
                             </motion.h2>
@@ -500,7 +500,7 @@ const Skills = () => {
 
                     <div className="relative flex flex-col items-center flex-1 md:flex-initial">
                         <motion.div
-                            style={{ x: bookX, opacity: bookOpacity }}
+                            style={{ x: bookX, opacity: bookOpacity, willChange: 'transform, opacity' }}
                             className="relative z-10 w-full 
                                        max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl 
                                        min-h-[400px] xs:min-h-[450px] sm:min-h-[500px] 
@@ -508,9 +508,7 @@ const Skills = () => {
                                        flex justify-center 
                                        [perspective:2000px]"
                         >
-                            {/* The Book "Spine/Base" */}
                             <div className="relative w-full h-full flex [transform-style:preserve-3d]">
-                                {/* === THE PAGES === */}
                                 {SKILL_CATEGORIES.map((category, index) => (
                                     <BookPage
                                         key={index}
@@ -523,11 +521,11 @@ const Skills = () => {
                             </div>
                         </motion.div>
 
-                        {/* Dynamic Status Text - Hidden on mobile */}
+                        {/* Dynamic Status Text */}
                         <div className="hidden lg:block absolute right-0 lg:right-32 xl:right-52 z-0 w-1/4 h-full pointer-events-none">
                             <div className="flex items-center h-full">
                                 <motion.div
-                                    style={{ opacity: introOpacity }}
+                                    style={{ opacity: introOpacity, willChange: 'opacity' }}
                                     className="absolute text-white font-light italic leading-relaxed text-sm xl:text-base"
                                 >
                                     " Hey there, curious mind! Before you dive in, know this — inside this book lies the secrets of advanced tech. Turn the pages, and each scroll will reveal skills, systems, and knowledge waiting just for you. "
@@ -535,7 +533,7 @@ const Skills = () => {
                                 </motion.div>
 
                                 <motion.div
-                                    style={{ opacity: outroOpacity }}
+                                    style={{ opacity: outroOpacity, willChange: 'opacity' }}
                                     className="absolute text-cyan-400 font-light italic leading-relaxed text-sm xl:text-base"
                                 >
                                     " Well done, explorer! You've navigated through every page and absorbed the tech wisdom within. Keep these insights close — they'll guide you on your next journey into the world of innovation. "

@@ -1,12 +1,41 @@
-import React, { useRef } from 'react';
+import React, { useRef, useCallback, useMemo } from 'react';
 import { FaGithub, FaExternalLinkAlt, FaStar, FaCodeBranch } from 'react-icons/fa';
 import { motion, useSpring, useMotionTemplate, useMotionValue, useScroll, useTransform } from 'framer-motion';
 import { REPOSITORIES } from '../../constants/projects';
 
+// Move static animation variants outside component
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: "easeOut" }
+    }
+};
+
+// Move getPreviewType outside component
+const getPreviewType = (name) => {
+    const n = name.toLowerCase();
+    if (n.includes('neural') || n.includes('ai') || n.includes('chat') || n.includes('gpt')) return 'ai';
+    if (n.includes('task') || n.includes('tracker') || n.includes('manager') || n.includes('list')) return 'task';
+    return 'code';
+};
+
 /**
- * 3D Tilt Card Component
+ * Memoized 3D Tilt Card Component
  */
-const TiltCard = ({ children, className }) => {
+const TiltCard = React.memo(({ children, className }) => {
     const ref = useRef(null);
 
     const x = useSpring(0, { stiffness: 150, damping: 15 });
@@ -18,7 +47,7 @@ const TiltCard = ({ children, className }) => {
     const transform = useMotionTemplate`rotateX(${x}deg) rotateY(${y}deg)`;
     const spotlight = useMotionTemplate`radial-gradient(650px circle at ${mouseX}px ${mouseY}px, rgba(34, 211, 238, 0.1), transparent 80%)`;
 
-    const handleMouseMove = (e) => {
+    const handleMouseMove = useCallback((e) => {
         if (!ref.current) return;
         // Only apply tilt on desktop
         if (window.innerWidth < 768) return;
@@ -36,41 +65,37 @@ const TiltCard = ({ children, className }) => {
         const yPct = mouseYVal / height - 0.5;
         x.set(yPct * -5);
         y.set(xPct * 5);
-    };
+    }, [x, y, mouseX, mouseY]);
 
-    const handleMouseLeave = () => {
+    const handleMouseLeave = useCallback(() => {
         x.set(0);
         y.set(0);
-    };
+    }, [x, y]);
 
     return (
         <motion.div
             ref={ref}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            style={{ transformStyle: "preserve-3d", transform }}
+            style={{ transformStyle: "preserve-3d", transform, willChange: 'transform' }}
             className={className}
         >
             <motion.div
                 className="pointer-events-none absolute -inset-px rounded-xl sm:rounded-2xl opacity-0 transition duration-300 group-hover:opacity-100 z-0"
-                style={{ background: spotlight }}
+                style={{ background: spotlight, willChange: 'opacity' }}
             />
             <div className="relative z-10 w-full h-full flex flex-col">
                 {children}
             </div>
         </motion.div>
     );
-};
+});
 
-const getPreviewType = (name) => {
-    const n = name.toLowerCase();
-    if (n.includes('neural') || n.includes('ai') || n.includes('chat') || n.includes('gpt')) return 'ai';
-    if (n.includes('task') || n.includes('tracker') || n.includes('manager') || n.includes('list')) return 'task';
-    return 'code';
-};
+TiltCard.displayName = 'TiltCard';
 
-const ProjectCardPreview = ({ repo }) => {
-    const type = getPreviewType(repo.name);
+// Memoized ProjectCardPreview component
+const ProjectCardPreview = React.memo(({ repo }) => {
+    const type = useMemo(() => getPreviewType(repo.name), [repo.name]);
 
     if (type === 'code') {
         return (
@@ -125,7 +150,132 @@ const ProjectCardPreview = ({ repo }) => {
             </div>
         </div>
     );
-};
+});
+
+ProjectCardPreview.displayName = 'ProjectCardPreview';
+
+// Memoized ProjectCard component
+const ProjectCard = React.memo(({ repo, index }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
+        className="flex-shrink-0 
+                   w-[85vw] sm:w-[75vw] md:w-[65vw] lg:w-[400px] xl:w-[450px] 
+                   snap-center"
+    >
+        <TiltCard className="group relative 
+                             h-full 
+                             rounded-xl sm:rounded-2xl 
+                             bg-gradient-to-b from-white/[0.04] to-transparent 
+                             border border-white/5 
+                             hover:border-cyan-500/40 
+                             transition-all duration-500 
+                             cursor-default 
+                             overflow-hidden 
+                             flex flex-col">
+
+            <ProjectCardPreview repo={repo} />
+
+            <div className="flex-1 p-4 sm:p-5 md:p-6 flex flex-col">
+                <div className="flex items-start justify-between mb-3 sm:mb-4">
+                    <h3 className="font-bold text-white group-hover:text-cyan-400 transition-colors flex-1 pr-2"
+                        style={{
+                            fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+                        }}
+                    >
+                        {repo.name}
+                    </h3>
+                    <div className="flex gap-2 sm:gap-3 flex-shrink-0">
+                        {repo.github_url && (
+                            <a
+                                href={repo.github_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-zinc-500 hover:text-cyan-400 transition-colors p-1"
+                                aria-label="View on GitHub"
+                            >
+                                <FaGithub className="text-base sm:text-lg" />
+                            </a>
+                        )}
+                        {repo.live_url && (
+                            <a
+                                href={repo.live_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-zinc-500 hover:text-cyan-400 transition-colors p-1"
+                                aria-label="View Live Demo"
+                            >
+                                <FaExternalLinkAlt className="text-base sm:text-lg" />
+                            </a>
+                        )}
+                    </div>
+                </div>
+
+                <p className="text-zinc-400 leading-relaxed mb-4 sm:mb-5 font-light flex-1"
+                    style={{
+                        fontSize: 'clamp(0.8125rem, 2vw, 0.9375rem)',
+                    }}
+                >
+                    {repo.description}
+                </p>
+
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5">
+                    {repo.tech && repo.tech.slice(0, 4).map((tech, i) => (
+                        <span
+                            key={i}
+                            className="px-2 sm:px-2.5 py-1 
+                                       bg-cyan-950/20 
+                                       text-cyan-300 
+                                       rounded 
+                                       border border-cyan-500/20 
+                                       font-mono font-medium"
+                            style={{
+                                fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                            }}
+                        >
+                            {tech}
+                        </span>
+                    ))}
+                    {repo.tech && repo.tech.length > 4 && (
+                        <span
+                            className="px-2 sm:px-2.5 py-1 
+                                       text-zinc-500 
+                                       font-mono"
+                            style={{
+                                fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                            }}
+                        >
+                            +{repo.tech.length - 4}
+                        </span>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-4 sm:gap-5 text-zinc-500 pt-3 sm:pt-4 border-t border-white/5"
+                    style={{
+                        fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)',
+                    }}
+                >
+                    {repo.stars !== undefined && (
+                        <div className="flex items-center gap-1.5">
+                            <FaStar className="text-yellow-500/70" />
+                            <span>{repo.stars}</span>
+                        </div>
+                    )}
+                    {repo.forks !== undefined && (
+                        <div className="flex items-center gap-1.5">
+                            <FaCodeBranch className="text-cyan-500/70" />
+                            <span>{repo.forks}</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </TiltCard>
+    </motion.div>
+));
+
+ProjectCard.displayName = 'ProjectCard';
 
 const Projects = () => {
     const targetRef = useRef(null);
@@ -134,10 +284,6 @@ const Projects = () => {
     });
 
     // Horizontal scroll calculation - Responsive based on card sizes
-    // Mobile (85vw cards): Need ~150% to show all 6 projects
-    // SM (75vw cards): Need ~130%
-    // MD (65vw cards): Need ~115%
-    // LG+ (400px cards): Need ~108%
     const xMobile = useTransform(scrollYProgress, [0, 1], ["0%", "-150%"]);
     const xSm = useTransform(scrollYProgress, [0, 1], ["0%", "-130%"]);
     const xMd = useTransform(scrollYProgress, [0, 1], ["0%", "-115%"]);
@@ -146,84 +292,54 @@ const Projects = () => {
     const leftOpacity = useTransform(scrollYProgress, [0, 0.05], [0, 1]);
     const rightOpacity = useTransform(scrollYProgress, [0.95, 1], [1, 0]);
 
-    // Standard Animation Variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" }
-        }
-    };
-
-    // Ambient floating animation
-    const floatingVariant = {
-        animate: {
-            y: [0, -20, 0],
-            opacity: [0.25, 0.5, 0.25],
-            scale: [1, 1.1, 1],
-            transition: {
-                duration: 8,
-                repeat: Infinity,
-                ease: "easeInOut"
-            }
-        }
-    };
-
     return (
         <section
-            ref={targetRef}
             id="projects"
-            className="relative
-                       h-[250vh] sm:h-[275vh] md:h-[300vh]
-                       bg-cyan-950/5"
+            ref={targetRef}
+            className="relative h-[300vh] bg-[#050a0f]"
         >
-            {/* Sticky Container */}
-            <div className="sticky top-0 h-screen flex flex-col justify-center overflow-hidden">
+            <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
 
-                {/* Background (Fixed to sticky container) */}
-                <div className="absolute inset-0 pointer-events-none -z-10">
-                    <div className="absolute inset-0 opacity-[0.02] sm:opacity-[0.025] md:opacity-[0.03] pointer-events-none mix-blend-overlay"
+                {/* Background Ambient Layers */}
+                <div className="absolute inset-0 pointer-events-none">
+                    <div className="absolute inset-0 opacity-[0.02] sm:opacity-[0.03] md:opacity-[0.04] mix-blend-overlay"
                         style={{
-                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opactiy='1'/%3E%3C/svg%3E")`
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`
                         }}
                     />
                     <motion.div
-                        variants={floatingVariant}
-                        animate="animate"
-                        className="absolute top-0 left-[-10%] 
-                                   w-[300px] h-[300px] 
-                                   sm:w-[400px] sm:h-[400px] 
-                                   md:w-[500px] md:h-[500px] 
-                                   lg:w-[600px] lg:h-[600px] 
+                        animate={{
+                            scale: [1, 1.15, 1],
+                            opacity: [0.08, 0.18, 0.08]
+                        }}
+                        transition={{
+                            duration: 12,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="absolute top-1/4 right-0 
+                                   w-[400px] h-[400px] 
+                                   sm:w-[500px] sm:h-[500px] 
+                                   md:w-[600px] md:h-[600px] 
+                                   lg:w-[700px] lg:h-[700px] 
+                                   xl:w-[800px] xl:h-[800px] 
                                    bg-cyan-500/5 
                                    rounded-full 
-                                   blur-[80px] sm:blur-[100px] md:blur-[120px] 
-                                   pointer-events-none"
+                                   blur-[100px] sm:blur-[120px] md:blur-[140px] lg:blur-[150px] 
+                                   mix-blend-screen"
+                        style={{ willChange: 'transform, opacity' }}
                     />
                 </div>
 
-                <div className="max-w-7xl w-full mx-auto 
-                                px-4 sm:px-6 md:px-8 lg:px-10 
-                                relative z-10">
-                    {/* Header Section */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 w-full relative z-10">
+
+                    {/* Header */}
                     <motion.div
+                        variants={containerVariants}
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.25 }}
-                        variants={containerVariants}
-                        className="mb-12 sm:mb-14 md:mb-16 lg:mb-20"
+                        className="mb-10 sm:mb-12 md:mb-14 lg:mb-16"
                     >
                         <motion.div
                             variants={itemVariants}
@@ -238,10 +354,11 @@ const Projects = () => {
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
                             <span className="text-cyan-400 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">
-                                Showcase
+                                Featured Work
                             </span>
                         </motion.div>
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full gap-4 md:gap-6">
+
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-6">
                             <motion.h2
                                 variants={itemVariants}
                                 className="font-bold text-white tracking-tighter leading-[0.9]"
@@ -249,10 +366,10 @@ const Projects = () => {
                                     fontSize: 'clamp(2rem, 8vw, 4.5rem)',
                                 }}
                             >
-                                Featured{" "}
+                                Selected{" "}
                                 <span className="relative inline-block mt-1 sm:mt-2">
                                     <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-100 to-cyan-400">
-                                        Builds.
+                                        Projects.
                                     </span>
                                     <motion.div
                                         initial={{ scaleX: 0 }}
@@ -263,6 +380,7 @@ const Projects = () => {
                                                    h-[2px] sm:h-0.5 
                                                    bg-gradient-to-r from-cyan-400 via-cyan-300 to-transparent 
                                                    origin-left"
+                                        style={{ willChange: 'transform' }}
                                     />
                                 </span>
                             </motion.h2>
@@ -273,600 +391,68 @@ const Projects = () => {
                                     fontSize: 'clamp(0.875rem, 2vw, 1.125rem)',
                                 }}
                             >
-                                Where <span className="text-cyan-400 font-medium">curiosity meets compilation</span>. Exploring new technologies through practical projects and open-source contributions.
+                                A curated showcase of <span className="text-cyan-400 font-medium">real-world applications</span> I've built—from concept to deployment.
                             </motion.p>
                         </div>
                     </motion.div>
 
-                    {/* Carousel Container */}
-                    <div className="relative w-full group/carousel overflow-hidden">
-
-                        {/* Side Gradients */}
+                    {/* Horizontal Scroll Container */}
+                    <div className="relative">
+                        {/* Scroll Hint - Left */}
                         <motion.div
-                            style={{ opacity: leftOpacity }}
-                            className="absolute left-0 top-0 bottom-0 
-                                       w-24 sm:w-32 lg:w-40 
-                                       bg-gradient-to-r from-[#050a0f] to-transparent 
-                                       z-20 pointer-events-none"
-                        />
+                            style={{ opacity: leftOpacity, willChange: 'opacity' }}
+                            className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                        >
+                            <div className="text-cyan-400 text-sm font-mono">← Scroll</div>
+                        </motion.div>
 
+                        {/* Scroll Hint - Right */}
                         <motion.div
-                            style={{ opacity: rightOpacity }}
-                            className="absolute right-0 top-0 bottom-0 
-                                       w-24 sm:w-32 lg:w-40 
-                                       bg-gradient-to-l from-[#050a0f] to-transparent 
-                                       z-20 pointer-events-none"
-                        />
+                            style={{ opacity: rightOpacity, willChange: 'opacity' }}
+                            className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-20 pointer-events-none"
+                        >
+                            <div className="text-cyan-400 text-sm font-mono">Scroll →</div>
+                        </motion.div>
 
-                        {/* Scrollable Track - Responsive horizontal scroll */}
-                        {/* Mobile version (< 640px) - 150% scroll */}
+                        {/* Mobile Cards */}
                         <motion.div
-                            style={{ x: xMobile }}
-                            className="flex flex-row sm:hidden
-                                       gap-6 
-                                       items-stretch 
-                                       pt-4 pb-8 
-                                       px-0"
+                            style={{ x: xMobile, willChange: 'transform' }}
+                            className="flex gap-4 sm:gap-5 md:hidden pb-4"
                         >
                             {REPOSITORIES.map((repo, index) => (
-                                <motion.div
-                                    key={index}
-                                    variants={itemVariants}
-                                    className="min-w-[85vw] snap-center"
-                                >
-                                    <TiltCard
-                                        className="group relative flex flex-col h-full 
-                                                   bg-white/[0.02] 
-                                                   backdrop-blur-sm 
-                                                   rounded-xl sm:rounded-2xl 
-                                                   border border-white/5 
-                                                   hover:border-cyan-500/40 
-                                                   hover:bg-white/[0.04] 
-                                                   hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] 
-                                                   transition-all duration-500"
-                                    >
-                                        {/* Smart Visual Preview */}
-                                        <div className="relative z-10 overflow-hidden">
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 z-20 pointer-events-none" />
-                                            <div className="absolute inset-0 pointer-events-none z-20 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-                                            <ProjectCardPreview repo={repo} />
-                                        </div>
-
-                                        <div className="p-4 sm:p-5 md:p-6 flex flex-col flex-grow relative z-10">
-                                            <div className="flex justify-between items-start mb-3 sm:mb-4">
-                                                <h3 className="font-bold text-white group-hover:text-cyan-400 transition-colors"
-                                                    style={{
-                                                        fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
-                                                    }}
-                                                >
-                                                    {repo.name}
-                                                </h3>
-                                                <div className="flex gap-2 sm:gap-3 text-zinc-500">
-                                                    {repo.website && (
-                                                        <a
-                                                            href={repo.website}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="hover:text-cyan-400 hover:scale-110 transition-all 
-                                                                       min-w-[32px] min-h-[32px] 
-                                                                       flex items-center justify-center
-                                                                       touch-manipulation"
-                                                        >
-                                                            <FaExternalLinkAlt size={14} className="sm:w-4 sm:h-4" />
-                                                        </a>
-                                                    )}
-                                                    <a
-                                                        href={repo.github}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="hover:text-white hover:scale-110 transition-all
-                                                                   min-w-[32px] min-h-[32px] 
-                                                                   flex items-center justify-center
-                                                                   touch-manipulation"
-                                                    >
-                                                        <FaGithub size={16} className="sm:w-[18px] sm:h-[18px]" />
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <p className="text-zinc-400 leading-relaxed mb-4 sm:mb-5 md:mb-6 flex-grow font-light"
-                                                style={{
-                                                    fontSize: 'clamp(0.8125rem, 2vw, 0.875rem)',
-                                                }}
-                                            >
-                                                {repo.description}
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6">
-                                                {repo.techStack.map((t, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="px-2 sm:px-2.5 py-1 sm:py-1.5 
-                                                                   uppercase tracking-wider 
-                                                                   font-mono text-cyan-300 
-                                                                   bg-cyan-500/5 
-                                                                   backdrop-blur-md 
-                                                                   rounded 
-                                                                   border border-cyan-500/10 
-                                                                   group-hover:border-cyan-500/30 
-                                                                   group-hover:bg-cyan-500/10 
-                                                                   transition-all duration-300 
-                                                                   shadow-[0_0_10px_rgba(34,211,238,0)] 
-                                                                   group-hover:shadow-[0_0_10px_rgba(34,211,238,0.1)]"
-                                                        style={{
-                                                            fontSize: 'clamp(0.5625rem, 1.5vw, 0.625rem)',
-                                                        }}
-                                                    >
-                                                        {t}
-                                                    </span>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between 
-                                                            gap-2 xs:gap-0 
-                                                            pt-3 sm:pt-4 
-                                                            border-t border-white/5 
-                                                            font-mono text-zinc-500"
-                                                style={{
-                                                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                                                }}
-                                            >
-                                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                                    {repo.languages.map((language, i) => (
-                                                        <span key={i}>{language}{i < repo.languages.length - 1 ? " | " : ""}</span>
-                                                    ))}
-                                                </div>
-                                                <div className="flex gap-3 sm:gap-4">
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaStar className="flex-shrink-0" /> {repo.stars}
-                                                    </span>
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaCodeBranch className="flex-shrink-0" /> {repo.forks}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </TiltCard>
-                                </motion.div>
+                                <ProjectCard key={index} repo={repo} index={index} />
                             ))}
                         </motion.div>
 
-                        {/* SM version (640px - 767px) - 130% scroll */}
+                        {/* SM Cards */}
                         <motion.div
-                            style={{ x: xSm }}
-                            className="hidden sm:flex md:hidden
-                                       flex-row 
-                                       gap-8 
-                                       items-stretch 
-                                       pt-4 pb-10 
-                                       px-0"
+                            style={{ x: xSm, willChange: 'transform' }}
+                            className="hidden sm:flex md:hidden gap-5 pb-4"
                         >
                             {REPOSITORIES.map((repo, index) => (
-                                <motion.div
-                                    key={index}
-                                    variants={itemVariants}
-                                    className="min-w-[75vw] snap-center"
-                                >
-                                    <TiltCard
-                                        className="group relative flex flex-col h-full 
-                                                   bg-white/[0.02] 
-                                                   backdrop-blur-sm 
-                                                   rounded-xl sm:rounded-2xl 
-                                                   border border-white/5 
-                                                   hover:border-cyan-500/40 
-                                                   hover:bg-white/[0.04] 
-                                                   hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] 
-                                                   transition-all duration-500"
-                                    >
-                                        {/* Smart Visual Preview */}
-                                        <div className="relative z-10 overflow-hidden">
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 z-20 pointer-events-none" />
-                                            <div className="absolute inset-0 pointer-events-none z-20 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-                                            <ProjectCardPreview repo={repo} />
-                                        </div>
-
-                                        <div className="p-4 sm:p-5 md:p-6 flex flex-col flex-grow relative z-10">
-                                            <div className="flex justify-between items-start mb-3 sm:mb-4">
-                                                <h3 className="font-bold text-white group-hover:text-cyan-400 transition-colors"
-                                                    style={{
-                                                        fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
-                                                    }}
-                                                >
-                                                    {repo.name}
-                                                </h3>
-                                                <div className="flex gap-2 sm:gap-3 text-zinc-500">
-                                                    {repo.website && (
-                                                        <a
-                                                            href={repo.website}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="hover:text-cyan-400 hover:scale-110 transition-all 
-                                                                       min-w-[32px] min-h-[32px] 
-                                                                       flex items-center justify-center
-                                                                       touch-manipulation"
-                                                        >
-                                                            <FaExternalLinkAlt size={14} className="sm:w-4 sm:h-4" />
-                                                        </a>
-                                                    )}
-                                                    <a
-                                                        href={repo.github}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="hover:text-white hover:scale-110 transition-all
-                                                                   min-w-[32px] min-h-[32px] 
-                                                                   flex items-center justify-center
-                                                                   touch-manipulation"
-                                                    >
-                                                        <FaGithub size={16} className="sm:w-[18px] sm:h-[18px]" />
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <p className="text-zinc-400 leading-relaxed mb-4 sm:mb-5 md:mb-6 flex-grow font-light"
-                                                style={{
-                                                    fontSize: 'clamp(0.8125rem, 2vw, 0.875rem)',
-                                                }}
-                                            >
-                                                {repo.description}
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6">
-                                                {repo.techStack.map((t, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="px-2 sm:px-2.5 py-1 sm:py-1.5 
-                                                                   uppercase tracking-wider 
-                                                                   font-mono text-cyan-300 
-                                                                   bg-cyan-500/5 
-                                                                   backdrop-blur-md 
-                                                                   rounded 
-                                                                   border border-cyan-500/10 
-                                                                   group-hover:border-cyan-500/30 
-                                                                   group-hover:bg-cyan-500/10 
-                                                                   transition-all duration-300 
-                                                                   shadow-[0_0_10px_rgba(34,211,238,0)] 
-                                                                   group-hover:shadow-[0_0_10px_rgba(34,211,238,0.1)]"
-                                                        style={{
-                                                            fontSize: 'clamp(0.5625rem, 1.5vw, 0.625rem)',
-                                                        }}
-                                                    >
-                                                        {t}
-                                                    </span>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between 
-                                                            gap-2 xs:gap-0 
-                                                            pt-3 sm:pt-4 
-                                                            border-t border-white/5 
-                                                            font-mono text-zinc-500"
-                                                style={{
-                                                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                                                }}
-                                            >
-                                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                                    {repo.languages.map((language, i) => (
-                                                        <span key={i}>{language}{i < repo.languages.length - 1 ? " | " : ""}</span>
-                                                    ))}
-                                                </div>
-                                                <div className="flex gap-3 sm:gap-4">
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaStar className="flex-shrink-0" /> {repo.stars}
-                                                    </span>
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaCodeBranch className="flex-shrink-0" /> {repo.forks}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </TiltCard>
-                                </motion.div>
+                                <ProjectCard key={index} repo={repo} index={index} />
                             ))}
                         </motion.div>
 
-                        {/* MD version (768px - 1023px) - 115% scroll */}
+                        {/* MD Cards */}
                         <motion.div
-                            style={{ x: xMd }}
-                            className="hidden md:flex lg:hidden
-                                       flex-row 
-                                       gap-8 
-                                       items-stretch 
-                                       pt-4 pb-12 
-                                       px-0"
+                            style={{ x: xMd, willChange: 'transform' }}
+                            className="hidden md:flex lg:hidden gap-6 pb-4"
                         >
                             {REPOSITORIES.map((repo, index) => (
-                                <motion.div
-                                    key={index}
-                                    variants={itemVariants}
-                                    className="min-w-[65vw] snap-center"
-                                >
-                                    <TiltCard
-                                        className="group relative flex flex-col h-full 
-                                                   bg-white/[0.02] 
-                                                   backdrop-blur-sm 
-                                                   rounded-xl sm:rounded-2xl 
-                                                   border border-white/5 
-                                                   hover:border-cyan-500/40 
-                                                   hover:bg-white/[0.04] 
-                                                   hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] 
-                                                   transition-all duration-500"
-                                    >
-                                        {/* Smart Visual Preview */}
-                                        <div className="relative z-10 overflow-hidden">
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 z-20 pointer-events-none" />
-                                            <div className="absolute inset-0 pointer-events-none z-20 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-                                            <ProjectCardPreview repo={repo} />
-                                        </div>
-
-                                        <div className="p-4 sm:p-5 md:p-6 flex flex-col flex-grow relative z-10">
-                                            <div className="flex justify-between items-start mb-3 sm:mb-4">
-                                                <h3 className="font-bold text-white group-hover:text-cyan-400 transition-colors"
-                                                    style={{
-                                                        fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
-                                                    }}
-                                                >
-                                                    {repo.name}
-                                                </h3>
-                                                <div className="flex gap-2 sm:gap-3 text-zinc-500">
-                                                    {repo.website && (
-                                                        <a
-                                                            href={repo.website}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="hover:text-cyan-400 hover:scale-110 transition-all 
-                                                                       min-w-[32px] min-h-[32px] 
-                                                                       flex items-center justify-center
-                                                                       touch-manipulation"
-                                                        >
-                                                            <FaExternalLinkAlt size={14} className="sm:w-4 sm:h-4" />
-                                                        </a>
-                                                    )}
-                                                    <a
-                                                        href={repo.github}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="hover:text-white hover:scale-110 transition-all
-                                                                   min-w-[32px] min-h-[32px] 
-                                                                   flex items-center justify-center
-                                                                   touch-manipulation"
-                                                    >
-                                                        <FaGithub size={16} className="sm:w-[18px] sm:h-[18px]" />
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <p className="text-zinc-400 leading-relaxed mb-4 sm:mb-5 md:mb-6 flex-grow font-light"
-                                                style={{
-                                                    fontSize: 'clamp(0.8125rem, 2vw, 0.875rem)',
-                                                }}
-                                            >
-                                                {repo.description}
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6">
-                                                {repo.techStack.map((t, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="px-2 sm:px-2.5 py-1 sm:py-1.5 
-                                                                   uppercase tracking-wider 
-                                                                   font-mono text-cyan-300 
-                                                                   bg-cyan-500/5 
-                                                                   backdrop-blur-md 
-                                                                   rounded 
-                                                                   border border-cyan-500/10 
-                                                                   group-hover:border-cyan-500/30 
-                                                                   group-hover:bg-cyan-500/10 
-                                                                   transition-all duration-300 
-                                                                   shadow-[0_0_10px_rgba(34,211,238,0)] 
-                                                                   group-hover:shadow-[0_0_10px_rgba(34,211,238,0.1)]"
-                                                        style={{
-                                                            fontSize: 'clamp(0.5625rem, 1.5vw, 0.625rem)',
-                                                        }}
-                                                    >
-                                                        {t}
-                                                    </span>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between 
-                                                            gap-2 xs:gap-0 
-                                                            pt-3 sm:pt-4 
-                                                            border-t border-white/5 
-                                                            font-mono text-zinc-500"
-                                                style={{
-                                                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                                                }}
-                                            >
-                                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                                    {repo.languages.map((language, i) => (
-                                                        <span key={i}>{language}{i < repo.languages.length - 1 ? " | " : ""}</span>
-                                                    ))}
-                                                </div>
-                                                <div className="flex gap-3 sm:gap-4">
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaStar className="flex-shrink-0" /> {repo.stars}
-                                                    </span>
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaCodeBranch className="flex-shrink-0" /> {repo.forks}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </TiltCard>
-                                </motion.div>
+                                <ProjectCard key={index} repo={repo} index={index} />
                             ))}
                         </motion.div>
 
-                        {/* LG+ version (1024px+) - 108% scroll */}
+                        {/* LG+ Cards */}
                         <motion.div
-                            style={{ x: xLg }}
-                            className="hidden lg:flex
-                                       flex-row 
-                                       gap-8 
-                                       items-stretch 
-                                       pt-4 pb-12 
-                                       px-0"
+                            style={{ x: xLg, willChange: 'transform' }}
+                            className="hidden lg:flex gap-8 pb-4"
                         >
                             {REPOSITORIES.map((repo, index) => (
-                                <motion.div
-                                    key={index}
-                                    variants={itemVariants}
-                                    className="min-w-[400px] snap-center"
-                                >
-                                    <TiltCard
-                                        className="group relative flex flex-col h-full 
-                                                   bg-white/[0.02] 
-                                                   backdrop-blur-sm 
-                                                   rounded-xl sm:rounded-2xl 
-                                                   border border-white/5 
-                                                   hover:border-cyan-500/40 
-                                                   hover:bg-white/[0.04] 
-                                                   hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] 
-                                                   transition-all duration-500"
-                                    >
-                                        {/* Smart Visual Preview */}
-                                        <div className="relative z-10 overflow-hidden">
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 z-20 pointer-events-none" />
-                                            <div className="absolute inset-0 pointer-events-none z-20 opacity-10 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-                                            <ProjectCardPreview repo={repo} />
-                                        </div>
-
-                                        <div className="p-4 sm:p-5 md:p-6 flex flex-col flex-grow relative z-10">
-                                            <div className="flex justify-between items-start mb-3 sm:mb-4">
-                                                <h3 className="font-bold text-white group-hover:text-cyan-400 transition-colors"
-                                                    style={{
-                                                        fontSize: 'clamp(1.125rem, 3vw, 1.25rem)',
-                                                    }}
-                                                >
-                                                    {repo.name}
-                                                </h3>
-                                                <div className="flex gap-2 sm:gap-3 text-zinc-500">
-                                                    {repo.website && (
-                                                        <a
-                                                            href={repo.website}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="hover:text-cyan-400 hover:scale-110 transition-all 
-                                                                       min-w-[32px] min-h-[32px] 
-                                                                       flex items-center justify-center
-                                                                       touch-manipulation"
-                                                        >
-                                                            <FaExternalLinkAlt size={14} className="sm:w-4 sm:h-4" />
-                                                        </a>
-                                                    )}
-                                                    <a
-                                                        href={repo.github}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="hover:text-white hover:scale-110 transition-all
-                                                                   min-w-[32px] min-h-[32px] 
-                                                                   flex items-center justify-center
-                                                                   touch-manipulation"
-                                                    >
-                                                        <FaGithub size={16} className="sm:w-[18px] sm:h-[18px]" />
-                                                    </a>
-                                                </div>
-                                            </div>
-
-                                            <p className="text-zinc-400 leading-relaxed mb-4 sm:mb-5 md:mb-6 flex-grow font-light"
-                                                style={{
-                                                    fontSize: 'clamp(0.8125rem, 2vw, 0.875rem)',
-                                                }}
-                                            >
-                                                {repo.description}
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4 sm:mb-5 md:mb-6">
-                                                {repo.techStack.map((t, i) => (
-                                                    <span
-                                                        key={i}
-                                                        className="px-2 sm:px-2.5 py-1 sm:py-1.5 
-                                                                   uppercase tracking-wider 
-                                                                   font-mono text-cyan-300 
-                                                                   bg-cyan-500/5 
-                                                                   backdrop-blur-md 
-                                                                   rounded 
-                                                                   border border-cyan-500/10 
-                                                                   group-hover:border-cyan-500/30 
-                                                                   group-hover:bg-cyan-500/10 
-                                                                   transition-all duration-300 
-                                                                   shadow-[0_0_10px_rgba(34,211,238,0)] 
-                                                                   group-hover:shadow-[0_0_10px_rgba(34,211,238,0.1)]"
-                                                        style={{
-                                                            fontSize: 'clamp(0.5625rem, 1.5vw, 0.625rem)',
-                                                        }}
-                                                    >
-                                                        {t}
-                                                    </span>
-                                                ))}
-                                            </div>
-
-                                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between 
-                                                            gap-2 xs:gap-0 
-                                                            pt-3 sm:pt-4 
-                                                            border-t border-white/5 
-                                                            font-mono text-zinc-500"
-                                                style={{
-                                                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                                                }}
-                                            >
-                                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                                                    {repo.languages.map((language, i) => (
-                                                        <span key={i}>{language}{i < repo.languages.length - 1 ? " | " : ""}</span>
-                                                    ))}
-                                                </div>
-                                                <div className="flex gap-3 sm:gap-4">
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaStar className="flex-shrink-0" /> {repo.stars}
-                                                    </span>
-                                                    <span className="flex items-center gap-1 group-hover:text-cyan-400 transition-colors">
-                                                        <FaCodeBranch className="flex-shrink-0" /> {repo.forks}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </TiltCard>
-                                </motion.div>
+                                <ProjectCard key={index} repo={repo} index={index} />
                             ))}
                         </motion.div>
-                    </div>
-
-                    <div className="w-full h-0.5 bg-cyan-950 rounded-full my-4 sm:my-5 blur-[2.55px]"></div>
-
-                    {/* View More Button */}
-                    <div className="flex justify-center">
-                        <motion.a
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.25 }}
-                            transition={{ delay: 0.5, duration: 0.5 }}
-                            href="https://github.com/BudraHH"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="group relative 
-                                       px-6 sm:px-8 py-2.5 sm:py-3 
-                                       rounded-xl 
-                                       bg-cyan-950/30 
-                                       overflow-hidden 
-                                       transition-all duration-300 
-                                       hover:scale-105 
-                                       hover:shadow-[0_0_40px_rgba(6,182,212,0.3)] 
-                                       border border-cyan-500/30
-                                       min-h-[48px]
-                                       flex items-center justify-center
-                                       touch-manipulation"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                            <span className="relative font-mono text-cyan-400 group-hover:text-cyan-300 font-bold tracking-wide"
-                                style={{
-                                    fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
-                                }}
-                            >
-                                View Full Archive on GitHub
-                            </span>
-                        </motion.a>
                     </div>
                 </div>
             </div>

@@ -26,6 +26,18 @@ const Navbar = () => {
         setMobileMenuOpen(false);
     }, [activeId]);
 
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [mobileMenuOpen]);
+
     const scrollToSection = (id) => {
         if (id) {
             navigate(`${NORMAL_ROUTES.ROOT}/${id}`);
@@ -49,33 +61,63 @@ const Navbar = () => {
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
                 transition={{ duration: 0.5 }}
-                className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-[#050a0f]/80 backdrop-blur-md border-b border-white/5 py-4' : 'bg-transparent py-6'}`}
+                className={`fixed top-0 w-full z-50 transition-all duration-300 
+                           ${scrolled
+                        ? 'bg-[#050a0f]/80 backdrop-blur-md border-b border-white/5 py-3 sm:py-4'
+                        : 'bg-transparent py-4 sm:py-5 md:py-6'
+                    }`}
             >
-                <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                <div className="max-w-7xl mx-auto 
+                                px-4 sm:px-6 md:px-8 lg:px-10 
+                                flex justify-between items-center">
 
                     {/* === Logo === */}
                     <div
                         onClick={() => scrollToSection('')}
-                        className="font-bold text-xl tracking-wider cursor-pointer group flex items-center gap-1"
+                        className="font-bold tracking-wider cursor-pointer group 
+                                   flex items-center gap-0.5 sm:gap-1
+                                   touch-manipulation
+                                   min-h-[44px] flex items-center"
+                        style={{
+                            fontSize: 'clamp(1rem, 3vw, 1.25rem)',
+                        }}
                     >
-                        <span className="text-white group-hover:text-cyan-400 transition-colors duration-300">BUDRA</span>
+                        <span className="text-white group-hover:text-cyan-400 transition-colors duration-300">
+                            BUDRA
+                        </span>
                         <motion.span
                             animate={{ opacity: [0.5, 1, 0.5] }}
                             transition={{ duration: 2, repeat: Infinity }}
                             className="text-cyan-400"
-                        >.</motion.span>
+                        >
+                            .
+                        </motion.span>
                     </div>
 
                     {/* === Desktop Nav === */}
-                    <div className="hidden md:flex items-center gap-1">
-                        <div className="flex items-center bg-white/5 rounded-full px-2 py-1 border border-white/5 backdrop-blur-sm">
+                    <div className="hidden md:flex items-center gap-4 lg:gap-6">
+                        <div className="flex items-center 
+                                        bg-white/5 
+                                        rounded-full 
+                                        px-1.5 lg:px-2 py-1 
+                                        border border-white/5 
+                                        backdrop-blur-sm">
                             {navItems.map((item) => {
                                 const isActive = item.id === activeId;
                                 return (
                                     <button
                                         key={item.id}
                                         onClick={() => scrollToSection(item.id)}
-                                        className={`relative px-4 py-1.5 text-sm font-medium transition-colors z-10 ${isActive ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
+                                        className={`relative 
+                                                   px-3 lg:px-4 py-1.5 
+                                                   font-medium 
+                                                   transition-colors 
+                                                   z-10
+                                                   min-h-[36px]
+                                                   ${isActive ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
+                                        style={{
+                                            fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)',
+                                        }}
                                     >
                                         {item.label}
                                         {isActive && (
@@ -90,25 +132,60 @@ const Navbar = () => {
                             })}
                         </div>
 
-                        {/* Theme Switcher */}
-                        
-                    </div>
-                            <button
+                        {/* Dev Mode Button - Desktop */}
+                        <button
                             onClick={() => navigate(DEV_ROUTES.FULL_WELCOME)}
-                            className="ml-6 flex items-center gap-2 px-4 py-2 text-xs font-bold border border-cyan-500/20 rounded-full text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 transition-all group"
+                            className="flex items-center 
+                                       gap-1.5 sm:gap-2 
+                                       px-3 lg:px-4 py-2 
+                                       border border-cyan-500/20 
+                                       rounded-full 
+                                       text-cyan-400 
+                                       hover:bg-cyan-500/10 
+                                       hover:border-cyan-400 
+                                       transition-all 
+                                       group
+                                       font-bold
+                                       min-h-[36px]"
+                            style={{
+                                fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
+                            }}
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 group-hover:animate-ping" />
-                            DEV_MODE
+                            <span className="hidden lg:inline">DEV_MODE</span>
+                            <span className="lg:hidden">DEV</span>
                         </button>
+                    </div>
+
                     {/* === Mobile Toggle === */}
                     <button
-                        className="md:hidden text-white p-2"
+                        className="md:hidden text-white 
+                                   p-2 
+                                   min-w-[44px] min-h-[44px]
+                                   flex items-center justify-center
+                                   touch-manipulation"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label="Toggle mobile menu"
                     >
                         <div className="w-6 flex flex-col items-end gap-1.5">
-                            <motion.span animate={{ rotate: mobileMenuOpen ? 45 : 0, y: mobileMenuOpen ? 6 : 0 }} className="w-full h-0.5 bg-white origin-center transition-all" />
-                            <motion.span animate={{ opacity: mobileMenuOpen ? 0 : 1 }} className="w-4 h-0.5 bg-cyan-400 transition-all" />
-                            <motion.span animate={{ rotate: mobileMenuOpen ? -45 : 0, y: mobileMenuOpen ? -6 : 0 }} className="w-full h-0.5 bg-white origin-center transition-all" />
+                            <motion.span
+                                animate={{
+                                    rotate: mobileMenuOpen ? 45 : 0,
+                                    y: mobileMenuOpen ? 6 : 0
+                                }}
+                                className="w-full h-0.5 bg-white origin-center transition-all"
+                            />
+                            <motion.span
+                                animate={{ opacity: mobileMenuOpen ? 0 : 1 }}
+                                className="w-4 h-0.5 bg-cyan-400 transition-all"
+                            />
+                            <motion.span
+                                animate={{
+                                    rotate: mobileMenuOpen ? -45 : 0,
+                                    y: mobileMenuOpen ? -6 : 0
+                                }}
+                                className="w-full h-0.5 bg-white origin-center transition-all"
+                            />
                         </div>
                     </button>
                 </div>
@@ -121,9 +198,30 @@ const Navbar = () => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className="fixed inset-0 z-40 bg-[#050a0f] pt-24 px-6 md:hidden"
+                        className="fixed inset-0 z-40 
+                                   bg-[#050a0f]/95 backdrop-blur-lg
+                                   pt-20 sm:pt-24 
+                                   px-4 sm:px-6 
+                                   md:hidden
+                                   overflow-y-auto"
                     >
-                        <div className="flex flex-col gap-6">
+                        {/* Background Effects */}
+                        <div className="absolute inset-0 pointer-events-none">
+                            {/* Noise Overlay */}
+                            <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay"
+                                style={{
+                                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`
+                                }}
+                            />
+                            {/* Glow */}
+                            <div className="absolute top-1/4 left-1/2 -translate-x-1/2 
+                                            w-64 h-64 
+                                            bg-cyan-500/5 
+                                            rounded-full 
+                                            blur-[80px]" />
+                        </div>
+
+                        <div className="relative z-10 flex flex-col gap-4 sm:gap-6 max-w-md mx-auto">
                             {navItems.map((item, idx) => {
                                 const isActive = item.id === activeId;
                                 return (
@@ -133,20 +231,54 @@ const Navbar = () => {
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: idx * 0.05 }}
                                         onClick={() => scrollToSection(item.id)}
-                                        className={`text-2xl font-light text-left border-b border-white/5 pb-4 flex items-center justify-between ${isActive ? 'text-white border-cyan-500/50' : 'text-zinc-500'}`}
+                                        className={`font-light text-left 
+                                                   border-b border-white/5 
+                                                   pb-3 sm:pb-4 
+                                                   flex items-center justify-between
+                                                   min-h-[48px]
+                                                   touch-manipulation
+                                                   ${isActive
+                                                ? 'text-white border-cyan-500/50'
+                                                : 'text-zinc-500 hover:text-zinc-300'
+                                            }`}
+                                        style={{
+                                            fontSize: 'clamp(1.25rem, 5vw, 1.5rem)',
+                                        }}
                                     >
                                         {item.label}
-                                        {isActive && <span className="w-2 h-2 rounded-full bg-cyan-400" />}
+                                        {isActive && (
+                                            <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="w-2 h-2 rounded-full bg-cyan-400"
+                                            />
+                                        )}
                                     </motion.button>
                                 );
                             })}
 
+                            {/* Dev Mode Button - Mobile */}
                             <motion.button
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
                                 onClick={() => navigate(DEV_ROUTES.FULL_WELCOME)}
-                                className="mt-4 w-full py-4 border border-cyan-500/30 rounded-lg text-cyan-400 text-sm font-mono tracking-widest uppercase hover:bg-cyan-500/10 flex items-center justify-center gap-2"
+                                className="mt-4 sm:mt-6 
+                                           w-full 
+                                           py-3 sm:py-4 
+                                           border border-cyan-500/30 
+                                           rounded-lg sm:rounded-xl 
+                                           text-cyan-400 
+                                           font-mono tracking-widest uppercase 
+                                           hover:bg-cyan-500/10 
+                                           flex items-center justify-center 
+                                           gap-2 sm:gap-3
+                                           min-h-[48px]
+                                           touch-manipulation
+                                           transition-all"
+                                style={{
+                                    fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                }}
                             >
                                 <span className="w-2 h-2 bg-cyan-400 rounded-sm" />
                                 Initialize Dev_Mode

@@ -1,38 +1,182 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaGlobe, FaCopy, FaArrowRight } from 'react-icons/fa';
 import { PROFILE } from '../../constants/profile';
 
+// Move static animation variants outside component
+const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.15,
+            delayChildren: 0.2
+        }
+    }
+};
+
+const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.8, ease: "easeOut" }
+    }
+};
+
+const slideInLeft = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.8, ease: "easeOut" }
+    }
+};
+
+// Memoized DetailCard Component
+const DetailCard = React.memo(({ icon, label, value, isLink, href }) => {
+    const [copied, setCopied] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const handleCopy = useCallback((e) => {
+        if (isLink) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigator.clipboard.writeText(value);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    }, [isLink, value]);
+
+    const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+    const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+    const content = (
+        <div
+            className="relative group h-full mx-4 md:mx-0"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            {/* Premium Gradient Border Effect */}
+            <div className="absolute -inset-[1px] 
+                            rounded-xl sm:rounded-2xl 
+                            bg-gradient-to-br from-white/10 via-cyan-500/5 to-transparent 
+                            opacity-100 
+                            group-hover:from-cyan-500/40 
+                            group-hover:via-cyan-500/10 
+                            group-hover:to-transparent 
+                            transition-all duration-700"
+            />
+
+            {/* Glass Card */}
+            <div className="relative h-full
+                            p-2 sm:p-5
+                            rounded-xl sm:rounded-2xl 
+                            bg-[#050a0f]/90 
+                            backdrop-blur-xl 
+                            border-t border-white/5 
+                            shadow-2xl 
+                            group-hover:bg-[#050a0f]/70 
+                            transition-all duration-500">
+
+                {/* Radial Glow on Hover */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: isHovered ? 1 : 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute inset-0 rounded-xl sm:rounded-2xl pointer-events-none"
+                    style={{
+                        background: 'radial-gradient(circle at 50% 50%, rgba(34,211,238,0.08) 0%, transparent 70%)',
+                        willChange: 'opacity'
+                    }}
+                />
+
+                <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-3">
+                    <span className="text-[10px] sm:text-xs 
+                                     font-mono 
+                                     text-zinc-500 
+                                     uppercase 
+                                     tracking-widest 
+                                     group-hover:text-cyan-400/70 
+                                     transition-colors duration-300">
+                        {label}
+                    </span>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {isLink && (
+                            <motion.button
+                                onClick={handleCopy}
+                                whileTap={{ scale: 0.9 }}
+                                className="text-[9px] sm:text-[10px] 
+                                           uppercase 
+                                           tracking-wider 
+                                           font-mono 
+                                           transition-all duration-300 
+                                           px-1.5 sm:px-2 
+                                           py-0.5 sm:py-1 
+                                           rounded-md 
+                                           hover:bg-cyan-500/10
+                                           min-w-[32px] min-h-[32px]
+                                           flex items-center justify-center
+                                           touch-manipulation"
+                                style={{ willChange: 'transform' }}
+                            >
+                                <span className={`transition-all duration-300 ${copied ? 'text-cyan-400' : 'text-zinc-600 group-hover:text-cyan-500'}`}>
+                                    {copied ? 'COPIED' : <FaCopy className="text-xs" />}
+                                </span>
+                            </motion.button>
+                        )}
+                        <motion.div
+                            transition={{ duration: 0.3 }}
+                            className={`text-base sm:text-lg md:text-xl 
+                                        transition-colors duration-300 
+                                        ${copied ? 'text-cyan-400' : 'text-zinc-600 group-hover:text-cyan-400'}`}
+                        >
+                            {icon}
+                        </motion.div>
+                    </div>
+                </div>
+
+                <div className="relative z-10 
+                                text-zinc-300 
+                                font-light 
+                                group-hover:text-white 
+                                transition-colors duration-300 
+                                leading-relaxed 
+                                break-words 
+                                text-sm sm:text-base 2xl:text-lg">
+                    {value}
+                </div>
+
+                {/* Subtle Bottom Accent */}
+                <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: isHovered ? 1 : 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="absolute bottom-0 left-0 right-0 
+                               h-[1px] 
+                               bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent 
+                               origin-center"
+                    style={{ willChange: 'transform' }}
+                />
+            </div>
+        </div>
+    );
+
+    if (isLink && href) {
+        return <a href={href} className="block">{content}</a>;
+    }
+
+    return content;
+});
+
+DetailCard.displayName = 'DetailCard';
+
 const Info = () => {
-    // Animation Variants
-    const staggerContainer = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.15,
-                delayChildren: 0.2
-            }
-        }
-    };
+    // Memoized languages string
+    const languagesText = useMemo(() => PROFILE.LANGUAGES_SPOKEN.join(", "), []);
 
-    const fadeInUp = {
-        hidden: { opacity: 0, y: 30 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.8, ease: "easeOut" }
-        }
-    };
-
-    const slideInLeft = {
-        hidden: { opacity: 0, x: -30 },
-        visible: {
-            opacity: 1,
-            x: 0,
-            transition: { duration: 0.8, ease: "easeOut" }
-        }
-    };
+    // Memoized phone href
+    const phoneHref = useMemo(() => `tel:${PROFILE.CONTACT.phone.replace(/ /g, '')}`, []);
 
     return (
         <section
@@ -42,9 +186,9 @@ const Info = () => {
                        bg-cyan-950/5 
                        overflow-hidden"
         >
-            {/* === Background Ambient Layers === */}
+            {/* Background Ambient Layers */}
             <div className="absolute inset-0 pointer-events-none">
-                {/* Cinematic Noise Overlay - Responsive opacity */}
+                {/* Cinematic Noise Overlay */}
                 <div
                     className="absolute inset-0 opacity-[0.02] sm:opacity-[0.025] md:opacity-[0.03] mix-blend-overlay"
                     style={{
@@ -52,7 +196,7 @@ const Info = () => {
                     }}
                 />
 
-                {/* Refined Grid - Hidden on mobile */}
+                {/* Refined Grid */}
                 <div
                     className="absolute inset-0 opacity-0 sm:opacity-[0.015] md:opacity-[0.02]"
                     style={{
@@ -61,7 +205,7 @@ const Info = () => {
                     }}
                 />
 
-                {/* Multi-Layer Breathing Ambient Glow - Responsive sizing */}
+                {/* Multi-Layer Breathing Ambient Glow */}
                 <motion.div
                     animate={{
                         scale: [1, 1.15, 1],
@@ -82,6 +226,7 @@ const Info = () => {
                                rounded-full 
                                blur-[100px] sm:blur-[120px] md:blur-[140px] lg:blur-[150px] 
                                mix-blend-screen"
+                    style={{ willChange: 'transform, opacity' }}
                 />
                 <motion.div
                     animate={{
@@ -104,14 +249,14 @@ const Info = () => {
                                rounded-full 
                                blur-[80px] sm:blur-[100px] md:blur-[120px] 
                                mix-blend-screen"
+                    style={{ willChange: 'transform, opacity' }}
                 />
 
                 {/* Radial Gradient Vignette */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#050a0f_100%)] opacity-50 sm:opacity-60" />
             </div>
 
-            <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-8 lg:px-10 w-full
-                            relative z-10">
+            <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-8 lg:px-10 w-full relative z-10">
 
                 {/* Section Badge */}
                 <motion.div
@@ -140,10 +285,10 @@ const Info = () => {
                                 gap-4 sm:gap-5 md:gap-6 lg:gap-8 xl:gap-10 2xl:gap-14
                                 items-start">
 
-                    {/* === Left Column: Text Content === */}
+                    {/* Left Column: Text Content */}
                     <div className="lg:col-span-7 flex flex-col items-start text-left relative z-20">
 
-                        {/* Floating Decorative Element - Hidden on mobile */}
+                        {/* Floating Decorative Element */}
                         <motion.div
                             animate={{
                                 y: [0, -10, 0],
@@ -161,6 +306,7 @@ const Info = () => {
                                        bg-gradient-to-br from-cyan-500/10 to-blue-500/5 
                                        rounded-full 
                                        blur-xl sm:blur-2xl"
+                            style={{ willChange: 'transform' }}
                         />
 
                         {/* Main Heading with Description */}
@@ -186,7 +332,7 @@ const Info = () => {
                                     <span className="relative text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-100 to-cyan-400">
                                         Code.
                                     </span>
-                                    {/* Underline Accent - Responsive */}
+                                    {/* Underline Accent */}
                                     <motion.div
                                         initial={{ scaleX: 0 }}
                                         whileInView={{ scaleX: 1 }}
@@ -198,6 +344,7 @@ const Info = () => {
                                                    h-[2px] sm:h-0.5 
                                                    bg-gradient-to-r from-cyan-400 via-cyan-300 to-transparent 
                                                    origin-left"
+                                        style={{ willChange: 'transform' }}
                                     />
                                 </span>
                             </motion.h2>
@@ -237,7 +384,7 @@ const Info = () => {
                                 <span className="text-transparent bg-clip-text bg-gradient-to-br from-white via-zinc-200 to-zinc-400">
                                     Who am I?
                                 </span>
-                                {/* Subtle Glow Behind Text - Hidden on mobile */}
+                                {/* Subtle Glow Behind Text */}
                                 <span className="hidden sm:block absolute inset-0 blur-lg bg-gradient-to-r from-cyan-500/10 to-transparent -z-10" />
                             </motion.h3>
 
@@ -256,9 +403,10 @@ const Info = () => {
                                                w-[2px] sm:w-0.5 
                                                bg-gradient-to-b from-cyan-500/60 via-cyan-500/20 to-transparent 
                                                rounded-full"
+                                    style={{ willChange: 'height' }}
                                 />
 
-                                {/* Decorative Dots - Responsive sizing */}
+                                {/* Decorative Dots */}
                                 <motion.div
                                     animate={{ opacity: [0.3, 1, 0.3] }}
                                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -307,7 +455,7 @@ const Info = () => {
                         </motion.div>
                     </div>
 
-                    {/* === Right Column: Details Cards === */}
+                    {/* Right Column: Details Cards */}
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -317,7 +465,7 @@ const Info = () => {
                                    gap-4 sm:gap-5 md:gap-6 
                                    relative"
                     >
-                        {/* Decorative Floating Element - Hidden on mobile */}
+                        {/* Decorative Floating Element */}
                         <motion.div
                             animate={{
                                 y: [0, 15, 0],
@@ -336,6 +484,7 @@ const Info = () => {
                                        rounded-full 
                                        blur-2xl md:blur-3xl 
                                        pointer-events-none"
+                            style={{ willChange: 'transform' }}
                         />
 
                         {/* Location Card */}
@@ -352,7 +501,7 @@ const Info = () => {
                             <DetailCard
                                 icon={<FaGlobe />}
                                 label="Languages"
-                                value={PROFILE.LANGUAGES_SPOKEN.join(", ")}
+                                value={languagesText}
                             />
                         </motion.div>
 
@@ -374,11 +523,11 @@ const Info = () => {
                                 label="Phone"
                                 value={PROFILE.CONTACT.phone}
                                 isLink
-                                href={`tel:${PROFILE.CONTACT.phone.replace(/ /g, '')}`}
+                                href={phoneHref}
                             />
                         </motion.div>
 
-                        {/* Resume Button - Enhanced touch target */}
+                        {/* Resume Button */}
                         <motion.div
                             variants={fadeInUp}
                             className="mt-2 sm:mt-3 md:mt-4 mx-4 md:mx-0"
@@ -415,136 +564,6 @@ const Info = () => {
             </div>
         </section>
     );
-};
-
-// Reusable Detail Card Component
-const DetailCard = ({ icon, label, value, isLink, href }) => {
-    const [copied, setCopied] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
-
-    const handleCopy = (e) => {
-        if (isLink) {
-            e.preventDefault();
-            e.stopPropagation();
-            navigator.clipboard.writeText(value);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    };
-
-    const content = (
-        <div
-            className="relative group h-full mx-4 md:mx-0"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            {/* Premium Gradient Border Effect */}
-            <div className="absolute -inset-[1px] 
-                            rounded-xl sm:rounded-2xl 
-                            bg-gradient-to-br from-white/10 via-cyan-500/5 to-transparent 
-                            opacity-100 
-                            group-hover:from-cyan-500/40 
-                            group-hover:via-cyan-500/10 
-                            group-hover:to-transparent 
-                            transition-all duration-700"
-            />
-
-            {/* Glass Card */}
-            <div className="relative h-full
-                            p-2 sm:p-5
-                            rounded-xl sm:rounded-2xl 
-                            bg-[#050a0f]/90 
-                            backdrop-blur-xl 
-                            border-t border-white/5 
-                            shadow-2xl 
-                            group-hover:bg-[#050a0f]/70 
-                            transition-all duration-500">
-
-                {/* Radial Glow on Hover */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isHovered ? 1 : 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute inset-0 rounded-xl sm:rounded-2xl pointer-events-none"
-                    style={{
-                        background: 'radial-gradient(circle at 50% 50%, rgba(34,211,238,0.08) 0%, transparent 70%)'
-                    }}
-                />
-
-                <div className="relative z-10 flex items-center justify-between mb-2 sm:mb-3">
-                    <span className="text-[10px] sm:text-xs 
-                                     font-mono 
-                                     text-zinc-500 
-                                     uppercase 
-                                     tracking-widest 
-                                     group-hover:text-cyan-400/70 
-                                     transition-colors duration-300">
-                        {label}
-                    </span>
-                    <div className="flex items-center gap-2 sm:gap-3">
-                        {isLink && (
-                            <motion.button
-                                onClick={handleCopy}
-                                whileTap={{ scale: 0.9 }}
-                                className="text-[9px] sm:text-[10px] 
-                                           uppercase 
-                                           tracking-wider 
-                                           font-mono 
-                                           transition-all duration-300 
-                                           px-1.5 sm:px-2 
-                                           py-0.5 sm:py-1 
-                                           rounded-md 
-                                           hover:bg-cyan-500/10
-                                           min-w-[32px] min-h-[32px]
-                                           flex items-center justify-center
-                                           touch-manipulation"
-                            >
-                                <span className={`transition-all duration-300 ${copied ? 'text-cyan-400' : 'text-zinc-600 group-hover:text-cyan-500'}`}>
-                                    {copied ? 'COPIED' : <FaCopy className="text-xs" />}
-                                </span>
-                            </motion.button>
-                        )}
-                        <motion.div
-                            transition={{ duration: 0.3 }}
-                            className={`text-base sm:text-lg md:text-xl 
-                                        transition-colors duration-300 
-                                        ${copied ? 'text-cyan-400' : 'text-zinc-600 group-hover:text-cyan-400'}`}
-                        >
-                            {icon}
-                        </motion.div>
-                    </div>
-                </div>
-
-                <div className="relative z-10 
-                                text-zinc-300 
-                                font-light 
-                                group-hover:text-white 
-                                transition-colors duration-300 
-                                leading-relaxed 
-                                break-words 
-                                text-sm sm:text-base 2xl:text-lg">
-                    {value}
-                </div>
-
-                {/* Subtle Bottom Accent */}
-                <motion.div
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: isHovered ? 1 : 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute bottom-0 left-0 right-0 
-                               h-[1px] 
-                               bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent 
-                               origin-center"
-                />
-            </div>
-        </div>
-    );
-
-    if (isLink && href) {
-        return <a href={href} className="block">{content}</a>;
-    }
-
-    return content;
 };
 
 export default Info;

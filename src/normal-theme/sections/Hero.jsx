@@ -1,69 +1,148 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FaArrowRight, FaGithub, FaInstagram, FaLinkedin } from 'react-icons/fa';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import ProfileImage from '../../assets/yes_color.png';
 import { PROFILE } from '../../constants/profile';
 import { SOCIAL_LINKS } from '../../constants/socials';
 
+// Move static animation variants outside component
+const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.12,
+            delayChildren: 0.2
+        }
+    }
+};
+
+const slideUp = {
+    hidden: { y: "100%" },
+    visible: {
+        y: 0,
+        transition: {
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1]
+        }
+    }
+};
+
+const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" }
+    }
+};
+
+const scaleIn = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 1, ease: "easeOut" }
+    }
+};
+
+// Memoized social links array
+const socialLinks = [
+    { icon: FaGithub, href: SOCIAL_LINKS.GITHUB, label: 'GitHub' },
+    { icon: FaLinkedin, href: SOCIAL_LINKS.LINKEDIN, label: 'LinkedIn' },
+    { icon: FaInstagram, href: SOCIAL_LINKS.INSTAGRAM, label: 'Instagram' }
+];
+
+// Memoized tech stack array
+const techStack = ['React', 'Node.js', 'Next.js', 'TypeScript', 'Tailwind', 'PostgreSQL', 'AWS', 'Docker'];
+
+// Throttle utility
+const throttle = (func, delay) => {
+    let timeoutId;
+    let lastRan;
+    return function (...args) {
+        if (!lastRan) {
+            func.apply(this, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                if ((Date.now() - lastRan) >= delay) {
+                    func.apply(this, args);
+                    lastRan = Date.now();
+                }
+            }, delay - (Date.now() - lastRan));
+        }
+    };
+};
+
+// Memoized SocialIcon component
+const SocialIcon = React.memo(({ social, variants }) => (
+    <motion.a
+        variants={variants}
+        whileHover={{ y: -5, color: "#22d3ee", scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        href={social.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={social.label}
+        className="text-zinc-500 hover:text-cyan-400 transition-all 
+                   text-2xl sm:text-2xl md:text-3xl
+                   p-2 sm:p-2.5
+                   rounded-lg
+                   hover:bg-cyan-500/10
+                   min-w-[44px] min-h-[44px]
+                   flex items-center justify-center
+                   touch-manipulation"
+        style={{ willChange: 'transform' }}
+    >
+        <social.icon />
+    </motion.a>
+));
+
+SocialIcon.displayName = 'SocialIcon';
+
 const Hero = () => {
     const navigate = useNavigate();
 
-    // === Animation Variants ===
-    const staggerContainer = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.12,
-                delayChildren: 0.2
-            }
-        }
-    };
-
-    const slideUp = {
-        hidden: { y: "100%" },
-        visible: {
-            y: 0,
-            transition: {
-                duration: 0.8,
-                ease: [0.16, 1, 0.3, 1]
-            }
-        }
-    };
-
-    const fadeInUp = {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6, ease: "easeOut" }
-        }
-    };
-
-    const scaleIn = {
-        hidden: { opacity: 0, scale: 0.8 },
-        visible: {
-            opacity: 1,
-            scale: 1,
-            transition: { duration: 1, ease: "easeOut" }
-        }
-    };
-
-    // Mouse Parallax Logic for Image Decor (Desktop only)
+    // Mouse Parallax Logic (Desktop only) - Throttled
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
-    const handleMouseMove = (e) => {
-        // Only apply parallax on larger screens
-        if (window.innerWidth >= 1024) {
-            const { clientX, clientY } = e;
-            const centerX = window.innerWidth / 2;
-            const centerY = window.innerHeight / 2;
-            mouseX.set(clientX - centerX);
-            mouseY.set(clientY - centerY);
-        }
-    };
+    const handleMouseMove = useCallback(
+        throttle((e) => {
+            // Only apply parallax on larger screens
+            if (window.innerWidth >= 1024) {
+                const { clientX, clientY } = e;
+                const centerX = window.innerWidth / 2;
+                const centerY = window.innerHeight / 2;
+                mouseX.set(clientX - centerX);
+                mouseY.set(clientY - centerY);
+            }
+        }, 16), // 60fps
+        [mouseX, mouseY]
+    );
+
+    // Memoized navigation handler
+    const handleContactClick = useCallback(() => {
+        navigate('/normal-theme/contact');
+    }, [navigate]);
+
+    // Memoized profile name parts
+    const nameParts = useMemo(() => {
+        const parts = PROFILE.NAME.split(' ');
+        return {
+            firstName: parts[0],
+            middleName: parts[1],
+            lastName: parts[2]
+        };
+    }, []);
+
+    // Memoized bio text
+    const bioText = useMemo(() =>
+        PROFILE.BIO.short.toLowerCase().replace("full stack developer | ", "a full-stack developer ")
+        , []);
 
     return (
         <section
@@ -71,7 +150,7 @@ const Hero = () => {
             className="relative min-h-screen flex items-center justify-center pt-20 sm:pt-24 md:pt-28 lg:pt-20 pb-20 sm:pb-24 md:pb-28 overflow-hidden bg-[#050a0f]"
             onMouseMove={handleMouseMove}
         >
-            {/* === Cinematic Noise Overlay === */}
+            {/* Cinematic Noise Overlay */}
             <div
                 className="absolute inset-0 opacity-[0.02] sm:opacity-[0.03] pointer-events-none z-[1]"
                 style={{
@@ -79,9 +158,9 @@ const Hero = () => {
                 }}
             />
 
-            {/* === Dynamic Parallax Background Layer === */}
+            {/* Dynamic Parallax Background Layer */}
             <div className="absolute inset-0 pointer-events-none z-0">
-                {/* Gradient Blobs - Highly Responsive */}
+                {/* Gradient Blobs */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -97,6 +176,7 @@ const Hero = () => {
                                rounded-full 
                                blur-[60px] sm:blur-[80px] md:blur-[100px] lg:blur-[120px] 
                                animate-pulse-slow"
+                    style={{ willChange: 'transform, opacity' }}
                 />
                 <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
@@ -113,10 +193,10 @@ const Hero = () => {
                                rounded-full 
                                blur-[60px] sm:blur-[80px] md:blur-[100px] lg:blur-[120px] 
                                animate-pulse-slow"
-                    style={{ animationDelay: '2s' }}
+                    style={{ animationDelay: '2s', willChange: 'transform, opacity' }}
                 />
 
-                {/* Grid Pattern - Responsive sizing */}
+                {/* Grid Pattern */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.03 }}
@@ -128,13 +208,13 @@ const Hero = () => {
                     }}
                 />
 
-                {/* Subtle Moving Background Lines - Desktop Only for performance */}
+                {/* Subtle Moving Background Lines - Desktop Only */}
                 <div className="absolute inset-0 overflow-hidden opacity-15 md:opacity-20 pointer-events-none hidden md:block">
-                    <div className="absolute top-0 left-[10%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '8s' }} />
-                    <div className="absolute top-0 left-[30%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '12s', animationDelay: '2s' }} />
-                    <div className="absolute top-0 left-[50%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '10s', animationDelay: '4s' }} />
-                    <div className="absolute top-0 left-[70%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '14s', animationDelay: '1s' }} />
-                    <div className="absolute top-0 left-[90%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '9s', animationDelay: '3s' }} />
+                    <div className="absolute top-0 left-[10%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '8s', willChange: 'transform' }} />
+                    <div className="absolute top-0 left-[30%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '12s', animationDelay: '2s', willChange: 'transform' }} />
+                    <div className="absolute top-0 left-[50%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '10s', animationDelay: '4s', willChange: 'transform' }} />
+                    <div className="absolute top-0 left-[70%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '14s', animationDelay: '1s', willChange: 'transform' }} />
+                    <div className="absolute top-0 left-[90%] w-[1px] h-full bg-gradient-to-b from-transparent via-cyan-500 to-transparent animate-move-down" style={{ animationDuration: '9s', animationDelay: '3s', willChange: 'transform' }} />
                 </div>
             </div>
 
@@ -142,7 +222,7 @@ const Hero = () => {
             <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-8 lg:px-10 w-full relative z-10">
                 <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-10 sm:gap-12 md:gap-14 lg:gap-16 xl:gap-20">
 
-                    {/* === Text Content === */}
+                    {/* Text Content */}
                     <div className="flex flex-col gap-5 sm:gap-6 md:gap-7 lg:gap-8 flex-1 lg:max-w-3xl w-full text-center lg:text-left order-2 lg:order-1">
                         <motion.div
                             variants={staggerContainer}
@@ -150,7 +230,7 @@ const Hero = () => {
                             animate="visible"
                             className="flex flex-col items-center lg:items-start"
                         >
-                            {/* Status Badge - Optimized for mobile */}
+                            {/* Status Badge */}
                             <motion.div
                                 variants={fadeInUp}
                                 whileHover={{ scale: 1.05 }}
@@ -168,6 +248,7 @@ const Hero = () => {
                                            transition-all duration-300 
                                            cursor-default 
                                            mb-5 sm:mb-6"
+                                style={{ willChange: 'transform' }}
                             >
                                 <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
@@ -178,7 +259,7 @@ const Hero = () => {
                                 </span>
                             </motion.div>
 
-                            {/* Main Headline - Fluid Typography */}
+                            {/* Main Headline */}
                             <h1 className="font-bold tracking-tight text-white leading-[1.05] sm:leading-[1.1] drop-shadow-2xl mb-1 sm:mb-2"
                                 style={{
                                     fontSize: 'clamp(2rem, 8vw, 6rem)',
@@ -200,7 +281,7 @@ const Hero = () => {
                                         Future.
                                     </motion.span>
 
-                                    {/* Animated Underline - Responsive */}
+                                    {/* Animated Underline */}
                                     <motion.div
                                         initial={{ scaleX: 0 }}
                                         animate={{ scaleX: 1 }}
@@ -210,11 +291,12 @@ const Hero = () => {
                                                    bg-cyan-500/50 
                                                    blur-[2px] sm:blur-[3px] md:blur-[4px] lg:blur-[5px] 
                                                    origin-left opacity-50"
+                                        style={{ willChange: 'transform' }}
                                     />
                                 </div>
                             </h1>
 
-                            {/* Bio Text - Fluid Typography */}
+                            {/* Bio Text */}
                             <motion.div
                                 variants={fadeInUp}
                                 className="text-zinc-400 max-w-2xl leading-relaxed font-light 
@@ -224,10 +306,10 @@ const Hero = () => {
                                     fontSize: 'clamp(0.875rem, 2.5vw, 1.25rem)',
                                 }}
                             >
-                                I'm <span className="text-cyan-50 font-semibold">{PROFILE.NAME.split(' ')[0]} {PROFILE.NAME.split(' ')[1]}</span> <span className="text-cyan-200 font-semibold">{PROFILE.NAME.split(' ')[2]}</span>, {PROFILE.BIO.short.toLowerCase().replace("full stack developer | ", "a full-stack developer ")}
+                                I'm <span className="text-cyan-50 font-semibold">{nameParts.firstName} {nameParts.middleName}</span> <span className="text-cyan-200 font-semibold">{nameParts.lastName}</span>, {bioText}
                             </motion.div>
 
-                            {/* CTA and Social Links - Enhanced Touch Targets */}
+                            {/* CTA and Social Links */}
                             <motion.div
                                 variants={{
                                     hidden: { opacity: 0 },
@@ -246,12 +328,12 @@ const Hero = () => {
                                            mt-7 sm:mt-8 md:mt-9 lg:mt-10 
                                            w-full sm:w-auto"
                             >
-                                {/* CTA Button - Enhanced for touch */}
+                                {/* CTA Button */}
                                 <motion.button
                                     variants={fadeInUp}
                                     whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 255, 255, 0.95)" }}
                                     whileTap={{ scale: 0.95 }}
-                                    onClick={() => navigate('/normal-theme/contact')}
+                                    onClick={handleContactClick}
                                     className="relative overflow-hidden 
                                                px-7 py-3.5 sm:px-8 sm:py-4 
                                                bg-white backdrop-blur-md 
@@ -267,16 +349,16 @@ const Hero = () => {
                                                w-full sm:w-auto
                                                min-h-[48px]
                                                touch-manipulation"
+                                    style={{ willChange: 'transform' }}
                                 >
                                     <span className="relative z-10 flex items-center gap-2">
                                         Start a Project
                                         <FaArrowRight className="group-hover:translate-x-1 transition-transform text-cyan-400 text-sm sm:text-base" />
                                     </span>
-                                    {/* Shine Effect */}
                                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent skew-x-12 translate-x-[-150%] group-hover:animate-shine-fast" />
                                 </motion.button>
 
-                                {/* Social Icons - Enhanced Touch Targets */}
+                                {/* Social Icons */}
                                 <motion.div
                                     variants={{
                                         hidden: { opacity: 1 },
@@ -287,38 +369,15 @@ const Hero = () => {
                                     }}
                                     className="flex flex-row justify-center items-center gap-4 sm:gap-5 md:gap-6"
                                 >
-                                    {[
-                                        { icon: FaGithub, href: SOCIAL_LINKS.GITHUB, label: 'GitHub' },
-                                        { icon: FaLinkedin, href: SOCIAL_LINKS.LINKEDIN, label: 'LinkedIn' },
-                                        { icon: FaInstagram, href: SOCIAL_LINKS.INSTAGRAM, label: 'Instagram' }
-                                    ].map((social, idx) => (
-                                        <motion.a
-                                            key={idx}
-                                            variants={fadeInUp}
-                                            whileHover={{ y: -5, color: "#22d3ee", scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                            href={social.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            aria-label={social.label}
-                                            className="text-zinc-500 hover:text-cyan-400 transition-all 
-                                                       text-2xl sm:text-2xl md:text-3xl
-                                                       p-2 sm:p-2.5
-                                                       rounded-lg
-                                                       hover:bg-cyan-500/10
-                                                       min-w-[44px] min-h-[44px]
-                                                       flex items-center justify-center
-                                                       touch-manipulation"
-                                        >
-                                            <social.icon />
-                                        </motion.a>
+                                    {socialLinks.map((social, idx) => (
+                                        <SocialIcon key={idx} social={social} variants={fadeInUp} />
                                     ))}
                                 </motion.div>
                             </motion.div>
                         </motion.div>
                     </div>
 
-                    {/* === Profile Image - Responsive Display === */}
+                    {/* Profile Image */}
                     <div className="relative flex-1 w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[420px] xl:max-w-[500px] order-1 lg:order-2">
                         <motion.div
                             variants={scaleIn}
@@ -346,6 +405,7 @@ const Hero = () => {
                                            shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                style={{ willChange: 'transform' }}
                             >
                                 {/* Cyan Tint Overlay */}
                                 <div className="absolute inset-0 bg-cyan-500/10 mix-blend-overlay z-10 transition-opacity duration-500 group-hover:opacity-0" />
@@ -383,10 +443,11 @@ const Hero = () => {
                         },
                     }}
                     className="flex gap-14 lg:gap-16 xl:gap-20 whitespace-nowrap"
+                    style={{ willChange: 'transform' }}
                 >
                     {[...Array(3)].map((_, idx) => (
                         <React.Fragment key={idx}>
-                            {['React', 'Node.js', 'Next.js', 'TypeScript', 'Tailwind', 'PostgreSQL', 'AWS', 'Docker'].map((tech, i) => (
+                            {techStack.map((tech, i) => (
                                 <span
                                     key={`${idx}-${i}`}
                                     className="text-xs lg:text-sm font-mono text-cyan-500/40 uppercase tracking-widest"
