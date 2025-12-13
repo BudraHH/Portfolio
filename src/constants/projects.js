@@ -2,77 +2,88 @@ export const LANGUAGE_COLORS = {
     JavaScript: "bg-yellow-400",
     TypeScript: "bg-blue-500",
     Python: "bg-green-500",
+    Java: "bg-red-500",
+    SQL: "bg-indigo-500",
     Rust: "bg-orange-600",
     Css: "bg-purple-500",
     Go: "bg-cyan-500",
+    Docker: "bg-sky-500",
 };
 
 
 export const REPOSITORIES = [
     {
-        name: "portfolio-v4",
-        description: "A futuristic, terminal-themed portfolio website built with React, TailwindCSS, and Framer Motion. Features a simulated OS environment.",
-        languages: ["JavaScript", "CSS"],
-        techStack: ["React", "TailwindCSS", "Framer Motion", "Vite"],
-        github: "https://github.com/BudraHH/portfolio-v4",
-        website: "https://portfolio.com",
-        stars: 124,
-        forks: 35,
-        updated: "Updated 2 days ago"
-    },
-    {
-        name: "eco-tracker-api",
-        description: "RESTful API for tracking carbon footprints using Node.js and MongoDB. Includes data visualization endpoints.",
-        languages: ["TypeScript", "JavaScript"],
-        techStack: ["Node.js", "Express", "MongoDB", "Mongoose", "JWT"],
-        github: "https://github.com/BudraHH/eco-tracker-api",
+        name: "ApplyForge",
+        description:
+            "An end-to-end automated job application platform designed to handle large-scale job scraping and intelligent resume matching. Built with a distributed architecture to process thousands of concurrent job listings across multiple platforms with fault tolerance and sub-second matching performance.",
+        languages: ["Python", "SQL"],
+        techStack: [
+            "FastAPI",
+            "PostgreSQL",
+            "Docker",
+            "Redis",
+            "Celery",
+            "JWT Auth",
+            "Async Workers"
+        ],
+        github: "https://github.com/BudraHH/ApplyForge",
         website: null,
-        stars: 89,
-        forks: 12,
-        updated: "Updated 5 days ago"
+        stars: 0,
+        forks: 0,
+        updated: "Active Development"
     },
     {
-        name: "neural-net-visualizer",
-        description: "Interactive 3D visualization of neural network layers using Three.js. Great for educational purposes.",
-        languages: ["Python", "JavaScript", "GLSL"],
-        techStack: ["Three.js", "React Three Fiber", "Python", "TensorFlow.js"],
-        github: "https://github.com/BudraHH/neural-net-visualizer",
-        website: "https://neural-vis-demo.vercel.app",
-        stars: 256,
-        forks: 67,
-        updated: "Updated 1 week ago"
-    },
-    {
-        name: "cli-task-manager",
-        description: "A rust-based command line tool for managing daily tasks with priority queues and local storage persistence.",
-        languages: ["Rust"],
-        techStack: ["Rust", "Clap", "Serde", "Tokio"],
-        github: "https://github.com/BudraHH/cli-task-manager",
+        name: "AutoIntell",
+        description:
+            "A predictive maintenance system delivering real-time insights through Django REST APIs and TensorFlow inference pipelines. Optimized database queries and inference workflows to achieve consistent sub-200ms response times in production scenarios.",
+        languages: ["Python", "SQL"],
+        techStack: [
+            "Django REST",
+            "TensorFlow",
+            "PostgreSQL",
+            "ORM Optimization",
+            "Model Inference"
+        ],
+        github: "https://github.com/BudraHH/AutoIntell",
         website: null,
-        stars: 45,
-        forks: 8,
-        updated: "Updated 2 weeks ago"
+        stars: 0,
+        forks: 0,
+        updated: "Completed"
     },
     {
-        name: "react-glassmorphism-ui",
-        description: "A lightweight UI component library focus on glassmorphism aesthetics. Fully customizable and accessible.",
-        languages: ["Css", "JavaScript"],
-        techStack: ["React", "CSS Modules", "Rollup", "Storybook"],
-        github: "https://github.com/BudraHH/react-glassmorphism-ui",
-        website: "https://glass-ui.budra.dev",
-        stars: 12,
-        forks: 2,
-        updated: "Updated 3 weeks ago"
-    },
-    {
-        name: "distributed-chat-app",
-        description: "Real-time chat application using WebSockets and Redis Pub/Sub for scalability across multiple server instances.",
-        languages: ["Go", "Dockerfile", "Shell"],
-        techStack: ["Go", "Gin", "Redis", "WebSockets", "Docker"],
-        github: "https://github.com/BudraHH/distributed-chat-app",
+        name: "TestCo",
+        description:
+            "A scalable test management and evaluation platform built on a serverless architecture. Securely executes concurrent code submissions using Docker-based sandboxing while ensuring performance isolation and platform stability.",
+        languages: ["JavaScript"],
+        techStack: [
+            "Node.js",
+            "AWS Lambda",
+            "Docker",
+            "CloudWatch",
+            "REST APIs"
+        ],
+        github: "https://github.com/BudraHH/TestCo",
         website: null,
-        stars: 78,
-        forks: 21,
-        updated: "Updated 1 month ago"
+        stars: 0,
+        forks: 0,
+        updated: "Completed"
+    },
+    {
+        name: "CVE Management System",
+        description:
+            "A vulnerability ingestion and analytics platform that continuously synchronizes threat intelligence from the NVD API. Optimized MongoDB schemas and indexing strategies to handle over 200K vulnerability records with sub-100ms query performance.",
+        languages: ["Python"],
+        techStack: [
+            "Flask",
+            "MongoDB",
+            "NVD API",
+            "Indexing",
+            "Security Analytics"
+        ],
+        github: "https://github.com/BudraHH/CVE-Management-System",
+        website: null,
+        stars: 0,
+        forks: 0,
+        updated: "Completed"
     }
 ];

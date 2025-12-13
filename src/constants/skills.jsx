@@ -1,11 +1,13 @@
 import {
-    FaReact, FaNodeJs, FaPython, FaDocker, FaGitAlt, FaAws, FaFigma,
-    FaVuejs, FaLinux, FaCodeBranch
+    FaReact, FaNodeJs, FaPython, FaDocker, FaGitAlt, FaAws,
+    FaHtml5, FaCss3Alt, FaLinux, FaCodeBranch
 } from 'react-icons/fa';
-import { SiNextdotjs, SiTypescript, SiTailwindcss, SiMongodb, SiPostgresql, SiFirebase, SiRedux, SiGraphql } from 'react-icons/si';
+import {
+    SiNextdotjs, SiTypescript, SiTailwindcss,
+    SiMongodb, SiPostgresql, SiRedux
+} from 'react-icons/si';
 
-// Note: dev-theme will likely use 'name' and ignore 'icon'
-// normal-theme uses 'icon' for the 3D book
+// Resume-aligned, portfolio-enhanced skill archive
 
 export const SKILL_CATEGORIES = [
     {
@@ -20,56 +22,82 @@ export const SKILL_CATEGORIES = [
         id: "synopsis",
         type: "synopsis",
         title: "Synopsis",
-        description: "This archive contains a comprehensive breakdown of the technical capabilities utilized to engineer scalable, high-performance digital solutions. Proceed to inspect individual modules.",
+        description:
+            "This archive documents the technical systems, tools, and engineering practices applied to build scalable, production-grade software. Each module reflects hands-on experience across full-stack development, backend systems, and cloud-native workflows.",
         bgGradient: "from-zinc-900 to-zinc-950",
         skills: []
     },
+
+    /* ================= FRONTEND ================= */
     {
         id: "frontend",
         type: "content",
         title: "Frontend Engineering",
-        description: "Crafting fully responsive, interactive, and high-performance user interfaces.",
+        description:
+            "Designing responsive, accessible, and high-performance user interfaces with a strong focus on component architecture and user experience.",
         bgGradient: "from-cyan-900/20 to-blue-900/20",
-        skills: [
-            { name: "React", icon: <FaReact />, category: "Frontend" },
-            { name: "Next.js", icon: <SiNextdotjs />, category: "Frontend" },
-            { name: "TypeScript", icon: <SiTypescript />, category: "Frontend" },
-            { name: "Tailwind CSS", icon: <SiTailwindcss />, category: "Frontend" },
-            { name: "Vue.js", icon: <FaVuejs />, category: "Frontend" },
-            { name: "Redux", icon: <SiRedux />, category: "Frontend" },
-            { name: "Framer Motion", icon: <span className="font-bold font-serif italic">f</span>, category: "Frontend" }
-        ]
+       skills: [
+    { name: "React.js", icon: <FaReact />, category: "Frontend" },
+    { name: "JavaScript (ES6+)", icon: <FaCodeBranch />, category: "Frontend" },
+    { name: "HTML5", icon: <FaHtml5 />, category: "Frontend" },
+    { name: "CSS3", icon: <FaCss3Alt />, category: "Frontend" },
+    { name: "Tailwind CSS", icon: <SiTailwindcss />, category: "Frontend" },
+    { name: "Redux", icon: <SiRedux />, category: "Frontend" }
+]
+
     },
+
+    /* ================= BACKEND ================= */
     {
         id: "backend",
         type: "content",
         title: "Backend Architecture",
-        description: "Building robust server-side systems, scalable APIs, and secure database architectures.",
+        description:
+            "Building secure, scalable backend systems and APIs with a focus on performance, data integrity, and maintainability.",
         bgGradient: "from-purple-900/20 to-pink-900/20",
         skills: [
             { name: "Node.js", icon: <FaNodeJs />, category: "Backend" },
             { name: "Python", icon: <FaPython />, category: "Backend" },
-            { name: "PostgreSQL", icon: <SiPostgresql />, category: "Backend" },
-            { name: "MongoDB", icon: <SiMongodb />, category: "Backend" },
-            { name: "GraphQL", icon: <SiGraphql />, category: "Backend" },
-            { name: "API Design", icon: <FaCodeBranch />, category: "Backend" }
+            { name: "FastAPI", icon: <FaCodeBranch />, category: "Backend" },
+            { name: "Django REST", icon: <FaCodeBranch />, category: "Backend" },
+            { name: "REST API Design", icon: <FaCodeBranch />, category: "Backend" },
+            { name: "System Debugging", icon: <FaCodeBranch />, category: "Backend" }
         ]
     },
+
+    /* ================= DATABASES ================= */
+    {
+        id: "databases",
+        type: "content",
+        title: "Data & Persistence",
+        description:
+            "Designing efficient data models and optimizing queries to support high-throughput, low-latency systems.",
+        bgGradient: "from-amber-900/20 to-orange-900/20",
+        skills: [
+            { name: "PostgreSQL", icon: <SiPostgresql />, category: "Database" },
+            { name: "MongoDB", icon: <SiMongodb />, category: "Database" },
+            { name: "Redis", icon: <FaCodeBranch />, category: "Database" },
+            { name: "SQL Optimization", icon: <FaCodeBranch />, category: "Database" }
+        ]
+    },
+
+    /* ================= DEVOPS ================= */
     {
         id: "devops",
         type: "content",
         title: "DevOps & Cloud",
-        description: "Streamlining deployment pipelines, containerization, and managing cloud infrastructure.",
+        description:
+            "Streamlining development workflows, containerized deployments, and cloud-based execution environments.",
         bgGradient: "from-emerald-900/20 to-teal-900/20",
         skills: [
             { name: "Docker", icon: <FaDocker />, category: "DevOps" },
-            { name: "AWS", icon: <FaAws />, category: "DevOps" },
-            { name: "Git", icon: <FaGitAlt />, category: "DevOps" },
-            { name: "Linux", icon: <FaLinux />, category: "DevOps" },
-            { name: "Figma", icon: <FaFigma />, category: "DevOps" },
-            { name: "Firebase", icon: <SiFirebase />, category: "DevOps" }
+            { name: "AWS Lambda", icon: <FaAws />, category: "DevOps" },
+            { name: "Git & GitHub", icon: <FaGitAlt />, category: "DevOps" },
+            { name: "GitHub Actions", icon: <FaCodeBranch />, category: "DevOps" },
+            { name: "Linux", icon: <FaLinux />, category: "DevOps" }
         ]
     },
+
     {
         id: "back-cover",
         type: "back_cover",
