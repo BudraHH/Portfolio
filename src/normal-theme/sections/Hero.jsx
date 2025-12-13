@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import ProfileImage from '../../assets/image_color.png';
 import { PROFILE } from '../../constants/profile';
 import { SOCIAL_LINKS } from '../../constants/socials';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Configuration ---
 
@@ -267,7 +268,7 @@ const Hero = () => {
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [handleMouseMove]);
 
-    const handleContactClick = useCallback(() => navigate('/normal-theme/contact'), [navigate]);
+    const handleContactClick = useCallback(() => navigate(`${NORMAL_ROUTES.ROOT}/${NORMAL_ROUTES.SECTIONS.CONTACT}`), [navigate]);
 
     // Data Memoization
     const nameParts = useMemo(() => {

@@ -2,6 +2,7 @@ import React, { useRef, useCallback, useMemo, memo } from 'react';
 import { motion, useSpring, useMotionTemplate, useMotionValue, useScroll, useTransform } from 'framer-motion';
 import { Github, ExternalLink, Star, GitFork } from 'lucide-react';
 import { REPOSITORIES } from '../../constants/projects.js';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -290,7 +291,7 @@ const ProjectsPc = () => {
 
     return (
         <div className="hidden md:block">
-            <section id="projects" ref={targetRef} className="relative h-[300vh] bg-[#050a0f]">
+            <section id={NORMAL_ROUTES.SECTIONS.PROJECTS} ref={targetRef} className="relative h-[300vh] bg-[#050a0f]">
                 <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center">
                     <AmbientBackground />
 

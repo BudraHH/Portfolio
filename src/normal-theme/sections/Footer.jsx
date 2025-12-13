@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SOCIAL_LINKS } from '../../constants/socials';
 import { PROFILE } from '../../constants/profile';
-import { NAVIGATION_LINKS } from '../constants/navigation';
+import { NAVIGATION_ITEMS } from '../constants/navigation';
 import { NORMAL_ROUTES } from '../routes/routes';
 
 // --- Constants ---
@@ -62,18 +62,18 @@ const NavLink = memo(({ item, onClick }) => (
         className="hover:text-cyan-400 transition-colors uppercase tracking-wider min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation"
         style={{ fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)' }}
     >
-        {item}
+        {item.label}
     </button>
 ));
 NavLink.displayName = 'NavLink';
 
 const FooterLinks = memo(({ onNavClick }) => (
     <div className="flex items-center justify-start md:justify-center gap-4 sm:gap-6 md:gap-8 font-medium text-zinc-400 flex-row">
-        {NAVIGATION_LINKS.map((item) => (
+        {NAVIGATION_ITEMS.map((item) => (
             <NavLink
-                key={item}
+                key={item.id}
                 item={item}
-                onClick={() => onNavClick(item)}
+                onClick={() => onNavClick(item.id)}
             />
         ))}
     </div>
@@ -143,9 +143,7 @@ const Footer = () => {
         }
     }, [navigate, location.pathname]);
 
-    const handleNavClick = useCallback((item) => {
-        const sectionId = item.toLowerCase() === 'home' ? '' : item.toLowerCase();
-
+    const handleNavClick = useCallback((sectionId) => {
         if (location.pathname.startsWith(NORMAL_ROUTES.ROOT) && window.lenis) {
             if (sectionId) {
                 const element = document.getElementById(sectionId);
@@ -155,6 +153,7 @@ const Footer = () => {
                     return;
                 }
             } else {
+                // For Home/Root
                 window.lenis.scrollTo(0, { offset: 0 });
                 window.history.pushState({}, '', NORMAL_ROUTES.ROOT);
                 return;

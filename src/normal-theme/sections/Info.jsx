@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaGlobe, FaCopy, FaArrowRight } from 'react-icons/fa';
 import { PROFILE } from '../../constants/profile';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -323,7 +324,7 @@ const Info = () => {
 
     return (
         <section
-            id="info"
+            id={NORMAL_ROUTES.SECTIONS.INFO}
             className="relative py-12 sm:py-16 md:py-20 lg:py-28 xl:py-36 2xl:py-44 bg-cyan-950/5 overflow-hidden"
         >
             {/* Background Layers */}

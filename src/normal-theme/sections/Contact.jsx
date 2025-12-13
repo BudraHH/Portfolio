@@ -12,6 +12,7 @@ import {
 import { motion } from 'framer-motion';
 import { SOCIAL_LINKS } from '../../constants/socials';
 import { PROFILE } from '../../constants/profile';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -267,7 +268,7 @@ const Contact = () => {
     const emailHref = useMemo(() => `mailto:${PROFILE.CONTACT.email}`, []);
 
     return (
-        <section id="contact" className="py-16 sm:py-20 md:py-28 lg:py-36 xl:py-44 2xl:py-48 bg-[#050a0f] relative overflow-hidden">
+        <section id={NORMAL_ROUTES.SECTIONS.CONTACT} className="py-16 sm:py-20 md:py-28 lg:py-36 xl:py-44 2xl:py-48 bg-[#050a0f] relative overflow-hidden">
             <AmbientBackground />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 relative z-10">
                 <ContactHeader />

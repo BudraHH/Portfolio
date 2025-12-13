@@ -2,6 +2,7 @@ import React, { useMemo, useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { SKILL_CATEGORIES } from '../../constants/skills';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -262,7 +263,7 @@ const SkillsMobile = () => {
     return (
         <div className="md:hidden">
             <section
-                id="skills"
+                id={NORMAL_ROUTES.SECTIONS.SKILLS}
                 className="relative py-16 sm:py-20 bg-[#050a0f] h-screen flex justify-center items-center overflow-hidden"
             >
                 {/* Background Effects */}

@@ -2,6 +2,7 @@ import React, { useRef, useMemo, memo } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { FaCodeBranch } from 'react-icons/fa';
 import { SKILL_CATEGORIES } from '../../constants/skills';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -303,7 +304,7 @@ const SkillsPc = () => {
     return (
         <div className="hidden md:block">
             <section
-                id="skills"
+                id={NORMAL_ROUTES.SECTIONS.SKILLS}
                 ref={sectionRef}
                 className="h-[500vh] bg-[#050a0f] relative"
             >

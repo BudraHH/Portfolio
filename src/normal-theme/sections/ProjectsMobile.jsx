@@ -2,6 +2,7 @@ import React, { useState, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Github, ExternalLink, Star, GitFork } from 'lucide-react';
 import { REPOSITORIES } from '../../constants/projects.js';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -222,7 +223,7 @@ const ProjectsMobile = () => {
 
     return (
         <div className="md:hidden">
-            <section id="projects" className="relative py-16 sm:py-20 bg-[#050a0f]">
+            <section id={NORMAL_ROUTES.SECTIONS.PROJECTS} className="relative py-16 sm:py-20 bg-[#050a0f]">
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute inset-0 opacity-[0.02] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }} />
                     <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[100px]" />

@@ -2,6 +2,7 @@ import React, { useMemo, useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaGraduationCap, FaBriefcase, FaCalendarAlt, FaBuilding } from 'react-icons/fa';
 import { EXPERIENCE_DATA } from '../../constants/experience';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -91,8 +92,8 @@ const TabSelector = memo(({ icon: Icon, label, isActive, onClick }) => (
         onClick={onClick}
         whileTap={{ scale: 0.95 }}
         className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-300 cursor-pointer ${isActive
-                ? 'bg-cyan-800/20 border-cyan-500/50 text-white'
-                : 'bg-white/[0.02] border-white/5 text-zinc-500 hover:border-white/10'
+            ? 'bg-cyan-800/20 border-cyan-500/50 text-white'
+            : 'bg-white/[0.02] border-white/5 text-zinc-500 hover:border-white/10'
             }`}
     >
         <div className={`w-10 h-10 rounded-lg bg-cyan-500/10 border-cyan-500/30 text-cyan-400 border flex items-center justify-center transition-all duration-300 ${isActive ? 'scale-102' : ''}`}>
@@ -243,7 +244,7 @@ const CareerMobile = () => {
 
     return (
         <div className="md:hidden">
-            <section id="career" className="relative py-16 sm:py-20 bg-[#050a0f] h-screen flex justify-center items-center overflow-hidden">
+            <section id={NORMAL_ROUTES.SECTIONS.CAREER} className="relative py-16 sm:py-20 bg-[#050a0f] h-screen flex justify-center items-center overflow-hidden">
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute inset-0 opacity-[0.02] sm:opacity-[0.025] mix-blend-overlay" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }} />
                     <div className="absolute top-0 left-0 w-64 h-64 sm:w-80 sm:h-80 bg-cyan-500/5 rounded-full blur-[80px] sm:blur-[100px]" />

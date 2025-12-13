@@ -2,6 +2,7 @@ import React, { useRef, useCallback, useMemo, memo, useState, useEffect } from '
 import { motion, useScroll, useTransform, useSpring, useMotionTemplate } from 'framer-motion';
 import { FaGraduationCap, FaBriefcase, FaCode } from 'react-icons/fa';
 import { EXPERIENCE_DATA } from '../../constants/experience';
+import { NORMAL_ROUTES } from '../../constants/routes';
 
 // --- Constants & Variants ---
 
@@ -278,7 +279,7 @@ const CareerPc = () => {
 
     return (
         <div className="hidden md:block">
-            <section id="career" ref={sectionRef} className="relative py-28 lg:py-36 xl:py-44 2xl:py-48 bg-[#050a0f] overflow-hidden">
+            <section id={NORMAL_ROUTES.SECTIONS.CAREER} ref={sectionRef} className="relative py-28 lg:py-36 xl:py-44 2xl:py-48 bg-[#050a0f] overflow-hidden">
                 <AmbientBackground />
                 <div className="max-w-7xl mx-auto px-8 lg:px-10 xl:px-12 relative z-10">
                     <CareerHeader />
