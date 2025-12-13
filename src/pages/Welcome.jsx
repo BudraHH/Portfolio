@@ -1,28 +1,117 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import {
+    motion,
+    AnimatePresence,
+    useMotionValue,
+    useSpring,
+    useTransform
+} from 'framer-motion';
 import { FaTerminal, FaLaptopCode, FaArrowRight } from 'react-icons/fa';
 
-// Throttle utility for performance optimization
-const throttle = (func, delay) => {
-    let timeoutId;
-    let lastRan;
-    return function (...args) {
-        if (!lastRan) {
-            func.apply(this, args);
-            lastRan = Date.now();
-        } else {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-                if ((Date.now() - lastRan) >= delay) {
-                    func.apply(this, args);
-                    lastRan = Date.now();
-                }
-            }, delay - (Date.now() - lastRan));
-        }
-    };
+// --- Constants & Variants ---
+
+const PAGE_TRANSITION = { duration: 0.6, ease: "easeOut" };
+const STAGGER_CHILDREN = 0.15;
+const SPRING_CONFIG = { damping: 25, stiffness: 120, mass: 0.5 }; // Lightweight spring for smoothness
+
+const pageVariants = {
+    initial: { opacity: 0 },
+    animate: {
+        opacity: 1,
+        transition: PAGE_TRANSITION
+    },
+    exit: {
+        opacity: 0,
+        transition: { duration: 0.4 }
+    }
 };
 
-// Memoized ThemeCard component to prevent unnecessary re-renders
-const ThemeCard = React.memo(({
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: STAGGER_CHILDREN,
+            delayChildren: 0.2
+        }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 }, // Reduced distance for less layout shift
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } // Custom bezier
+    }
+};
+
+const cardVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+    }
+};
+
+// --- Optimized Components ---
+
+// Static Grid Pattern - prevent re-renders
+const GridPattern = memo(() => (
+    <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.02 }}
+        transition={{ duration: 1.5, delay: 0.3 }}
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+            backgroundImage: `linear-gradient(#06b6d4 1px, transparent 1px), linear-gradient(90deg, #06b6d4 1px, transparent 1px)`,
+            backgroundSize: '40px 40px',
+            willChange: 'opacity'
+        }}
+    />
+));
+
+GridPattern.displayName = 'GridPattern';
+
+// Hardware Accelerated Spotlight - Uses transform instead of background-position paint
+const Spotlight = memo(({ x, y, colorRGB, inverted = false }) => {
+    // Transform percentage coordinates to window-relative movement
+    // We map 0-100 input range to position styles
+    // inverted handles the secondary light
+
+    // Note: We use massive dimensions to cover screen, translated by percentage
+    // This allows the browser to simply move a texture around (Composite layer)
+
+    // x and y are MotionValues (0-100)
+
+    const xPos = useTransform(x, val => inverted ? `${100 - val}%` : `${val}%`);
+    const yPos = useTransform(y, val => inverted ? `${100 - val}%` : `${val}%`);
+
+    return (
+        <motion.div
+            className="absolute z-0 pointer-events-none mix-blend-screen"
+            style={{
+                top: 0,
+                left: 0,
+                x: xPos,
+                y: yPos,
+                width: '100vmax', // Ensure it covers enough area
+                height: '100vmax',
+                translateX: '-50%', // Center the radial gradient on the coordinate
+                translateY: '-50%',
+                background: `radial-gradient(circle closest-side, rgba(${colorRGB}, 0.15) 0%, transparent 100%)`,
+                willChange: 'transform' // Force GPU layer
+            }}
+        />
+    );
+});
+
+Spotlight.displayName = 'Spotlight';
+
+// Memoized ThemeCard component
+const ThemeCard = memo(({
     theme,
     isHovered,
     onHover,
@@ -35,251 +124,191 @@ const ThemeCard = React.memo(({
     colorScheme
 }) => {
     const isActive = isHovered === theme;
+    // Determine static classes vs dynamic ones to help engine
+    const borderColor = colorScheme === 'cyan' ? 'border-cyan-500/50' : 'border-blue-500/50';
+    const shadowColor = colorScheme === 'cyan' ? 'rgba(6,182,212,0.15)' : 'rgba(59,130,246,0.15)';
+    const hoverBg = `group-hover:bg-${colorScheme}-500/20`;
+    // Note: Tailwind arbitrary values in template literals only work if safelisted or pre-compiled. 
+    // Assuming 'cyan' and 'blue' are safe.
 
-    const cardClassName = `group relative 
-                           p-5 sm:p-6 md:p-7 lg:p-8 
-                           rounded-xl sm:rounded-2xl md:rounded-3xl 
-                           text-left 
-                           transition-all duration-500 
-                           border
-                           min-h-[280px] sm:min-h-[320px]
-                           flex flex-col
-                           touch-manipulation
-                           ${isActive
-            ? `bg-[#0a1520] border-${colorScheme}-500/50 shadow-[0_0_30px_rgba(${colorScheme === 'cyan' ? '6,182,212' : '59,130,246'},0.12)] sm:shadow-[0_0_40px_rgba(${colorScheme === 'cyan' ? '6,182,212' : '59,130,246'},0.15)] scale-[1.01] sm:scale-[1.02]`
-            : 'bg-[#0a1520]/60 border-white/5 hover:border-white/10'
-        }`;
-
-    const cardStyle = useMemo(() => ({
-        willChange: isActive ? 'transform, opacity' : 'auto',
-        transform: 'translateZ(0)' // Force GPU layer
-    }), [isActive]);
+    const activeClass = isActive
+        ? `bg-[#0a1520] ${borderColor} shadow-[0_0_30px_${shadowColor}]`
+        : 'bg-[#0a1520]/60 border-white/5 hover:border-white/10';
 
     return (
-        <button
+        <motion.button
+            variants={cardVariants}
+            whileHover={{ scale: 1.02, y: -5 }} // Reduced movement for faster paint
+            whileTap={{ scale: 0.98 }}
             onClick={onClick}
             onMouseEnter={onHover}
             onMouseLeave={onLeave}
-            className={cardClassName}
-            style={cardStyle}
+            className={`group relative p-6 md:p-8 rounded-2xl flex flex-col text-left 
+                       border min-h-[280px] sm:min-h-[320px] transition-all duration-300 
+                       will-change-transform ${activeClass}`}
         >
-            <div className={`absolute inset-0 
-                            bg-gradient-to-br from-${colorScheme}-500/10 to-transparent 
-                            opacity-0 group-hover:opacity-100 
-                            transition-opacity duration-500 
-                            rounded-xl sm:rounded-2xl md:rounded-3xl`} />
+            {/* Optimized Glow - fade in/out opacity instead of expensive layout changes */}
+            <div
+                className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-${colorScheme}-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+            />
 
             <div className="relative z-10 flex flex-col h-full">
-                <div className={`w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 
-                                rounded-lg sm:rounded-xl md:rounded-2xl 
-                                bg-${colorScheme}-500/10 
-                                flex items-center justify-center 
-                                mb-4 sm:mb-5 md:mb-6 
-                                group-hover:bg-${colorScheme}-500/20 
-                                transition-colors`}>
-                    <Icon className={`text-${colorScheme}-400`}
-                        style={{
-                            fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-                        }} />
+                {/* Icon */}
+                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-${colorScheme}-500/10 
+                               flex items-center justify-center mb-6 
+                               ${hoverBg} transition-colors duration-300`}>
+                    <Icon className={`text-${colorScheme}-400 text-xl md:text-2xl`} />
                 </div>
 
-                <h3 className={`font-bold text-white 
-                              mb-2 
-                              group-hover:text-${colorScheme}-200 
-                              transition-colors`}
-                    style={{
-                        fontSize: 'clamp(1.125rem, 3vw, 1.5rem)',
-                    }}
-                >
+                <h3 className={`font-bold text-xl md:text-2xl text-white mb-3 group-hover:text-${colorScheme}-200 transition-colors duration-300`}>
                     {title}
                 </h3>
-                <p className="text-zinc-400
-                             leading-relaxed
-                             mb-5 sm:mb-6 md:mb-8
-                             flex-1"
-                    style={{
-                        fontSize: 'clamp(0.8125rem, 2vw, 0.875rem)',
-                    }}
-                >
+
+                <p className="text-zinc-400 leading-relaxed mb-6 flex-1 text-sm md:text-base">
                     {description}
                 </p>
 
-                <div className={`flex items-center 
-                               text-${colorScheme}-400 
-                               font-medium 
-                               group-hover:translate-x-1 
-                               transition-transform`}
-                    style={{
-                        fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
-                    }}
-                >
-                    {actionText} <FaArrowRight className="ml-2 text-xs sm:text-sm" />
+                <div className={`flex items-center text-${colorScheme}-400 font-medium text-sm md:text-base group-hover:translate-x-1 transition-transform duration-300`}>
+                    {actionText}
+                    <FaArrowRight className="ml-2 text-xs" />
                 </div>
             </div>
-        </button>
+        </motion.button>
     );
 });
 
 ThemeCard.displayName = 'ThemeCard';
 
 const Welcome = ({ onSelectTheme }) => {
-    const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+    // Use MotionValues for high-performance mouse tracking (bypasses React render cycle)
+    const mouseX = useMotionValue(50);
+    const mouseY = useMotionValue(50);
+
+    // Smooth out the movement with a spring
+    const smoothX = useSpring(mouseX, SPRING_CONFIG);
+    const smoothY = useSpring(mouseY, SPRING_CONFIG);
+
     const [isHovered, setIsHovered] = useState(null);
 
-    // Throttled mouse move handler - limits updates to ~60fps
-    const handleMouseMove = useCallback(
-        throttle((e) => {
-            setMousePosition({
-                x: (e.clientX / window.innerWidth) * 100,
-                y: (e.clientY / window.innerHeight) * 100,
-            });
-        }, 16), // 16ms = ~60fps
-        []
-    );
+    // Optimized Event Handler
+    const handleMouseMove = useCallback((e) => {
+        // Calculate percentage directly
+        const { clientX, clientY } = e;
+        const { innerWidth, innerHeight } = window;
 
+        const xPercent = (clientX / innerWidth) * 100;
+        const yPercent = (clientY / innerHeight) * 100;
+
+        mouseX.set(xPercent);
+        mouseY.set(yPercent);
+    }, [mouseX, mouseY]);
+
+    // Passive event listener for scrolling performance
     useEffect(() => {
-        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mousemove', handleMouseMove, { passive: true });
         return () => window.removeEventListener('mousemove', handleMouseMove);
     }, [handleMouseMove]);
 
-    // Memoized background gradient style
-    const backgroundStyle = useMemo(() => ({
-        background: `
-            radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(6,182,212,0.15) 0%, transparent 50%),
-            radial-gradient(circle at ${100 - mousePosition.x}% ${100 - mousePosition.y}%, rgba(59,130,246,0.1) 0%, transparent 50%)
-        `
-    }), [mousePosition.x, mousePosition.y]);
-
-    // Memoized event handlers
+    // Stable Handlers
     const handleDevClick = useCallback(() => onSelectTheme('dev'), [onSelectTheme]);
     const handleNormalClick = useCallback(() => onSelectTheme('normal'), [onSelectTheme]);
     const handleDevHover = useCallback(() => setIsHovered('dev'), []);
     const handleNormalHover = useCallback(() => setIsHovered('normal'), []);
-    const handleMouseLeave = useCallback(() => setIsHovered(null), []);
+    const handleLeave = useCallback(() => setIsHovered(null), []);
 
     return (
-        <div className="relative min-h-screen w-full
-                        bg-[#050a0f]
-                        overflow-hidden
-                        flex flex-col items-center justify-center
-                        font-sans antialiased
-                        selection:bg-cyan-500/30
-                        py-8 sm:py-12 md:py-0
-                        px-4 sm:px-6">
-            {/* Dynamic Background - Optimized with memoized style */}
-            <div
-                className="absolute inset-0 pointer-events-none
-                           opacity-30 sm:opacity-35 md:opacity-40
-                           transition-opacity duration-1000"
-                style={backgroundStyle}
-            />
-
-            {/* Grid Pattern - Static, no re-render needed */}
-            <div className="absolute inset-0 opacity-[0.015] sm:opacity-[0.02] md:opacity-[0.03]"
-                style={{
-                    backgroundImage: `linear-gradient(#06b6d4 1px, transparent 1px), linear-gradient(90deg, #06b6d4 1px, transparent 1px)`,
-                    backgroundSize: '40px 40px'
-                }}
-            />
-
-            {/* Content Container - Flattened structure */}
-            <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
-
-                {/* Header / Greeting */}
-                <div className="text-center
-                                mb-8 sm:mb-10 md:mb-12 lg:mb-16
-                                space-y-3 sm:space-y-4
-                                animate-fadeInUp
-                                w-full">
-                    <div className="inline-flex items-center
-                                    gap-1.5 sm:gap-2
-                                    px-2.5 sm:px-3 py-1 sm:py-1.5
-                                    rounded-full
-                                    bg-cyan-500/10
-                                    border border-cyan-500/20
-                                    text-cyan-400
-                                    font-medium tracking-wider uppercase
-                                    mb-2 sm:mb-3 md:mb-4"
-                        style={{
-                            fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                        }}
-                    >
-                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                        System Ready
-                    </div>
-                    <h1 className="font-bold
-                                   text-transparent bg-clip-text
-                                   bg-gradient-to-r from-white via-cyan-100 to-cyan-200
-                                   tracking-tight leading-tight
-                                   px-2"
-                        style={{
-                            fontSize: 'clamp(2rem, 8vw, 4.5rem)',
-                        }}
-                    >
-                        Hello, I'm <span className="text-cyan-400">Budra</span>
-                    </h1>
-                    <p className="text-zinc-400
-                                  leading-relaxed
-                                  max-w-xl md:max-w-2xl
-                                  mx-auto
-                                  px-2 sm:px-4"
-                        style={{
-                            fontSize: 'clamp(0.875rem, 2vw, 1.25rem)',
-                        }}
-                    >
-                        I craft digital experiences. Choose your preferred interface to explore my portfolio.
-                    </p>
-                </div>
-
-                {/* Theme Selection Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2
-                                gap-4 sm:gap-5 md:gap-6 lg:gap-8
-                                w-full
-                                max-w-sm sm:max-w-xl md:max-w-4xl
-                                mx-auto">
-
-                    <ThemeCard
-                        theme="dev"
-                        isHovered={isHovered}
-                        onHover={handleDevHover}
-                        onLeave={handleMouseLeave}
-                        onClick={handleDevClick}
-                        icon={FaTerminal}
-                        title="Developer OS"
-                        description="An immersive, terminal-inspired desktop environment. Experience my work through key commands, file systems, and window management."
-                        actionText="Enter System"
-                        colorScheme="cyan"
-                    />
-
-                    <ThemeCard
-                        theme="normal"
-                        isHovered={isHovered}
-                        onHover={handleNormalHover}
-                        onLeave={handleMouseLeave}
-                        onClick={handleNormalClick}
-                        icon={FaLaptopCode}
-                        title="Standard View"
-                        description="A clean, modern single-page portfolio layout. Straightforward and content-focused for a classic browsing experience."
-                        actionText="Browse Standard"
-                        colorScheme="blue"
-                    />
-
-                </div>
-            </div>
-
-            {/* Footer */}
-            <div className="absolute bottom-6 sm:bottom-8
-                            text-zinc-600
-                            font-medium tracking-wide
-                            text-center
-                            px-4"
-                style={{
-                    fontSize: 'clamp(0.625rem, 1.5vw, 0.75rem)',
-                }}
+        <AnimatePresence mode="wait">
+            <motion.div
+                key="welcome"
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="relative min-h-screen w-full bg-[#050a0f] overflow-hidden flex flex-col items-center justify-center font-sans antialiased selection:bg-cyan-500/30 px-4 sm:px-6"
             >
-                DESIGNED & DEVELOPED BY HARI HARA BUDRA
-            </div>
-        </div>
+                {/* Performance Optimized Backgrounds */}
+                <Spotlight x={smoothX} y={smoothY} colorRGB="6,182,212" /> {/* Cyan */}
+                <Spotlight x={smoothX} y={smoothY} colorRGB="59,130,246" inverted /> {/* Blue */}
+                <GridPattern />
+
+                {/* Main Content */}
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="relative z-10 w-full max-w-7xl flex flex-col items-center"
+                >
+                    {/* Header */}
+                    <div className="text-center mb-12 lg:mb-16 w-full max-w-2xl mx-auto">
+                        <motion.div
+                            variants={itemVariants}
+                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium tracking-wider uppercase mb-4"
+                        >
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                            </span>
+                            System Ready
+                        </motion.div>
+
+                        <motion.h1
+                            variants={itemVariants}
+                            className="text-4xl sm:text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-cyan-100 to-cyan-200 tracking-tight leading-tight mb-4"
+                        >
+                            Hello, I'm <span className="text-cyan-400">Budra</span>
+                        </motion.h1>
+
+                        <motion.p
+                            variants={itemVariants}
+                            className="text-zinc-400 text-lg md:text-xl leading-relaxed"
+                        >
+                            I craft digital experiences. Choose your preferred interface.
+                        </motion.p>
+                    </div>
+
+                    {/* Cards Container */}
+                    <motion.div
+                        variants={containerVariants}
+                        className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto"
+                    >
+                        <ThemeCard
+                            theme="normal"
+                            isHovered={isHovered}
+                            onHover={handleNormalHover}
+                            onLeave={handleLeave}
+                            onClick={handleNormalClick}
+                            icon={FaLaptopCode}
+                            title="Standard View"
+                            description="A clean, modern single-page portfolio layout. Straightforward and content-focused for a classic browsing experience."
+                            actionText="Browse Standard"
+                            colorScheme="blue"
+                        />
+                        <ThemeCard
+                            theme="dev"
+                            isHovered={isHovered}
+                            onHover={handleDevHover}
+                            onLeave={handleLeave}
+                            onClick={handleDevClick}
+                            icon={FaTerminal}
+                            title="Developer OS"
+                            description="An immersive, terminal-inspired desktop environment. Experience my work through key commands and window management."
+                            actionText="Enter System"
+                            colorScheme="cyan"
+                        />
+                    </motion.div>
+                </motion.div>
+
+                {/* Simplified Footer */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: 1 }}
+                    className="absolute bottom-6 text-zinc-600 text-xs font-medium tracking-wide"
+                >
+                    DESIGNED & DEVELOPED BY HARI HARA BUDRA
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>
     );
 };
 

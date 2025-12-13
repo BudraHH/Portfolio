@@ -31,13 +31,13 @@ export const SKILL_CATEGORIES = [
         description: "Crafting fully responsive, interactive, and high-performance user interfaces.",
         bgGradient: "from-cyan-900/20 to-blue-900/20",
         skills: [
-            { name: "React", icon: <FaReact /> },
-            { name: "Next.js", icon: <SiNextdotjs /> },
-            { name: "TypeScript", icon: <SiTypescript /> },
-            { name: "Tailwind CSS", icon: <SiTailwindcss /> },
-            { name: "Vue.js", icon: <FaVuejs /> },
-            { name: "Redux", icon: <SiRedux /> },
-            { name: "Framer Motion", icon: <span className="font-bold font-serif italic">f</span> }
+            { name: "React", icon: <FaReact />, category: "Frontend" },
+            { name: "Next.js", icon: <SiNextdotjs />, category: "Frontend" },
+            { name: "TypeScript", icon: <SiTypescript />, category: "Frontend" },
+            { name: "Tailwind CSS", icon: <SiTailwindcss />, category: "Frontend" },
+            { name: "Vue.js", icon: <FaVuejs />, category: "Frontend" },
+            { name: "Redux", icon: <SiRedux />, category: "Frontend" },
+            { name: "Framer Motion", icon: <span className="font-bold font-serif italic">f</span>, category: "Frontend" }
         ]
     },
     {
@@ -47,12 +47,12 @@ export const SKILL_CATEGORIES = [
         description: "Building robust server-side systems, scalable APIs, and secure database architectures.",
         bgGradient: "from-purple-900/20 to-pink-900/20",
         skills: [
-            { name: "Node.js", icon: <FaNodeJs /> },
-            { name: "Python", icon: <FaPython /> },
-            { name: "PostgreSQL", icon: <SiPostgresql /> },
-            { name: "MongoDB", icon: <SiMongodb /> },
-            { name: "GraphQL", icon: <SiGraphql /> },
-            { name: "API Design", icon: <FaCodeBranch /> }
+            { name: "Node.js", icon: <FaNodeJs />, category: "Backend" },
+            { name: "Python", icon: <FaPython />, category: "Backend" },
+            { name: "PostgreSQL", icon: <SiPostgresql />, category: "Backend" },
+            { name: "MongoDB", icon: <SiMongodb />, category: "Backend" },
+            { name: "GraphQL", icon: <SiGraphql />, category: "Backend" },
+            { name: "API Design", icon: <FaCodeBranch />, category: "Backend" }
         ]
     },
     {
@@ -62,12 +62,12 @@ export const SKILL_CATEGORIES = [
         description: "Streamlining deployment pipelines, containerization, and managing cloud infrastructure.",
         bgGradient: "from-emerald-900/20 to-teal-900/20",
         skills: [
-            { name: "Docker", icon: <FaDocker /> },
-            { name: "AWS", icon: <FaAws /> },
-            { name: "Git", icon: <FaGitAlt /> },
-            { name: "Linux", icon: <FaLinux /> },
-            { name: "Figma", icon: <FaFigma /> },
-            { name: "Firebase", icon: <SiFirebase /> }
+            { name: "Docker", icon: <FaDocker />, category: "DevOps" },
+            { name: "AWS", icon: <FaAws />, category: "DevOps" },
+            { name: "Git", icon: <FaGitAlt />, category: "DevOps" },
+            { name: "Linux", icon: <FaLinux />, category: "DevOps" },
+            { name: "Figma", icon: <FaFigma />, category: "DevOps" },
+            { name: "Firebase", icon: <SiFirebase />, category: "DevOps" }
         ]
     },
     {

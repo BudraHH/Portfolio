@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaEnvelope, FaMapMarkerAlt, FaLink, FaInstagram, FaBuilding, FaStar, FaCodeBranch } from "react-icons/fa";
 import { RiGitRepositoryLine } from "react-icons/ri";
-import image_2 from '../../assets/image_2.jpg';
-import yes from '../../assets/yes.png';
+import image from  '../../assets/image_bw.png';
 import { REPOSITORIES, LANGUAGE_COLORS } from '../../constants/projects.js';
 import { ABOUT_ME_HEADER, CONTACTS, NAV_TABS, SOCIAL_STATS } from '../constants/profile.js';
 
@@ -94,7 +93,7 @@ export default function Info({ onNavigate }) {
                         <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-gray-800 overflow-hidden relative group shadow-2xl ring-4 ring-gray-800/50">
                             <div className="absolute inset-0 bg-gradient-to-br from-cyan-900 to-gray-900 mix-blend-overlay" />
                             <img
-                                src={yes}
+                                src={image}
                                 alt="Profile"
                                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />

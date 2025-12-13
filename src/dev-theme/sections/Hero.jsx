@@ -1,4 +1,4 @@
-import profile_image from "../../assets/yes_color.png";
+import profile_image from "../../assets/image_color.png";
 import TypedText from "../components/TypedText.jsx";
 import { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";

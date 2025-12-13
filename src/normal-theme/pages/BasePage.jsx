@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { NORMAL_ROUTES } from "../routes/routes.js";
 import Navbar from "../components/Navbar.jsx";
 import Hero from "../sections/Hero.jsx";
-import Projects from "../sections/Projects.jsx";
+import ProjectsPc from "../sections/ProjectsPc.jsx";
 import Contact from "../sections/Contact.jsx";
 import Footer from "../sections/Footer.jsx";
 import { LenisScroll } from "../components/LenisScroll.jsx";
-import Career from "../sections/Career.jsx";
+import CareerPc from "../sections/CareerPc.jsx";
+import CareerMobile from "../sections/CareerMobile.jsx";
 import Info from "../sections/Info.jsx";
-import Skills from "../sections/Skills.jsx";
+import SkillsPc from "../sections/SkillsPc.jsx";
+import SkillsMobile from "../sections/SkillsMobile.jsx";
+import ProjectsMobile from "../sections/ProjectsMobile.jsx";
 
 import QuoteTransition from "../components/QuoteTransition.jsx";
 
@@ -88,9 +91,12 @@ const BasePage = () => {
                 <Hero />
                 <QuoteTransition />
                 <Info />
-                <Skills />
-                <Career />
-                <Projects />
+                <SkillsPc />
+                <SkillsMobile />
+                <CareerPc />
+                <CareerMobile />
+                <ProjectsPc />
+                <ProjectsMobile />
                 <Contact />
             </main>
             <Footer />

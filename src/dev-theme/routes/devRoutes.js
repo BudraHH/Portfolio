@@ -1,8 +1,2 @@
-export const DEV_ROUTES = {
-    ROOT: '/dev-theme',
-    WELCOME: 'welcome',
-    DESKTOP: 'desktop',
-    // Helper to get full paths
-    get FULL_WELCOME() { return `${this.ROOT}/${this.WELCOME}`; },
-    get FULL_DESKTOP() { return `${this.ROOT}/${this.DESKTOP}`; }
-};
+// Re-export from centralized routes for backward compatibility
+export { DEV_ROUTES } from '../../constants/routes.js';

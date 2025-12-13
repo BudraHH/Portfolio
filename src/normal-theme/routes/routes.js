@@ -1,12 +1,2 @@
-export const NORMAL_ROUTES = {
-    ROOT: '/normal-theme',
-    SECTIONS: {
-        HERO: '',
-        INFO: 'info',
-        SKILLS: 'skills',
-        CAREER: 'career',
-        PROJECTS: 'projects',
-        CONTACT: 'contact'
-    },
-    get FULL_ROOT() { return this.ROOT; }
-};
+// Re-export from centralized routes for backward compatibility
+export { NORMAL_ROUTES } from '../../constants/routes.js';

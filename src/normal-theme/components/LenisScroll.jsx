@@ -10,9 +10,11 @@ export const LenisScroll = () => {
             gestureDirection: 'vertical',
             smooth: true,
             mouseMultiplier: 1,
-            smoothTouch: false,
+            smoothTouch: true,
             touchMultiplier: 2,
         });
+
+        window.lenis = lenis;
 
         function raf(time) {
             lenis.raf(time);
@@ -23,6 +25,7 @@ export const LenisScroll = () => {
 
         return () => {
             lenis.destroy();
+            window.lenis = null;
         };
     }, []);
 

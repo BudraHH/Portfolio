@@ -4,8 +4,7 @@ import DevRouter from "../dev-theme/routes/DevRouter.jsx";
 import NormalRouter from "../normal-theme/routes/NormalRouter.jsx";
 import NotFound from "../pages/error/NotFound.jsx";
 
-import { NORMAL_ROUTES } from "../normal-theme/routes/routes.js";
-import { DEV_ROUTES } from "../dev-theme/routes/devRoutes.js";
+import { GLOBAL_ROUTES, NORMAL_ROUTES, DEV_ROUTES } from "../constants/routes.js";
 
 const AppRouter = () => {
     const navigate = useNavigate();
@@ -20,16 +19,16 @@ const AppRouter = () => {
 
     return (
         <Routes>
-            <Route path="/" element={<Navigate to="/welcome" replace />} />
+            <Route path={GLOBAL_ROUTES.ROOT} element={<Navigate to={GLOBAL_ROUTES.WELCOME} replace />} />
             <Route
-                path="/welcome"
+                path={GLOBAL_ROUTES.WELCOME}
                 element={<GlobalWelcome onSelectTheme={handleThemeSelect} />}
             />
-            <Route path="/dev-theme/*" element={<DevRouter />} />
+            <Route path={`${DEV_ROUTES.ROOT}/*`} element={<DevRouter />} />
             <Route path={`${NORMAL_ROUTES.ROOT}/*`} element={<NormalRouter />} />
             {/* Fallback route - directs back to welcome if no match found (optional, but good practice) */}
-            {/* <Route path="*" element={<Navigate to="/welcome" replace />} /> */}
-            <Route path="*" element={<NotFound />} />
+            {/* <Route path={GLOBAL_ROUTES.NOT_FOUND} element={<Navigate to={GLOBAL_ROUTES.WELCOME} replace />} /> */}
+            <Route path={GLOBAL_ROUTES.NOT_FOUND} element={<NotFound />} />
         </Routes>
     );
 };
