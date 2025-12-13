@@ -248,7 +248,7 @@ const BookPage = memo(({ category, index, totalPages, scrollIndex }) => {
 
             {/* BACK FACE */}
             <div
-                className="absolute inset-0 [backface-visibility:hidden] bg-[#080c11] border-l border-t border-b border-white/5 rounded-l-lg sm:rounded-l-xl md:rounded-l-2xl overflow-hidden shadow-xl md:shadow-2xl"
+                className="absolute inset-0 [backface-visibility:block] bg-cyan-950/10 border-l-2 border-t-2 border-b-2 border-cyan-950/50 rounded-l-lg sm:rounded-l-xl md:rounded-l-2xl overflow-hidden shadow-xl md:shadow-2xl"
                 style={{ transform: 'rotateY(180deg)' }}
             >
                 <div className="absolute inset-0 bg-gradient-to-bl from-cyan-900/5 to-transparent" />

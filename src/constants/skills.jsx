@@ -13,17 +13,17 @@ export const SKILL_CATEGORIES = [
     {
         id: "cover",
         type: "cover",
-        title: "SYSTEM ARCHITECTURE",
-        subtitle: "A Handbook of Competencies",
+        title: "ENGINEERING SKILLS",
+        subtitle: "A Technical Reference",
         bgGradient: "from-cyan-950 to-slate-950",
         skills: []
     },
     {
         id: "synopsis",
         type: "synopsis",
-        title: "Synopsis",
+        title: "Preface",
         description:
-            "This archive documents the technical systems, tools, and engineering practices applied to build scalable, production-grade software. Each module reflects hands-on experience across full-stack development, backend systems, and cloud-native workflows.",
+            "This section documents the core technologies and engineering practices I apply when building production-grade software. Each chapter reflects practical experience gained from real-world systems, with an emphasis on scalability, reliability, and maintainable design.",
         bgGradient: "from-zinc-900 to-zinc-950",
         skills: []
     },
@@ -97,13 +97,14 @@ export const SKILL_CATEGORIES = [
             { name: "Linux", icon: <FaLinux />, category: "DevOps" }
         ]
     },
-
     {
-        id: "back-cover",
-        type: "back_cover",
-        title: "END OF ARCHIVE",
-        subtitle: "System Shutdown",
-        bgGradient: "from-slate-950 to-cyan-950",
+        id: "synopsis",
+        type: "synopsis",
+        title: "Preface",
+        description:
+            "This section documents the core technologies and engineering practices I apply when building production-grade software. Each chapter reflects practical experience gained from real-world systems, with an emphasis on scalability, reliability, and maintainable design.",
+        bgGradient: "from-zinc-900 to-zinc-950",
         skills: []
     }
+
 ];
