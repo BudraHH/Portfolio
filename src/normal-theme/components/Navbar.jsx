@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Info, Wrench, Briefcase, FolderGit2, Mail, Code2 } from 'lucide-react';
@@ -12,8 +12,12 @@ const Navbar = () => {
     const location = useLocation();
     const { sectionId } = useParams();
 
-    // Determine active section (empty string for root/home)
-    const activeId = sectionId || NORMAL_ROUTES.SECTIONS.HERO;
+    // Derived activeId from URL for initial state and fallback
+    const urlActiveId = sectionId || NORMAL_ROUTES.SECTIONS.HERO;
+    const [activeSection, setActiveSection] = useState(urlActiveId);
+
+    // Track if strict mode double-invoke or initial mount to avoid flickering
+    const isMounted = useRef(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -23,10 +27,64 @@ const Navbar = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Close mobile menu on route change or when activeId updates
+    // Sync activeSection with URL on route change (e.g. clicking back button)
+    useEffect(() => {
+        if (sectionId) {
+            setActiveSection(sectionId);
+        } else if (location.pathname === NORMAL_ROUTES.ROOT) {
+            setActiveSection(NORMAL_ROUTES.SECTIONS.HERO);
+        }
+    }, [sectionId, location.pathname]);
+
+    // ScrollSpy Implementation
+    useEffect(() => {
+        isMounted.current = true;
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -35% 0px', // Trigger when section is in the middle-ish of viewport
+            threshold: 0.1
+        };
+
+        const observerCallback = (entries) => {
+            // Find the intersecting entry with the highest intersection ratio
+            // or simply the first one that meets the criteria if multiple are close
+            const visibleEntries = entries.filter(entry => entry.isIntersecting);
+
+            if (visibleEntries.length > 0) {
+                // Sort by intersection ratio to find the "most visible" section
+                visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+                const targetId = visibleEntries[0].target.id;
+
+                // Only update if it's different to prevent unnecessary renders
+                // Also check if we are currently navigating to avoid fighting with scrollToSection
+                setActiveSection(targetId);
+            } else if (window.scrollY < 100) {
+                // Fallback for very top of page
+                setActiveSection(NORMAL_ROUTES.SECTIONS.HERO);
+            }
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+        // Observe all sections
+        const sections = Object.values(NORMAL_ROUTES.SECTIONS).map(id => document.getElementById(id));
+        sections.forEach(section => {
+            if (section) observer.observe(section);
+        });
+
+        return () => {
+            sections.forEach(section => {
+                if (section) observer.unobserve(section);
+            });
+            observer.disconnect();
+        };
+    }, []);
+
+    // Close mobile menu on route change
     useEffect(() => {
         setMobileMenuOpen(false);
-    }, [activeId, location.pathname]);
+    }, [location.pathname]);
 
     // Prevent body scroll when mobile menu is open, handle Lenis state
     useEffect(() => {
@@ -45,6 +103,9 @@ const Navbar = () => {
 
     const scrollToSection = useCallback((id) => {
         setMobileMenuOpen(false); // Close menu immediately
+
+        // Optimistically set active section for instant feedback
+        setActiveSection(id || NORMAL_ROUTES.SECTIONS.HERO);
 
         // Force start Lenis in case it was stopped by the menu
         window.lenis?.start();
@@ -133,7 +194,7 @@ const Navbar = () => {
                                         border border-white/5 
                                         backdrop-blur-sm">
                             {navItems.map((item) => {
-                                const isActive = item.id === activeId || (item.id === NORMAL_ROUTES.SECTIONS.HERO && activeId === undefined);
+                                const isActive = activeSection === item.id || (!activeSection && item.id === NORMAL_ROUTES.SECTIONS.HERO);
                                 return (
                                     <button
                                         key={item.id}
@@ -253,7 +314,7 @@ const Navbar = () => {
 
                         <div className="relative z-10 flex flex-col gap-4 sm:gap-6 max-w-md mx-auto">
                             {navItems.map((item, idx) => {
-                                const isActive = item.id === activeId || (item.id === NORMAL_ROUTES.SECTIONS.HERO && activeId === undefined);
+                                const isActive = activeSection === item.id || (!activeSection && item.id === NORMAL_ROUTES.SECTIONS.HERO);
                                 return (
                                     <motion.button
                                         key={item.id}
