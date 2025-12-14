@@ -19,7 +19,7 @@ const AppRouter = () => {
 
     return (
         <Routes>
-            <Route path={GLOBAL_ROUTES.ROOT} element={<Navigate to={GLOBAL_ROUTES.WELCOME} replace />} />
+            <Route path={GLOBAL_ROUTES.ROOT} element={<Navigate to={NORMAL_ROUTES.ROOT} replace />} />
             <Route
                 path={GLOBAL_ROUTES.WELCOME}
                 element={<GlobalWelcome onSelectTheme={handleThemeSelect} />}
