@@ -386,7 +386,7 @@ const Hero = () => {
                 </div>
             </div>
 
-            <TechTicker />
+            {/*<TechTicker />*/}
         </section>
     );
 };
