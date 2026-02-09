@@ -1,8 +1,9 @@
 import React, { useState, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, ExternalLink, Star, GitFork } from 'lucide-react';
+import { Github, ExternalLink, Star, GitFork, ArrowRight } from 'lucide-react';
 import { REPOSITORIES } from '../../constants/projects.js';
 import { NORMAL_ROUTES } from '../../constants/routes';
+import { SOCIAL_LINKS } from '../../constants/socials';
 
 // --- Constants & Variants ---
 
@@ -208,6 +209,23 @@ const ShowMoreButton = memo(({ showAll, onClick }) => (
 ));
 ShowMoreButton.displayName = 'ShowMoreButton';
 
+const ViewGitHubButton = memo(() => (
+    <motion.a
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        href={SOCIAL_LINKS.GITHUB}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full py-3 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-xl border border-cyan-500/30 hover:border-cyan-400/50 text-cyan-400 text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2"
+        style={{ willChange: 'transform, opacity' }}
+    >
+        <Github className="w-4 h-4" />
+        <span>See more on GitHub</span>
+        <ArrowRight className="w-4 h-4" />
+    </motion.a>
+));
+ViewGitHubButton.displayName = 'ViewGitHubButton';
+
 const ProjectsMobile = () => {
     const [showAll, setShowAll] = useState(false);
 
@@ -245,6 +263,10 @@ const ProjectsMobile = () => {
 
                         {hasMore && (
                             <ShowMoreButton showAll={showAll} onClick={toggleShowAll} />
+                        )}
+
+                        {showAll && (
+                            <ViewGitHubButton />
                         )}
                     </div>
                 </div>

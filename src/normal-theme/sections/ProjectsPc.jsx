@@ -1,8 +1,9 @@
 import React, { useRef, useCallback, useMemo, memo } from 'react';
 import { motion, useSpring, useMotionTemplate, useMotionValue, useScroll, useTransform } from 'framer-motion';
-import { Github, ExternalLink, Star, GitFork } from 'lucide-react';
+import { Github, ExternalLink, Star, GitFork, LinkIcon, ArrowRight } from 'lucide-react';
 import { REPOSITORIES } from '../../constants/projects.js';
 import { NORMAL_ROUTES } from '../../constants/routes';
+import { SOCIAL_LINKS } from '../../constants/socials';
 
 // --- Constants & Variants ---
 
@@ -106,7 +107,38 @@ const TiltCard = memo(({ children, className }) => {
 TiltCard.displayName = 'TiltCard';
 
 const ProjectCardPreview = memo(({ repo }) => {
-    const type = useMemo(() => getPreviewType(repo.name), [repo.name]);
+    // If project has a website, show live iframe preview
+    if (repo.website) {
+        return (
+            <div className="w-full h-36 sm:h-40 md:h-48 bg-zinc-900/50 rounded-t-xl overflow-hidden relative border-b border-white/5 group">
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-white opacity-50 z-20" />
+
+                {/* Iframe container with zoom out effect */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <iframe
+                        src={repo.website}
+                        title={`${repo.name} preview`}
+                        className="w-[400%] h-[400%] origin-top-left scale-[0.25] pointer-events-none border-0"
+                        loading="lazy"
+                        sandbox="allow-scripts allow-same-origin"
+                    />
+                </div>
+
+                {/* Overlay to prevent interaction and add hover effect */}
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-900/80 via-zinc-900/20 to-transparent z-10" />
+                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 transition-colors duration-300 z-10" />
+
+                {/* Live indicator */}
+                <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full bg-zinc-900/80 border border-cyan-500/30 backdrop-blur-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-[10px] text-cyan-400 font-medium uppercase tracking-wider">Live</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Fallback to placeholder preview for projects without website
+    const type = getPreviewType(repo.name);
 
     if (type === 'code') {
         return (
@@ -187,7 +219,7 @@ const ProjectCard = memo(({ repo, index }) => (
                         )}
                         {repo.website && (
                             <a href={repo.website} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-cyan-400 transition-colors p-1" aria-label="View Live Demo">
-                                <ExternalLink className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <LinkIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                             </a>
                         )}
                     </div>
@@ -209,26 +241,59 @@ const ProjectCard = memo(({ repo, index }) => (
                         </span>
                     )}
                 </div>
-
-                <div className="flex items-center gap-4 sm:gap-5 text-zinc-500 pt-3 sm:pt-4 border-t border-white/5" style={{ fontSize: 'clamp(0.75rem, 1.5vw, 0.875rem)' }}>
-                    {repo.stars !== undefined && (
-                        <div className="flex items-center gap-1.5">
-                            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-yellow-500/70" />
-                            <span>{repo.stars}</span>
-                        </div>
-                    )}
-                    {repo.forks !== undefined && (
-                        <div className="flex items-center gap-1.5">
-                            <GitFork className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-500/70" />
-                            <span>{repo.forks}</span>
-                        </div>
-                    )}
-                </div>
             </div>
         </TiltCard>
     </motion.div>
 ));
 ProjectCard.displayName = 'ProjectCard';
+
+const SeeMoreCard = memo(() => (
+    <motion.div
+        initial={{ opacity: 0, y: 50 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.25 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        className="flex-shrink-0 w-[85vw] sm:w-[75vw] md:w-[65vw] lg:w-[400px] xl:w-[450px] snap-center"
+    >
+        <a
+            href={SOCIAL_LINKS.GITHUB}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative h-full min-h-[400px] rounded-xl sm:rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent border border-white/5 hover:border-cyan-500/40 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col items-center justify-center p-8"
+        >
+            {/* Background glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-transparent to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+            {/* Animated border glow */}
+            <div className="absolute inset-0 rounded-xl sm:rounded-2xl overflow-hidden pointer-events-none">
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    className="absolute -inset-[100%] bg-gradient-to-r from-cyan-500/20 via-transparent to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                />
+            </div>
+
+
+            {/* Text */}
+            <h3 className="relative z-10 font-bold text-white text-xl sm:text-2xl mb-3 group-hover:text-cyan-400 transition-colors">
+                See more
+            </h3>
+            <p className="relative z-10 text-zinc-400 text-center font-light mb-6" style={{ fontSize: 'clamp(0.875rem, 2vw, 1rem)' }}>
+                Explore all my repositories on GitHub
+            </p>
+
+            {/* Arrow button */}
+            <motion.div
+                whileHover={{ x: 5 }}
+                className="relative z-10 flex items-center gap-2 px-4 py-2 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:bg-cyan-500/20 group-hover:border-cyan-400/50 transition-all duration-300"
+            >
+                <span className="font-medium text-sm">View GitHub</span>
+                <ArrowRight className="w-4 h-4" />
+            </motion.div>
+        </a>
+    </motion.div>
+));
+SeeMoreCard.displayName = 'SeeMoreCard';
 
 const ProjectsHeader = memo(() => (
     <motion.div
@@ -315,6 +380,7 @@ const ProjectsPc = () => {
                                 {REPOSITORIES.map((repo, index) => (
                                     <ProjectCard key={index} repo={repo} index={index} />
                                 ))}
+                                <SeeMoreCard />
                             </motion.div>
                         </div>
                     </div>

@@ -16,8 +16,9 @@ export const REPOSITORIES = [
         name: "ApplyForge",
         description:
             "An end-to-end automated job application platform designed to handle large-scale job scraping and intelligent resume matching. Built with a distributed architecture to process thousands of concurrent job listings across multiple platforms with fault tolerance and sub-second matching performance.",
-        languages: ["Python", "SQL"],
+        languages: ["JavaScript", "Python", "SQL"],
         techStack: [
+            "React.js",
             "FastAPI",
             "PostgreSQL",
             "Docker",
@@ -27,10 +28,31 @@ export const REPOSITORIES = [
             "Async Workers"
         ],
         github: "https://github.com/BudraHH/ApplyForge",
-        website: null,
+        website: "https://apply-vortex.vercel.app/",
         stars: 0,
         forks: 0,
         updated: "Active Development"
+    },
+    {
+        name: "CloudDrive",
+        description:
+            "An AWS-powered cloud storage platform delivering secure, high-speed file transfers with 100% binary data integrity through AWS S3 pre-signed URLs. Features optimized directory traversal with 35% faster API response times via nested parent-child MongoDB indexing, and enhanced security through two-step verification and JWT-based session management.",
+        languages: ["JavaScript"],
+        techStack: [
+            "React.js",
+            "Express.js",
+            "Node.js",
+            "AWS S3",
+            "MongoDB",
+            "JWT Auth",
+            "Pre-signed URLs",
+            "Two-Step Verification"
+        ],
+        github: "https://github.com/BudraHH/CloudDrive",
+        website: "https://clouddrive-red.vercel.app/",
+        stars: 0,
+        forks: 0,
+        updated: "Completed"
     },
     {
         name: "AutoIntell",
@@ -38,6 +60,7 @@ export const REPOSITORIES = [
             "A predictive maintenance system delivering real-time insights through Django REST APIs and TensorFlow inference pipelines. Optimized database queries and inference workflows to achieve consistent sub-200ms response times in production scenarios.",
         languages: ["Python", "SQL"],
         techStack: [
+            
             "Django REST",
             "TensorFlow",
             "PostgreSQL",
@@ -56,7 +79,10 @@ export const REPOSITORIES = [
             "A scalable test management and evaluation platform built on a serverless architecture. Securely executes concurrent code submissions using Docker-based sandboxing while ensuring performance isolation and platform stability.",
         languages: ["JavaScript"],
         techStack: [
+            "React.js",
+            "Express.js",
             "Node.js",
+            "MongoDB",
             "AWS Lambda",
             "Docker",
             "CloudWatch",
@@ -68,22 +94,4 @@ export const REPOSITORIES = [
         forks: 0,
         updated: "Completed"
     },
-    {
-        name: "CVE Management System",
-        description:
-            "A vulnerability ingestion and analytics platform that continuously synchronizes threat intelligence from the NVD API. Optimized MongoDB schemas and indexing strategies to handle over 200K vulnerability records with sub-100ms query performance.",
-        languages: ["Python"],
-        techStack: [
-            "Flask",
-            "MongoDB",
-            "NVD API",
-            "Indexing",
-            "Security Analytics"
-        ],
-        github: "https://github.com/BudraHH/CVE-Management-System",
-        website: null,
-        stars: 0,
-        forks: 0,
-        updated: "Completed"
-    }
 ];
