@@ -5,7 +5,7 @@ export const EXPERIENCE_DATA = [
         role: "React Developer",
         company: "SystItSoft Solutions",
         location: "Coimbatore, India",
-        period: "Jun 2025 – Nov 2025",
+        period: "Jun 2025 – Dec 2025",
         description:
             "Built and optimized end-to-end responsive web interfaces using React.js, JavaScript, and Tailwind CSS, delivering fast, accessible, and user-centric experiences. Collaborated closely with designers and backend engineers to translate product requirements into reusable components and clean UI flows, while integrating REST APIs to ensure reliable, production-grade data rendering.",
         tech: ["REACT", "JAVASCRIPT", "TAILWIND", "REST API", "AGILE"]
