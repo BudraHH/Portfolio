@@ -45,7 +45,7 @@ export default function Welcome({ setWelcomeRendered }: WelcomeProps) {
     const handleContinue = () => {
         setTimeout(() => {
             setWelcomeRendered(true);
-        }, 1000);
+        }, 10000000);
     };
 
     return (
@@ -103,7 +103,7 @@ export default function Welcome({ setWelcomeRendered }: WelcomeProps) {
                         </motion.span>
                         <motion.span
                             variants={spanItemVariants}
-                            onAnimationComplete={handleContinue}
+                            onAnimationComplete={window.innerWidth >= 1024 ? handleContinue : undefined}
                             className="text-sm md:text-base font-mono font-medium text-muted-foreground/80 tracking-widest uppercase leading-relaxed max-w-md mx-auto"
                         >
                             .
@@ -111,6 +111,31 @@ export default function Welcome({ setWelcomeRendered }: WelcomeProps) {
 
                     </p>
 
+                    <div className='lg:hidden pt-20'>
+                        <motion.p
+                            variants={spanItemVariants}
+                            className="text-sm md:text-base font-mono font-medium text-muted-foreground/80 tracking-widest uppercase leading-relaxed max-w-md mx-auto">
+                            Note:
+
+                        </motion.p>
+
+                        <motion.span
+                            variants={spanItemVariants}
+                            className="text-sm md:text-base font-mono font-medium text-muted-foreground/80 tracking-widest uppercase leading-relaxed max-w-md mx-auto">
+                            I am best experienced on a<br />
+                        </motion.span>
+                        <motion.span
+                            variants={spanItemVariants}
+                            className="text-sm md:text-base font-bold text-primary tracking-widest uppercase leading-relaxed max-w-md mx-auto">
+                            desktop device.<br />
+                        </motion.span>
+                        <motion.span
+                            variants={spanItemVariants}
+                            className="text-sm md:text-base font-mono font-medium text-muted-foreground/80 tracking-widest uppercase leading-relaxed max-w-md mx-auto">
+
+                            Some UI elements have been adjusted for this mobile environment.
+                        </motion.span>
+                    </div>
                 </div>
 
 

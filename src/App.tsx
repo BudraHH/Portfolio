@@ -8,8 +8,8 @@ import { useState, useEffect } from 'react';
 import Welcome from './pages/Welcome';
 
 function App() {
-  useBreakpointLogger();
-  useDocumentTitle('BudraPortfolio');
+  // useBreakpointLogger();
+  // useDocumentTitle('BudraPortfolio');
 
   const [welcomeRendered, setWelcomeRendered] = useState(() => {
     const stored = localStorage.getItem('welcome_seen');
