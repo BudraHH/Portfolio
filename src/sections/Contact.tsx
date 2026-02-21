@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { SendHorizonalIcon, ArrowUpRight, Copy } from 'lucide-react';
 import { SECTIONS } from '../utils/constants';
-import { SOCIALS, contacts } from '../utils/contact';
+import { SOCIALS, CONTACTS } from '../utils/contact';
 import { Button } from '../components/shared/Button';
 
 export function Contact() {
@@ -72,11 +72,11 @@ export function Contact() {
                             <motion.div variants={fadeInUp} className="flex flex-row w-full items-center justify-between lg:justify-start lg:flex-col lg:items-start group cursor-default">
                                 <p className="text-xs md:text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">Email_Address</p>
                                 <div className="flex items-center justify-between text-sm xl:text-xl font-black tracking-tight group/email gap-4 lg:w-full lg:pt-1">
-                                    <a href={contacts.EMAIL.href} className="hover:text-primary transition-colors truncate">
-                                        {contacts.EMAIL.value}
+                                    <a href={CONTACTS.EMAIL.href} className="hover:text-primary transition-colors truncate">
+                                        {CONTACTS.EMAIL.value}
                                     </a>
                                     <button
-                                        onClick={() => handleCopy(contacts.EMAIL.value, 'email')}
+                                        onClick={() => handleCopy(CONTACTS.EMAIL.value, 'email')}
                                         className={`hidden lg:flex items-center gap-1.5 px-2 py-1.5 border transition-all rounded cursor-pointer active:scale-95 ${emailCopied
                                             ? 'bg-primary/20 border-primary/40 opacity-100'
                                             : 'bg-accent/30 border-border/20 opacity-0 group-hover/email:opacity-100 hover:border-primary/40'
@@ -93,11 +93,11 @@ export function Contact() {
                             <motion.div variants={fadeInUp} className="flex flex-row w-full items-center justify-between lg:justify-start lg:flex-col lg:items-start group cursor-default">
                                 <p className="text-xs md:text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">Voice_Line</p>
                                 <div className="flex items-center justify-between text-sm xl:text-xl font-black tracking-tight group/phone gap-4 lg:w-full lg:pt-1">
-                                    <a href={contacts.PHONE_NUMBER.href} className="hover:text-primary transition-colors truncate">
-                                        {contacts.PHONE_NUMBER.value}
+                                    <a href={CONTACTS.PHONE_NUMBER.href} className="hover:text-primary transition-colors truncate">
+                                        {CONTACTS.PHONE_NUMBER.value}
                                     </a>
                                     <button
-                                        onClick={() => handleCopy(contacts.PHONE_NUMBER.value, 'phone')}
+                                        onClick={() => handleCopy(CONTACTS.PHONE_NUMBER.value, 'phone')}
                                         className={`hidden lg:flex items-center gap-1.5 px-2 py-1.5 border transition-all rounded cursor-pointer active:scale-95 ${phoneCopied
                                             ? 'bg-primary/20 border-primary/40 opacity-100'
                                             : 'bg-accent/30 border-border/20 opacity-0 group-hover/phone:opacity-100 hover:border-primary/40'

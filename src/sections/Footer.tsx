@@ -1,5 +1,5 @@
 import { ArrowUp } from 'lucide-react';
-import { SOCIALS, contacts } from '../utils/contact';
+import { SOCIALS, CONTACTS } from '../utils/contact';
 
 export function Footer() {
     const currentYear = new Date().getFullYear();
@@ -64,7 +64,7 @@ export function Footer() {
                                     </a>
                                 ))}
                                 <a
-                                    href={contacts.RESUME.href}
+                                    href={CONTACTS.RESUME.href}
                                     download
                                     className="group text-xs font-black uppercase tracking-widest text-primary hover:text-foreground transition-all flex items-center gap-2"
                                 >

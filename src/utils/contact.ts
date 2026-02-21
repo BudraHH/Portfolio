@@ -4,7 +4,7 @@ export interface SocialLink {
     href: string;
 }
 
-export const contacts = {
+export const CONTACTS = {
     PHONE_NUMBER: {
         label: "Phone Number",
         value: "+91 73975 09844",

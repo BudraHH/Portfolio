@@ -1,7 +1,6 @@
 import { motion, type Variants } from 'framer-motion';
-import { Button } from '../../components/shared/Button';
-import { contacts } from '../../utils/contact';
-import { Download } from 'lucide-react';
+import { CONTACTS } from '../../utils/contact';
+import { ArrowUpRight } from 'lucide-react';
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -28,7 +27,7 @@ const itemVariants: Variants = {
 
 export const HeroMobileView = () => {
     return (
-        <div className="pt-5 flex flex-col justify-center relative border-b border-border bg-background overflow-hidden">
+        <div className="pt-5 flex flex-col justify-center relative bg-background overflow-hidden">
             {/* Background Engineering Grid */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#888_1px,transparent_1px)] [background-size:20px_20px]" />
 
@@ -83,16 +82,31 @@ export const HeroMobileView = () => {
                     </p>
                 </motion.div>
 
-                {/* High-Impact Actions */}
-                <motion.div
-                    className="grid grid-cols-2 gap-3"
+               <motion.div
+                    className="ml-2 flex items-center gap-8"
                     variants={itemVariants}
                 >
-                    <a href={contacts.RESUME.href} download className="w-full">
-                        <Button variant="outline" className="w-full text-[10px] font-black uppercase tracking-widest gap-2 px-2">
-                            <Download size={14} />
-                            Resume
-                        </Button>
+
+
+                    {/* Scroll Hint */}
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em] text-muted-foreground/40">
+                            Currently looking for opportunities.
+                        </span>
+                    </div>
+
+                    <div className="h-px w-8 bg-border/40 hidden xl:block" />
+
+                    {/* Minimal Resume Link */}
+                    <a
+                        href={CONTACTS.RESUME.href}
+                        download
+                        className="hidden xl:flex items-center gap-2 group/res"
+                    >
+                        <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em] text-muted-foreground/40 group-hover/res:text-primary transition-colors">
+                            Download_CV
+                        </span>
+                        <ArrowUpRight size={12} className="text-muted-foreground/20 group-hover/res:text-primary transition-transform group-hover/res:translate-x-0.5 group-hover/res:-translate-y-0.5" />
                     </a>
                 </motion.div>
             </motion.div>

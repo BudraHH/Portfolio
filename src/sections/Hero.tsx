@@ -1,6 +1,6 @@
 import { motion, type Variants } from 'framer-motion';
 import { SECTIONS } from '../utils/constants';
-import { contacts } from '../utils/contact';
+import { CONTACTS } from '../utils/contact';
 import { ArrowUpRight } from 'lucide-react';
 
 // ─── Animation Variants ────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ const SectionOne = () => {
 
                     {/* Minimal Resume Link */}
                     <a
-                        href={contacts.RESUME.href}
+                        href={CONTACTS.RESUME.href}
                         download
                         className="hidden xl:flex items-center gap-2 group/res"
                     >
