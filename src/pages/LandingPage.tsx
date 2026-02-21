@@ -1,5 +1,5 @@
 import { Stack } from '../sections/Stack';
-import { CareerMobile } from '../sections/CareerMobile';
+import { CareerMobile } from '../sections/mobile-view/CareerMobile';
 import { Builds } from '../sections/Builds';
 import { Contact } from '../sections/Contact';
 import { Footer } from '../sections/Footer';

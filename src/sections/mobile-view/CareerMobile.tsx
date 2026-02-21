@@ -1,8 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent, useTransform, type Variants } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
-import { CAREER_DATA, EDUCATION_DATA } from '../utils/career';
-import { SECTIONS } from '../utils/constants';
+import { CAREER_DATA, EDUCATION_DATA } from '../../utils/career';
+import { SECTIONS } from '../../utils/constants';
 
 // ─── Animation Variants ─────────────────────────────────────────────────
 const sectionHeaderVariants: Variants = {
@@ -69,9 +69,11 @@ export const CareerMobile = () => {
                     whileInView="visible"
                     viewport={{ once: true }}
                     variants={sectionHeaderVariants}
-                    className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none italic mb-5"
+                    className="font-black uppercase tracking-tighter leading-none italic mb-10"
                 >
-                    <span className="text-muted-foreground font-normal not-italic">His </span>Academic <span className="group not-italic">Background<span className="group-hover:text-red-800">.</span></span>
+                   <h2 className="text-5xl font-black uppercase tracking-tighter leading-none">
+                        His <span className="text-muted-foreground font-regular italic group">Academic Background<span className="group-hover:text-red-800 not-italic">.</span></span>
+                    </h2>
                 </motion.h2>
 
                 <div className="space-y-20">
@@ -158,15 +160,17 @@ const ExperienceLockScroll = () => {
             <div className="sticky top-16 h-[calc(80vh-4rem)] flex flex-col">
                 {/* Sticky Header + Narration — solid bg, above entries */}
                 <div className="relative z-10 bg-background pb-4 space-y-3 border-b border-border/10 shrink-0">
-                    <motion.h2
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true }}
-                        variants={sectionHeaderVariants}
-                        className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none italic border-b border-border pb-5 pt-5"
-                    >
-                        <span className="text-muted-foreground font-normal not-italic">His </span>Professional <span className="group not-italic">Path<span className="group-hover:text-red-800">.</span></span>
-                    </motion.h2>
+                   <motion.h2
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={sectionHeaderVariants}
+                    className="font-black uppercase tracking-tighter leading-none italic"
+                >
+                   <h2 className="text-5xl font-black uppercase tracking-tighter leading-none">
+                        Professional Path <span className="text-muted-foreground font-regular italic group">His<span className="group-hover:text-red-800 not-italic">.</span></span>
+                    </h2>
+                </motion.h2>
                 </div>
 
                 <div className="flex-1 overflow-hidden relative">
