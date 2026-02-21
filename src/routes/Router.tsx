@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
-import PortfolioApp from '../PortfolioApp';
 import App from '../App';
 import LandingPage from '../pages/LandingPage';
 
@@ -9,7 +8,6 @@ const router = createBrowserRouter([
         children: [
             {
                 path: '/',
-                element: <PortfolioApp />,
                 children: [
                     {
                         index: true,
@@ -28,4 +26,3 @@ const router = createBrowserRouter([
 export function Router() {
     return <RouterProvider router={router} />;
 }
-

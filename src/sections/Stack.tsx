@@ -1,20 +1,9 @@
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, type Variants } from 'framer-motion';
-import {
-    Database, Layout, Command,
-    Brain, Code,
-    Activity, Cpu as Processor
-} from 'lucide-react';
+
 import { STACK_DATA } from '../utils/stack';
 import { SECTIONS } from '../utils/constants';
 
-const categoryIcons: Record<string, any> = {
-    "Language Layer": Code,
-    "System Architecture": Processor,
-    "Persistence & Cloud": Database,
-    "Interactive Layer": Layout,
-    "Intelligence Strata": Brain,
-};
 const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
@@ -34,7 +23,7 @@ const staggerContainer: Variants = {
 // --- Sub-components for the Dashboard View ---
 
 
-const CategoryDisplay = ({ data, index }: { data: typeof STACK_DATA[0], index: number }) => {
+const CategoryDisplay = ({ data }: { data: typeof STACK_DATA[0] }) => {
     return (
         <div className="flex flex-col h-full w-full p-8 bg-white dark:bg-accent/50 rounded shadow-sm border border-border/50">
             {/* Header: Identity */}
@@ -156,7 +145,6 @@ export const Stack = () => {
                         {/* LEFT: System Navigation Panels */}
                         <div className="flex flex-col gap-4 w-72 xl:w-96 shrink-0 ">
                             {STACK_DATA.map((group, idx) => {
-                                const NavIcon = categoryIcons[group.category] || Command;
                                 const isActive = activeIndex === idx;
 
                                 return (
@@ -207,7 +195,7 @@ export const Stack = () => {
                                     transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                                     className="h-full w-full"
                                 >
-                                    <CategoryDisplay data={STACK_DATA[activeIndex]} index={activeIndex} />
+                                    <CategoryDisplay data={STACK_DATA[activeIndex]} />
                                 </motion.div>
                             </AnimatePresence>
                         </div>

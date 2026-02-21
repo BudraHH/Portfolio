@@ -1,9 +1,8 @@
 import { useRef, useState } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform, type Variants } from 'framer-motion';
-import { GraduationCap } from 'lucide-react';
+import { motion, useScroll, useMotionValueEvent, useTransform, type Variants } from 'framer-motion';
 import { EDUCATION_DATA, type Education } from '../utils/career';
 
-export function EducationCertification() {
+export function Education() {
     const sectionRef = useRef<HTMLDivElement>(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -23,7 +22,6 @@ export function EducationCertification() {
         ["0%", `-${(EDUCATION_DATA.length - 1) * 100}%`]
     );
 
-    const activeEducation = EDUCATION_DATA[activeIndex];
 
     return (
         <section className="relative bg-background h-full">
@@ -87,14 +85,6 @@ const headerVariants: Variants = {
     }
 };
 
-const narrationVariants: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.5, ease: "easeOut" as const }
-    }
-};
 
 // ─── Right Panel: education entry stagger (delayed to match narration) ──
 const entryVariants: Variants = {
@@ -157,24 +147,24 @@ const EducationLogEntry = ({
                 <motion.div variants={itemVariants} className="flex flex-row justify-between gap-8 items-center border-t border-b border-border/10 py-6">
                     <div className="space-y-1">
                         <div className='flex flex-row justify-between items-center w-full gap-4'>
-                        <p className="text-xs xl:text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">UnderGraduation <span className="text-primary">{education.degree}</span></p>
-                        <p className="text-sm xl:text-xl font-black uppercase text-primary tracking-tight">{education.score}</p>
+                            <p className="text-xs xl:text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">UnderGraduation <span className="text-primary">{education.degree}</span></p>
+                            <p className="text-sm xl:text-xl font-black uppercase text-primary tracking-tight">{education.score}</p>
                         </div>
                         <p className="text-xl font-black uppercase text-primary tracking-tight">{education.specialization}</p>
 
                     </div>
-                     <div className="h-8 w-[1px] bg-border/10 hidden sm:block" />
+                    <div className="h-8 w-[1px] bg-border/10 hidden sm:block" />
                     <div className="space-y-1">
                         <p className="text-xs xl:text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">Location</p>
                         <p className="text-sm xl:text-xl font-black uppercase tracking-tight flex items-center gap-2">
-                           {education.location}
+                            {education.location}
                         </p>
                     </div>
 
-                   <div className="space-y-1">
+                    <div className="space-y-1">
                         <p className="text-xs xl:text-sm font-mono font-bold text-muted-foreground uppercase tracking-widest">Time_Stamp</p>
                         <p className="text-sm xl:text-xl font-black uppercase tracking-tight flex items-center gap-2">
-                             {education.period}
+                            {education.period}
                         </p>
                     </div>
                 </motion.div>

@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform, type Variants } from 'framer-motion';
-import { ArrowUpRight, Cpu } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { CAREER_DATA } from '../utils/career';
-import { SECTIONS } from '../utils/constants';
+
 
 const WORK_MISSIONS = CAREER_DATA.map(exp => ({ ...exp, type: 'EXPERIENCE' as const }));
 
@@ -45,7 +45,7 @@ export function Experience() {
                                 variants={leftPanelVariants}
                             >
                                 <div className="space-y-6 justify-between flex flex-col h-full">
-                                   <motion.h2
+                                    <motion.h2
                                         variants={headerVariants}
                                         className="text-4xl xl:text-5xl 2xl:text-6xl font-black uppercase tracking-tighter leading-none italic "
                                     >

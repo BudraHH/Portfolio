@@ -1,12 +1,12 @@
 import { SECTIONS } from "../utils/constants";
-import { EducationCertification } from "./EducationCertification";
+import { Education } from "./Education";
 import { Experience } from "./Experience";
 
 export function Career() {
     return (
         <section id={SECTIONS.CAREER} className="">
             <Experience />
-            <EducationCertification />
+            <Education />
         </section>
     );
 }

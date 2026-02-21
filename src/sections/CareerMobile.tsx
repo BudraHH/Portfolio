@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent, useTransform, type Variants } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent, useTransform, type Variants } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { CAREER_DATA, EDUCATION_DATA } from '../utils/career';
 import { SECTIONS } from '../utils/constants';
@@ -146,7 +146,6 @@ const ExperienceLockScroll = () => {
         ["0%", `-${(CAREER_DATA.length - 1) * 100}%`]
     );
 
-    const activeMission = CAREER_DATA[activeIndex];
 
     return (
         <div
