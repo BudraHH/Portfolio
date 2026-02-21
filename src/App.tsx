@@ -1,9 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { ThemeProvider } from './components/theme/ThemeProvider';
-import { useBreakpointLogger } from './hooks/useBreakpointLogger';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from './components/Navbar';
-import { useDocumentTitle } from './hooks/useDocumentTitle';
 import { useState, useEffect } from 'react';
 import Welcome from './pages/Welcome';
 
