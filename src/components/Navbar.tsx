@@ -1,13 +1,13 @@
 import { ModeToggle } from '@/components/theme/ModeToggle';
 import { SECTIONS, NAV_LINKS } from '../utils/constants';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSectionObserver } from '../hooks/useSectionObserver';
 
 
 export function Navbar({ welcomeRendered }: { welcomeRendered: boolean }) {
-    const [activeSection, setActiveSection, suppressHashUpdate] = useSectionObserver({
+    const [activeSection, setActiveSection, suppressHashUpdateRef] = useSectionObserver({
         sectionIds: NAV_LINKS.map(link => link.id),
         homeSectionId: SECTIONS.HOME
     });
@@ -19,48 +19,15 @@ export function Navbar({ welcomeRendered }: { welcomeRendered: boolean }) {
         activeSectionRef.current = activeSection;
     }, [activeSection]);
 
-    useEffect(() => {
-        const handleHashChange = () => {
-            if (isProgrammaticScroll.current) return;
-
-            const id = window.location.hash.substring(1) || SECTIONS.HOME;
-            // Only scroll if we aren't already there (prevents loops)
-            if (activeSectionRef.current !== id) {
-                // Pass false to updateHash because the hash has already changed externally
-                scrollToSection(id, false);
-            }
-        };
-
-        window.addEventListener('hashchange', handleHashChange);
-
-        // Handle initial hash on load
-        if (window.location.hash) {
-            handleHashChange();
-        }
-
-        return () => window.removeEventListener('hashchange', handleHashChange);
-    }, []); // Listener set up once
-
-    useEffect(() => {
-        if (isMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isMenuOpen]);
-
-    const scrollToSection = (id: string, updateHash = true) => {
+    const scrollToSection = useCallback((id: string, updateHash = true) => {
         setIsMenuOpen(false);
         isProgrammaticScroll.current = true;
-        suppressHashUpdate.current = true;
+        suppressHashUpdateRef.current = true;
 
         const finishScroll = () => {
             setTimeout(() => {
                 isProgrammaticScroll.current = false;
-                suppressHashUpdate.current = false;
+                suppressHashUpdateRef.current = false;
             }, 800); // Buffer long enough for smooth scroll to complete
         };
 
@@ -107,7 +74,40 @@ export function Navbar({ welcomeRendered }: { welcomeRendered: boolean }) {
         } else {
             isProgrammaticScroll.current = false;
         }
-    };
+    }, [setActiveSection, setIsMenuOpen, suppressHashUpdateRef]);
+
+    useEffect(() => {
+        const handleHashChange = () => {
+            if (isProgrammaticScroll.current) return;
+
+            const id = window.location.hash.substring(1) || SECTIONS.HOME;
+            // Only scroll if we aren't already there (prevents loops)
+            if (activeSectionRef.current !== id) {
+                // Pass false to updateHash because the hash has already changed externally
+                scrollToSection(id, false);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+
+        // Handle initial hash on load
+        if (window.location.hash) {
+            handleHashChange();
+        }
+
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, [scrollToSection]); // Include scrollToSection in dependencies
+
+    useEffect(() => {
+        if (isMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMenuOpen]);
 
     return (
         <div className="sticky top-0 w-full border-b bg-background z-50 ">

@@ -1,10 +1,10 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useSpring, type Variants } from 'framer-motion';
 import { Code, Database, Layout, Brain, Cpu as Processor, Command } from 'lucide-react';
 import { STACK_DATA } from '../../utils/stack';
 import { SECTIONS } from '../../utils/constants';
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, React.ComponentType<{ size?: number }>> = {
     "Language Layer": Code,
     "System Architecture": Processor,
     "Persistence & Cloud": Database,

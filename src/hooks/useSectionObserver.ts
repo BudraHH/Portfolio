@@ -91,7 +91,7 @@ export function useSectionObserver({ sectionIds, homeSectionId }: UseSectionObse
         });
 
         return () => observer.disconnect();
-    }, [sectionIds, homeSectionId]);
+    }, [sectionIds, homeSectionId, activeSection]);
 
     return [activeSection, setActiveSection, suppressHashUpdate] as const;
 }

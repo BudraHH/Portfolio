@@ -147,7 +147,7 @@ const MissionLogEntry = ({
     index,
     idPrefix
 }: {
-    mission: any;
+    mission: typeof CAREER_DATA[number];
     index: number;
     idPrefix: string;
 }) => {
