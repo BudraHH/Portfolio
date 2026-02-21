@@ -45,7 +45,7 @@ export default function Welcome({ setWelcomeRendered }: WelcomeProps) {
     const handleContinue = () => {
         setTimeout(() => {
             setWelcomeRendered(true);
-        }, 10000000);
+        }, 1000);
     };
 
     return (
@@ -131,6 +131,7 @@ export default function Welcome({ setWelcomeRendered }: WelcomeProps) {
                         </motion.span>
                         <motion.span
                             variants={spanItemVariants}
+                            onAnimationComplete={window.innerWidth <= 1024 ? handleContinue : undefined}
                             className="text-sm md:text-base font-mono font-medium text-muted-foreground/80 tracking-widest uppercase leading-relaxed max-w-md mx-auto">
 
                             Some UI elements have been adjusted for this mobile environment.
