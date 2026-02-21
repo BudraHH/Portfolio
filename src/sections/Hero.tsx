@@ -164,7 +164,7 @@ const SectionTwo = () => {
 
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-export function Hero({ manualY }: { manualY?: number }) {
+export function Hero({ manualY }: { manualY?: number | string }) {
     return (
         <section id={SECTIONS.HOME} className={`w-full ${manualY ? 'h-full' : 'md:min-h-screen'}`}>
 

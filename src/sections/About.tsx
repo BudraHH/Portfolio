@@ -23,7 +23,7 @@ const container: Variants = {
     }
 };
 
-export function About({ manualY }: { manualY?: number }) {
+export function About({ manualY }: { manualY?: number | string }) {
     const [time, setTime] = useState(new Date());
 
     useEffect(() => {
