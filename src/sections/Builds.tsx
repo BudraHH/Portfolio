@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 
-import { motion, useScroll, useMotionValueEvent, AnimatePresence, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent, AnimatePresence, useTransform, useSpring, type Variants } from 'framer-motion';
 import { ChevronRight, Github as GithubIcon, LinkIcon } from 'lucide-react';
 import { SECTIONS } from '../utils/constants';
 import { BUILDS_DATA, type ProjectBuild } from '../utils/builds';
@@ -30,6 +30,28 @@ const TechnologyBadge = ({ items, label }: { items: string[]; label: string }) =
         </div>
     </div>
 );
+
+const headerVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: "easeOut" as const }
+    }
+};
+
+const leftPanelVariants: Variants = {
+    hidden: { x: -100, opacity: 0 },
+    visible: {
+        x: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.8,
+            ease: [0.16, 1, 0.3, 1],
+            staggerChildren: 0.1
+        }
+    }
+};
 
 export function Builds() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -88,20 +110,32 @@ export function Builds() {
 
                 {/* ── Left Sidebar: Navigation HUD ── */}
                 <motion.div
-                    initial={{ x: -100, opacity: 0 }}
-                    whileInView={{ x: 0, opacity: 1 }}
+                    initial="hidden"
+                    whileInView="visible"
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    variants={leftPanelVariants}
                     className="hidden lg:flex flex-col justify-between w-[250px] xl:w-[400px] 2xl:w-[460px] border-r border-primary/10 py-20 pr-10 relative z-20 bg-background/50 backdrop-blur-sm"
                 >
                     <div className="space-y-12">
                         <div className="space-y-4">
-                            <h2 className="text-2xl xl:text-5xl  2xl:text-6xl  font-black uppercase tracking-tighter leading-none">
-                                Here is what <span className="text-muted-foreground font-regular italic group transition-colors duration-300">He engineered<span className="group-hover:text-red-800 transition-colors duration-300">.</span></span>
-                            </h2>
-                            <p className="pr-2 text-[10px] xl:text-xs 2xl:text-sm  font-mono text-muted-foreground uppercase tracking-widest leading-relaxed">
+                            <motion.h2
+                                variants={headerVariants}
+                                className="text-4xl xl:text-5xl 2xl:text-6xl font-black uppercase tracking-tighter leading-none italic "
+                            >
+                                <span className="text-muted-foreground font-regular not-italic">Here is </span>what <span className="group not-italic">He built<span className="group-hover:text-red-800">.</span></span>
+                            </motion.h2>
+                            <motion.p
+                                variants={headerVariants}
+                                className="pr-2 text-[10px] xl:text-xs 2xl:text-sm  font-mono text-muted-foreground uppercase tracking-widest leading-relaxed"
+                            >
                                 Highlighting projects where he focused on clean code and reliable performance.
-                            </p>
+                            </motion.p>
+                            <motion.p
+                                variants={headerVariants}
+                                className=" text-[10px] xl:text-xs font-semibold text-primary/50 uppercase tracking-[0.4em] pt-4"
+                            >
+                                [ <span className="text-primary">Viewing_Key_Builds_Selection </span>]
+                            </motion.p>
                         </div>
 
                         <div className="space-y-4 xl:space-y-6">

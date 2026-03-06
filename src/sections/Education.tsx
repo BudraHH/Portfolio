@@ -37,16 +37,12 @@ export function Education() {
                                 viewport={{ once: true }}
                                 variants={leftPanelVariants}
                             >
-                                <div className="space-y-6">
-                                    <motion.h2
+                                <motion.h2
                                         variants={headerVariants}
                                         className="text-4xl xl:text-5xl 2xl:text-6xl font-black uppercase tracking-tighter leading-none italic "
                                     >
                                         <span className="text-muted-foreground font-regular not-italic">His </span>Academic <span className="group not-italic">Background<span className="group-hover:text-red-800">.</span></span>
                                     </motion.h2>
-
-
-                                </div>
                             </motion.div>
                         </div>
 

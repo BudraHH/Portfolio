@@ -59,7 +59,7 @@ export const EDUCATION_DATA: Education[] = [
         specialization: "Artificial Intelligence & Data Science",
         location: "Coimbatore, India",
         period: "2021 — 2025",
-        score: "7.87 CGPA",
+        score: "8.01 CGPA",
        details: [
     "Specialized in Neural Architectures, bridging NLP and Computer Vision heuristics with distributed system design and algorithmic theory.",
     "Proven capability to execute under high-pressure scenarios, securing a Runner-up finish at PSG iTech Hackfest and a Global Top 15 ranking in the Volkswagen iMobilithon."

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { SECTIONS } from '../utils/constants';
 import { CONTACTS } from '../utils/contact';
@@ -165,6 +166,8 @@ const SectionTwo = () => {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 export function Hero({ manualY }: { manualY?: number | string }) {
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
+
     return (
         <section id={SECTIONS.HOME} className={`w-full ${manualY ? 'h-full' : 'md:min-h-screen'}`}>
 
@@ -191,7 +194,7 @@ export function Hero({ manualY }: { manualY?: number | string }) {
                     <motion.div
                         className="w-full h-full z-0"
                         initial={{ scale: 1.2, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
+                        animate={isImageLoaded ? { scale: 1, opacity: 1 } : { scale: 1.2, opacity: 0 }}
                         transition={{
                             duration: 1.5,
                             ease: [0.22, 1, 0.36, 1],
@@ -201,6 +204,8 @@ export function Hero({ manualY }: { manualY?: number | string }) {
                         <img
                             src="/dp_img_clr.png"
                             alt="Hero Portrait"
+                            onLoad={() => setIsImageLoaded(true)}
+                            loading="eager"
                             className="w-full h-full object-cover contrast-110"
                         />
                     </motion.div>
