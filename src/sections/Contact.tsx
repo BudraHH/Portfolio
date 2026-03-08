@@ -54,7 +54,7 @@ export function Contact() {
             <div className="flex flex-col lg:flex-row items-stretch gap-10 lg:gap-0 ">
 
                 {/* ─── LEFT SIDE: Sticky Hub ─────────────────────────── */}
-                <div className="lg:w-1/3  flex flex-col justify-start overflow-hidden ">
+                <div className="lg:w-2/5  flex flex-col justify-start overflow-hidden ">
                     <motion.div
                         className="space-y-10 relative z-10  flex flex-col justify-start"
                         initial="hidden"
@@ -148,7 +148,7 @@ export function Contact() {
                 </div>
 
                 {/* ─── RIGHT SIDE: Scrolling Connection ─────────────────────── */}
-                <div className="lg:w-2/3 flex flex-col justify-center items-stretch  lg:pl-12 2xl:pl-20 3xl:pl-32 relative lg:border-l lg:border-primary/10">
+                <div className="lg:w-3/5 flex flex-col justify-center items-stretch  lg:pl-12 2xl:pl-20 3xl:pl-32 relative lg:border-l lg:border-primary/10">
                     <motion.div
                         className="relative z-10 w-full h-full"
                         initial="hidden"

@@ -29,7 +29,7 @@ const CategoryDisplay = ({ data }: { data: typeof STACK_DATA[0] }) => {
             {/* Header: Identity */}
             <div className="2xl:mb-10 mb-4 2xl:space-y-4 space-y-2">
                 <h4 className="text-4xl 2xl:text-5xl font-black uppercase tracking-tighter leading-none italic">
-                    {data.category.split(' ')[0]} <span className="text-muted-foreground font-thin not-italic">{data.category.split(' ').slice(1).join(' ')}</span>
+                    <span>{data.category.split(' ')[0]}</span> <span className="ml-2 text-muted-foreground font-thin not-italic">{data.category.split(' ').slice(1).join(' ')}</span>
                 </h4>
                 <p className="text-sm text-muted-foreground/80 max-w-2xl leading-relaxed">
                     A comprehensive suite of systems engineered for horizontal scalability, performance optimization, and industrial-grade reliability.

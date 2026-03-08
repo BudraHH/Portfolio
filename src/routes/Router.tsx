@@ -1,6 +1,7 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from '../App';
 import LandingPage from '../pages/LandingPage';
+import NotFound from '../pages/NotFound';
 
 const router = createBrowserRouter([
     {
@@ -16,8 +17,8 @@ const router = createBrowserRouter([
                 ],
             },
             {
-                path: '/portfolio/*',
-                element: <Navigate to="/" replace />,
+                path: '*',
+                element: <NotFound />,
             },
         ],
     },

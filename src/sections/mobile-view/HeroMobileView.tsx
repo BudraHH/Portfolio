@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { CONTACTS } from '../../utils/contact';
 import { ArrowUpRight } from 'lucide-react';
@@ -26,6 +27,8 @@ const itemVariants: Variants = {
 };
 
 export const HeroMobileView = () => {
+    const [isImageLoaded, setIsImageLoaded] = useState(false);
+
     return (
         <div className="pt-5 flex flex-col justify-center relative bg-background overflow-hidden">
             {/* Background Engineering Grid */}
@@ -60,13 +63,21 @@ export const HeroMobileView = () => {
                 <motion.div
                     variants={itemVariants}
                     className="w-full flex items-center justify-center aspect-square rounded-xl overflow-hidden relative border border-border/50 group cursor-pointer active:scale-[0.98] transition-all"
-                    onTouchStart={() => { }}
                 >
-                    <img
-                        src="/dp_img_clr.png"
-                        alt="Hero Portrait"
-                        className="w-full h-full object-cover contrast-110"
-                    />
+                    <motion.div
+                        className="w-full h-full"
+                        initial={{ opacity: 0, scale: 1.05 }}
+                        animate={isImageLoaded ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                        <img
+                            src="/dp_img_clr.png"
+                            alt="Hero Portrait"
+                            onLoad={() => setIsImageLoaded(true)}
+                            loading="eager"
+                            className="w-full h-full object-cover contrast-110"
+                        />
+                    </motion.div>
                     <div
                         className={`absolute z-10 inset-0 backdrop-grayscale group-hover:opacity-0 group-active:opacity-0 group-focus:opacity-0 transition-all duration-300`}
                     />
@@ -82,7 +93,7 @@ export const HeroMobileView = () => {
                     </p>
                 </motion.div>
 
-               <motion.div
+                <motion.div
                     className="ml-2 flex items-center gap-8"
                     variants={itemVariants}
                 >
