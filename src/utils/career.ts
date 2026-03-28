@@ -23,7 +23,7 @@ export interface Education {
 export const CAREER_DATA: Experience[] = [
     {
         id: "systitsoft-2025",
-        company: "Syst It Soft Solutions",
+        company: "Syst It Soft Technologies",
         location: "Coimbatore, TN",
         role: "Software Developer Intern",
         period: "JUL 2025 — DEC 2025",
