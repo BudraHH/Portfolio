@@ -100,15 +100,38 @@ export const HeroMobileView = () => {
 
 
                     {/* Scroll Hint */}
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-mono font-black uppercase tracking-[0.4em] text-muted-foreground/40">
-                            Currently looking for opportunities.
-                        </span>
-                    </div>
+                    <motion.div
+                        className="flex items-center gap-3"
+                        variants={{
+                            visible: {
+                                transition: {
+                                    staggerChildren: 0.2,
+                                }
+                            }
+                        }}
+                    >
+                        <motion.span
+                            variants={itemVariants}
+                            className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/80"
+                        >
+                            Systems Engineer
+                        </motion.span>
+                        <motion.span
+                            variants={itemVariants}
+                            className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/80"
+                        >
+                            @
+                        </motion.span>
+                        <motion.span
+                            variants={itemVariants}
+                            className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/80"
+                        >
+                            Tata Consultancy Services
+                        </motion.span>
+                    </motion.div>
 
-                    <div className="h-px w-8 bg-border/40 hidden xl:block" />
+                    {/* <div className="h-px w-8 bg-border/40 hidden xl:block" />
 
-                    {/* Minimal Resume Link */}
                     <a
                         href={CONTACTS.RESUME.href}
                         download
@@ -118,7 +141,7 @@ export const HeroMobileView = () => {
                             Download_CV
                         </span>
                         <ArrowUpRight size={12} className="text-muted-foreground/20 group-hover/res:text-primary transition-transform group-hover/res:translate-x-0.5 group-hover/res:-translate-y-0.5" />
-                    </a>
+                    </a> */}
                 </motion.div>
             </motion.div>
         </div>

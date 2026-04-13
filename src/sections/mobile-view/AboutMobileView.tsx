@@ -52,7 +52,7 @@ export const AboutMobileView = () => {
                     <div className="space-y-6">
                         <motion.div variants={fadeInUp}>
                             <h2 className="text-4xl sm:text-5xl font-black uppercase tracking-tighter leading-[0.85]">
-                                Who <span className="text-muted-foreground italic font-regular">actually </span>is
+                                Who <span className="text-muted-foreground italic font-regular mr-2">actually </span>is
                                 <br />This <span className="group">Guy <span className="active:text-red-800 focus:text-red-800 transition-colors duration-300">?</span></span>
                             </h2>
                         </motion.div>
@@ -74,10 +74,10 @@ export const AboutMobileView = () => {
                     <div className="space-y-8">
                         <motion.div variants={fadeInUp}>
                             <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">
-                                Early career professional
+                                Maker at Enterprise Scale
                             </p>
-                            <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
-                                with Established Internship Depth
+                            <p className="text-[10px] md:text-xs uppercase font-bold text-muted-foreground/60 font-mono">
+                                Systems Engineer @ Tata Consultancy Services
                             </p>
                         </motion.div>
 
@@ -85,7 +85,7 @@ export const AboutMobileView = () => {
                             <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">
                                 AI & Data Science Graduate
                             </p>
-                            <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
+                            <p className="text-[10px] md:text-xs uppercase font-bold text-muted-foreground/60 font-mono">
                                 Academic Milestone Class of 2025
                             </p>
                         </motion.div>
@@ -97,15 +97,15 @@ export const AboutMobileView = () => {
                             <p className="text-[12px] md:text-sm uppercase  font-black text-primary/60 font-mono">
                                 Based In
                             </p>
-                            <p className="text-sm md:text-base font-black uppercase tracking-tighter text-primary/90">
-                                Chennai, India
+                            <p className="text-sm md:text-base font-black uppercase tracking-tighter text-primary">
+                                Hyderabad, India
                             </p>
                         </div>
                         <div className="space-x-1 w-full flex flex-row justify-between items-baseline text-right">
                             <p className="text-[12px] md:text-sm uppercase font-black text-primary/60 font-mono">
                                 Local Time (IST)
                             </p>
-                            <p className="text-sm md:text-base font-black uppercase tracking-tighter text-primary/90 tabular-nums">
+                            <p className="text-sm md:text-base font-black uppercase tracking-tighter text-primary tabular-nums">
                                 {time.toLocaleTimeString('en-US', {
                                     timeZone: 'Asia/Kolkata',
                                     hour: '2-digit',
@@ -156,7 +156,7 @@ export const AboutMobileView = () => {
                             <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">
                                 Absolute Ownership
                             </p>
-                            <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
+                            <p className="text-[10px] md:text-xs uppercase font-bold text-muted-foreground/60 font-mono">
                                 Treating every project as a long-term asset, not just a task.
                             </p>
                         </motion.div>
@@ -166,7 +166,7 @@ export const AboutMobileView = () => {
                             <p className="text-xl md:text-2xl font-black uppercase tracking-tighter">
                                 Practical Work Style
                             </p>
-                            <p className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
+                            <p className="text-[10px] md:text-xs uppercase font-bold text-muted-foreground/60 font-mono">
                                 Keeping things simple and building tools that are easy to use.
                             </p>
                         </motion.div>

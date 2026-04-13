@@ -56,7 +56,7 @@ export function About({ manualY }: { manualY?: number | string }) {
                         <div className="space-y-6">
                             <motion.div variants={fadeInUp} className="space-y-4">
                                 <h2 className="text-2xl xl:text-5xl 2xl:text-7xl font-black uppercase tracking-tighter leading-[0.85]">
-                                    Who <span className="text-muted-foreground italic font-regular">actually </span>is
+                                    Who <span className="text-muted-foreground italic font-regular mr-2">actually </span>is
                                     This <span className="group">Guy <span className="group-hover:text-red-800 transition-colors duration-300">?</span></span>
                                 </h2>
                             </motion.div>
@@ -77,10 +77,10 @@ export function About({ manualY }: { manualY?: number | string }) {
 
                         <motion.div variants={fadeInUp}>
                             <p className="text-xl 2xl:text-2xl 3xl:text-3xl font-black uppercase tracking-tighter group-hover:text-secondary transition-colors">
-                                Early career professional
+                                Maker at Enterprise Scale
                             </p>
-                            <p className="text-[10px] 2xl:text-base uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
-                                with Established Internship Depth
+                            <p className="text-[10px] 2xl:text-base uppercase font-bold text-muted-foreground/60 font-mono">
+                                Systems Engineer @ Tata Consultancy Services
                             </p>
                         </motion.div>
 
@@ -88,7 +88,7 @@ export function About({ manualY }: { manualY?: number | string }) {
                             <p className="text-xl lg:text-2xl 3xl:text-3xl font-black uppercase tracking-tighter group-hover:text-secondary transition-colors">
                                 AI & Data Science Graduate
                             </p>
-                            <p className="text-[10px] 2xl:text-base uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
+                            <p className="text-[10px] 2xl:text-base uppercase  font-bold text-muted-foreground/60 font-mono">
                                 Academic Milestone Class of 2025
                             </p>
                         </motion.div>
@@ -98,15 +98,15 @@ export function About({ manualY }: { manualY?: number | string }) {
                                 <p className="text-[12px] 2xl:text-base uppercase  font-black text-primary/60 font-mono">
                                     Based In
                                 </p>
-                                <p className="text-base 2xl:text-lg 3xl:text-xl font-black uppercase tracking-tighter text-muted-foreground group-hover:text-foreground transition-colors">
-                                    Chennai, India
+                                <p className="text-base 2xl:text-lg 3xl:text-xl font-black uppercase tracking-tighter text-primary group-hover:text-foreground transition-colors">
+                                    Hyderabad, India
                                 </p>
                             </div>
                             <div className="2xl:space-y-1 group/info cursor-default text-right">
                                 <p className="text-[12px] 2xl:text-base uppercase font-black text-primary/60 font-mono">
                                     Local Time (IST)
                                 </p>
-                                <p className="text-base 2xl:text-lg 3xl:text-xl font-black uppercase tracking-tighter text-muted-foreground group-hover:text-foreground transition-colors tabular-nums">
+                                <p className="text-base 2xl:text-lg 3xl:text-xl font-black uppercase tracking-tighter text-primary group-hover:text-foreground transition-colors tabular-nums">
                                     {time.toLocaleTimeString('en-US', {
                                         timeZone: 'Asia/Kolkata',
                                         hour: '2-digit',
@@ -156,7 +156,7 @@ export function About({ manualY }: { manualY?: number | string }) {
                             <p className="text-xl 2xl:text-2xl 3xl:text-3xl font-black uppercase tracking-tighter group-hover:text-secondary transition-colors">
                                 Absolute Ownership
                             </p>
-                            <p className="text-[10px] 2xl:text-base uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
+                            <p className="text-[10px] 2xl:text-base uppercase mt-2 font-bold text-muted-foreground/60 font-mono">
                                 Treating every project as a long-term asset, not just a task.
                             </p>
                         </motion.div>
@@ -165,7 +165,7 @@ export function About({ manualY }: { manualY?: number | string }) {
                             <p className="text-xl 2xl:text-2xl 3xl:text-3xl font-black uppercase tracking-tighter group-hover:text-secondary transition-colors">
                                 Practical Work Style
                             </p>
-                            <p className="text-[10px] 2xl:text-base uppercase tracking-[0.3em] font-bold text-muted-foreground/60 font-mono">
+                            <p className="text-[10px] 2xl:text-base uppercase mt-2 font-bold text-muted-foreground/60 font-mono">
                                 Keeping things simple and building tools that are easy to use and maintain.
                             </p>
                         </motion.div>

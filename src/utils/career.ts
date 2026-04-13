@@ -22,6 +22,20 @@ export interface Education {
 }
 export const CAREER_DATA: Experience[] = [
     {
+        id: "tcs-2026",
+        company: "Tata Consultancy Services",
+        location: "Hyderabad, TS",
+        role: "Systems Engineer",
+        period: "APR 2026 — PRESENT",
+        description: [
+            "Joining the global engineering and industrial systems teams at TCS.",
+            "Preparing to contribute to large-scale infrastructure deployments and maintain reliable service results.",
+            "Focusing on the implementation of standardized engineering protocols during the initial project deployment phase."
+        ],
+        technologies: ["Engineering Services", "Systems Integration", "Enterprise Solutions"],
+        summary: "Beginning my professional journey as a Systems Engineer, contributing to the core of global engineering operations."
+    },
+    {
         id: "systitsoft-2025",
         company: "Syst It Soft Technologies",
         location: "Coimbatore, TN",
