@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { SECTIONS } from '../utils/constants';
-import { CONTACTS } from '../utils/contact';
-import { ArrowUpRight } from 'lucide-react';
 
 // ─── Animation Variants ────────────────────────────────────────────────────────
 const containerVariants: Variants = {

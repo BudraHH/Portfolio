@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
-import { CONTACTS } from '../../utils/contact';
-import { ArrowUpRight } from 'lucide-react';
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
